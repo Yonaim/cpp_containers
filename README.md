@@ -6,12 +6,11 @@ The project replicates the behavior and interface of standard containers such as
 All functionality is implemented from scratch using C++98, emphasizing template programming, allocator usage, and iterator design.  
 Through this project, developers gain a deeper understanding of STL internals, template metaprogramming, and container performance characteristics.
 
-
 # Schedule
 
 ### 10/03 (1회차) — 환경 세팅 / Utils Part 1
-- [ ] Git repo & 디렉토리 구조 생성  
-- [ ] Makefile 작성 (all, clean, fclean, re)  
+- [x] Git repo & 디렉토리 구조 생성  
+- [x] Makefile 작성 (all, clean, fclean, re)  
 - [ ] ft::pair, ft::make_pair  
 - [ ] ft::equal, ft::lexicographical_compare  
 
