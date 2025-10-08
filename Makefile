@@ -2,13 +2,22 @@
 
 NAME			= containers
 CXX				= c++
-CXXFLAGS		= -Wall -Wextra -Werror -std=c++98
-CPPFLAGS		=
+CXXFLAGS		= -std=c++98 -MMD -MP -Wall -Wextra -Werror -fsanitize=address
+CPPFLAGS		= -I./include
 LDFLAGS			=
 LDLIBS			=
-FILE			= main
-SRCS 			= $(addprefix $(PREFIX), $(addsuffix $(SUFFIX).cpp, $(FILE)))
-OBJS 			= $(SRCS:.cpp=.o)
+
+TEST_FILE   = pair equal lexicographical_compare
+TEST_PREFIX = ./src/test/
+
+FILE        = utils/print main
+PREFIX      = ./src/
+
+SRCS       := $(addprefix $(PREFIX),      $(addsuffix .cpp,$(FILE)))
+TEST_SRCS  := $(addprefix $(TEST_PREFIX), $(addsuffix .cpp,$(TEST_FILE)))
+
+OBJS       := $(SRCS:.cpp=.o) $(TEST_SRCS:.cpp=.o)
+DEPS       := $(OBJS:.o=.d)
 
 # ********************************* MAKE RULES ******************************* #
 
@@ -18,7 +27,7 @@ $(NAME) : $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME) $(LDFLAGS) $(LDLIBS)
 
 clean :
-	rm -f $(OBJS)
+	rm -f $(OBJS) $(DEPS) 
 
 fclean : clean
 	rm -f $(NAME)
@@ -27,5 +36,7 @@ re : fclean all
 
 %.o : %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
+
+-include $(DEPS)
 
 .PHONY : all clean fclean re
