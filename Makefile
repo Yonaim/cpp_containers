@@ -3,21 +3,21 @@
 NAME			= containers
 CXX				= c++
 CXXFLAGS		= -std=c++98 -MMD -MP -Wall -Wextra -Werror -fsanitize=address
-CPPFLAGS		= -I./include
+CPPFLAGS		= -I./include -I./include/ft
 LDFLAGS			=
 LDLIBS			=
 
-TEST_FILE   = pair equal lexicographical_compare
-TEST_PREFIX = ./src/test/
+TEST_FILE   	= pair equal lexicographical_compare
+TEST_PREFIX	 	= ./src/test/
 
-FILE        = utils/print main
-PREFIX      = ./src/
+FILE        	= utils/print main
+PREFIX      	= ./src/
 
-SRCS       := $(addprefix $(PREFIX),      $(addsuffix .cpp,$(FILE)))
-TEST_SRCS  := $(addprefix $(TEST_PREFIX), $(addsuffix .cpp,$(TEST_FILE)))
+SRCS       		:= $(addprefix $(PREFIX),      $(addsuffix .cpp,$(FILE)))
+TEST_SRCS  		:= $(addprefix $(TEST_PREFIX), $(addsuffix .cpp,$(TEST_FILE)))
 
-OBJS       := $(SRCS:.cpp=.o) $(TEST_SRCS:.cpp=.o)
-DEPS       := $(OBJS:.o=.d)
+OBJS       		:= $(SRCS:.cpp=.o) $(TEST_SRCS:.cpp=.o)
+DEPS      		:= $(OBJS:.o=.d)
 
 # ********************************* MAKE RULES ******************************* #
 
