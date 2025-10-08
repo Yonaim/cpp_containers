@@ -11,8 +11,8 @@ Through this project, developers gain a deeper understanding of STL internals, t
 ### 10/03 (1회차) — 환경 세팅 / Utils Part 1
 - [x] Git repo & 디렉토리 구조 생성  
 - [x] Makefile 작성 (all, clean, fclean, re)  
-- [ ] ft::pair, ft::make_pair  
-- [ ] ft::equal, ft::lexicographical_compare  
+- [x] ft::pair, ft::make_pair  
+- [x] ft::equal, ft::lexicographical_compare  
 
 ---
 
