@@ -2,12 +2,12 @@
 
 NAME			= containers
 CXX				= c++
-CXXFLAGS		= -std=c++98 -MMD -MP -Wall -Wextra -Werror -fsanitize=address
-CPPFLAGS		= -I./include -I./include/ft
+CXXFLAGS		= -std=c++98 -MMD -MP -Wall -Wextra -Werror -fsanitize=address -DNAMESPACE=ft
+CPPFLAGS		= -I./include -I./include/ft -I./include/utils
 LDFLAGS			=
 LDLIBS			=
 
-TEST_FILE   	= pair equal lexicographical_compare
+TEST_FILE   	= pair equal lexicographical_compare enable_if is_integral
 TEST_PREFIX	 	= ./src/test/
 
 FILE        	= utils/print main
