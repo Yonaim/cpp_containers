@@ -8,7 +8,7 @@
 namespace ft
 {
     template <class T>
-    struct is_floating_point : false_type
+    struct is_floating_point : false_type // fallback
     {
     };
 
