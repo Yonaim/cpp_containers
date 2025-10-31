@@ -3,11 +3,10 @@
 #include "is_integral.h"
 #include "test_config.h"
 
-
 void test_is_integral()
 {
     std::cout << std::boolalpha; // true / false로 출력
-    std::cout << "=== Testing " << (std::string(NAMESPACE_NAME)) << "::is_integral ===\n";
+    std::cout << "=== Testing " << NAMESPACE_STR << "::is_integral ===\n";
 
     // 정수형 타입
     std::cout << "int:               " << NAMESPACE::is_integral<int>::value << "\n";

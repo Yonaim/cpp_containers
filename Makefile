@@ -3,13 +3,13 @@ NAME			= containers
 
 # ******************* SETTINGS (NAMESPACE, STD VERSION) ********************** #
 
-NAMESPACE		?= std 
-CXXSTD			= c++11
+NAMESPACE		?= ft
+CXXSTD			= c++98
 
 ifeq ($(NAMESPACE),ft)
-    NAMESPACE_FLAGS = -DNAMESPACE=ft -DNAMESPACE_NAME=$(shell echo '"ft"')
+    NAMESPACE_FLAGS = -DNAMESPACE=ft
 else
-    NAMESPACE_FLAGS = -DNAMESPACE=std -DNAMESPACE_NAME=$(shell echo '"std"')
+    NAMESPACE_FLAGS = -DNAMESPACE=std
 endif
 
 # ****************************** COMPILE FLAGS ******************************* #
