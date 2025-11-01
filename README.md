@@ -17,10 +17,10 @@ Through this project, developers gain a deeper understanding of STL internals, t
 ---
 
 ### 10/26 ~ 11/01 (2회차) — Utils Part 2
-- [ ] ft::enable_if  
-- [ ] ft::is_integral  
-- [ ] ft::iterator_traits  
-- [ ] ft::reverse_iterator  
+- [x] ft::enable_if  
+- [x] ft::is_integral  
+- [x] ft::iterator_traits  
+- [x] ft::reverse_iterator  
 
 ---
 
