@@ -1,22 +1,21 @@
-#include "test_modules.h"
 #include "test_config.h"
 #include "test_print.h"
-
+#include "test_units.h"
 
 #ifndef TEST_UTILS
-#define TEST_UTILS 0
+    #define TEST_UTILS 0
 #endif
 
 #ifndef TEST_VECTOR
-#define TEST_VECTOR 0
+    #define TEST_VECTOR 0
 #endif
 
 #ifndef TEST_MAP
-#define TEST_MAP 0
+    #define TEST_MAP 0
 #endif
 
 #ifndef TEST_STACK
-#define TEST_STACK 0
+    #define TEST_STACK 0
 #endif
 
 int main()
