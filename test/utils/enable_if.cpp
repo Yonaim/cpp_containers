@@ -6,30 +6,34 @@ Substitution Failure Is Not An Error (SFINAE)
 */
 // C++98 버전에서는 없었다. Boost 팀이 처음 구현했다가 이후 표준에 포함됨.
 
-#include <iostream>
-#include "enable_if.h"
-#include "is_floating_point.h"
-#include "is_integral.h"
 #include "test_config.h"
 #include "test_print.h"
+
+#if NANESPACE == std
+    #include <type_traits>
+#else
+    #include "enable_if.h"
+    #include "is_floating_point.h"
+    #include "is_integral.h"
+#endif
 
 // =========================== use in Return Type ==============================
 
 template <typename T>
-typename NAMESPACE::enable_if<NAMESPACE::is_integral<T>::value, void>::type printType(T val)
+typename ft::enable_if<ft::is_integral<T>::value, void>::type printType(T val)
 {
     std::cout << val << " is integral (Return Type)\n";
 }
 
 template <typename T>
-typename NAMESPACE::enable_if<NAMESPACE::is_floating_point<T>::value, void>::type printType(T val)
+typename ft::enable_if<ft::is_floating_point<T>::value, void>::type printType(T val)
 {
     std::cout << val << " is floating-point (Return Type)\n";
 }
 
 // 여러 후보가 동시에 true면 안 됨!
 // template <typename T>
-// typename NAMESPACE::enable_if<true, void>::type printType(T val)
+// typename ft::enable_if<true, void>::type printType(T val)
 // {
 //     std::cout << val << " Always true\n";
 // }
@@ -38,8 +42,7 @@ typename NAMESPACE::enable_if<NAMESPACE::is_floating_point<T>::value, void>::typ
 
 // void 포인터는 기본값(0)을 주기 위한 트릭
 template <typename T>
-void printTypeParam(
-    T val, typename NAMESPACE::enable_if<NAMESPACE::is_integral<T>::value, void>::type * = 0)
+void printTypeParam(T val, typename ft::enable_if<ft::is_integral<T>::value, void>::type * = 0)
 {
     std::cout << val << " is integral (Parameter Type)\n";
 }
@@ -48,7 +51,7 @@ void printTypeParam(
 
 // C++98에서는 Default template argument가 제한되어 있었음
 // template <typename T, typename Enable = typename
-// NAMESPACE::enable_if<NAMESPACE::is_integral<T>::value, void>::type>
+// ft::enable_if<ft::is_integral<T>::value, void>::type>
 // void printTypeTemplate(T val)
 // {
 //     std::cout << val << " is integral (Template Argument Type)\n";

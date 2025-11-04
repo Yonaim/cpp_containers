@@ -1,8 +1,12 @@
-#include <iostream>
 #include <vector>
-#include "reverse_iterator.h"
 #include "test_config.h"
 #include "test_print.h"
+
+#if NAMESPACE == std
+    #include <iterator>
+#else
+    #include "reverse_iterator.h"
+#endif
 
 void test_reverse_iterator()
 {
@@ -11,14 +15,14 @@ void test_reverse_iterator()
     int              arr[] = {10, 20, 30, 40};
     std::vector<int> v(arr, arr + 4);
 
-    NAMESPACE::reverse_iterator<std::vector<int>::iterator> rbegin(v.end());
-    NAMESPACE::reverse_iterator<std::vector<int>::iterator> rend(v.begin());
+    ft::reverse_iterator<std::vector<int>::iterator> rbegin(v.end());
+    ft::reverse_iterator<std::vector<int>::iterator> rend(v.begin());
 
     // ===========================================================
     // 1. 기본 순회
     // ===========================================================
     print_section("Basic reverse iteration");
-    for (NAMESPACE::reverse_iterator<std::vector<int>::iterator> it = rbegin; it != rend; ++it)
+    for (ft::reverse_iterator<std::vector<int>::iterator> it = rbegin; it != rend; ++it)
         std::cout << *it << " ";
     std::cout << '\n';
 
@@ -26,8 +30,8 @@ void test_reverse_iterator()
     // 2. 연산자 테스트
     // ===========================================================
     print_section("Operator tests");
-    NAMESPACE::reverse_iterator<std::vector<int>::iterator> it1 = rbegin;
-    NAMESPACE::reverse_iterator<std::vector<int>::iterator> it2 = it1 + 2;
+    ft::reverse_iterator<std::vector<int>::iterator> it1 = rbegin;
+    ft::reverse_iterator<std::vector<int>::iterator> it2 = it1 + 2;
     std::cout << "*(it1 + 2): " << *it2 << '\n';
 
     it1++;

@@ -1,11 +1,14 @@
-#include <iostream>
-#include <stack> // for std::stack comparison
-#include "pair.h"
-#include "stack.h"
 #include "test_config.h"
 #include "test_print.h"
-#include "vector.h"
 
+#if NANESPACE == std
+    #include <stack>
+    #include <utility>
+#else
+    #include "pair.h"
+    #include "stack.h"
+
+#endif
 
 void test_stack()
 {
@@ -16,7 +19,7 @@ void test_stack()
     // ===========================================================
     print_section("Constructor / empty / size");
 
-    NAMESPACE::stack<int> s;
+    ft::stack<int> s;
     print_bool(s.empty());
     std::cout << "Initial size: " << s.size() << '\n';
 
@@ -44,7 +47,7 @@ void test_stack()
     // ===========================================================
     print_section("Stack of strings");
 
-    NAMESPACE::stack<std::string> s_str;
+    ft::stack<std::string> s_str;
     s_str.push("Konkuk");
     s_str.push("University");
     s_str.push("CSE");
@@ -58,8 +61,8 @@ void test_stack()
     // ===========================================================
     print_section("Comparison operators (==, !=, <, <=, >, >=)");
 
-    NAMESPACE::stack<int> s1;
-    NAMESPACE::stack<int> s2;
+    ft::stack<int> s1;
+    ft::stack<int> s2;
     for (int i = 0; i < 3; ++i)
     {
         s1.push(i);
@@ -79,8 +82,8 @@ void test_stack()
     // ===========================================================
     print_section("Compare behavior with std::stack");
 
-    std::stack<int>       std_s;
-    NAMESPACE::stack<int> ft_s;
+    std::stack<int> std_s;
+    ft::stack<int>  ft_s;
 
     for (int i = 1; i <= 3; ++i)
     {

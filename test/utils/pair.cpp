@@ -1,10 +1,12 @@
-#include <iostream>
-#include <string>
-#include <utility>
 #include "SomeTypes.h"
-#include "pair.h"
 #include "test_config.h"
 #include "test_print.h"
+
+#if NAMESPACE == std
+    #include <utility>
+#else
+    #include "pair.h"
+#endif
 
 // generic function: 타입에 상관없이 동작하는 일반화된 함수 (자동으로 타입 P 추론)
 template <class P>
@@ -27,7 +29,7 @@ void test_pair()
     // ===========================================================
     print_section("Generic programming");
 
-    NAMESPACE::pair<int, std::string> p0;
+    ft::pair<int, std::string> p0;
     p0.first = 42;
     p0.second = "Hello world";
     member_type_check(p0);
@@ -37,13 +39,13 @@ void test_pair()
     // ===========================================================
     print_section("Constructors");
 
-    NAMESPACE::pair<SomeType1, SomeType2> p1;
-    SomeType1                             some_1(123);
-    SomeType2                             some_2(456);
+    ft::pair<SomeType1, SomeType2> p1;
+    SomeType1                      some_1(123);
+    SomeType2                      some_2(456);
     p1.first = some_1;
     p1.second = some_2;
 
-    NAMESPACE::pair<SomeType1, SomeType2> p1_copy(p1);
+    ft::pair<SomeType1, SomeType2> p1_copy(p1);
 
     std::cout << "p1_copy.first.value:  " << p1_copy.first.value << '\n';
     std::cout << "p1_copy.second.value: " << p1_copy.second.value << '\n';
@@ -53,7 +55,7 @@ void test_pair()
     // ===========================================================
     print_section("make_pair");
 
-    NAMESPACE::pair<int, std::string> p2 = NAMESPACE::make_pair<int, std::string>(393, "Pengdori");
+    ft::pair<int, std::string> p2 = ft::make_pair<int, std::string>(393, "Pengdori");
 
     std::cout << "p2.first:  " << p2.first << '\n';
     std::cout << "p2.second: " << p2.second << '\n';
@@ -63,10 +65,10 @@ void test_pair()
     // ===========================================================
     print_section("Operators (==, !=, <, <=, >, >=)");
 
-    NAMESPACE::pair<int, int> p3(1, 2);
-    NAMESPACE::pair<int, int> p4(3, 4);
-    NAMESPACE::pair<int, int> p5(1, 7);
-    NAMESPACE::pair<int, int> p3_same(1, 2);
+    ft::pair<int, int> p3(1, 2);
+    ft::pair<int, int> p4(3, 4);
+    ft::pair<int, int> p5(1, 7);
+    ft::pair<int, int> p3_same(1, 2);
 
     // == operator
     print_section("== operator");

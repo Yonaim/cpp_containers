@@ -1,11 +1,13 @@
-#include <iostream>
-#include <map>
-#include <string>
-#include "map.h"
-#include "pair.h"
 #include "test_config.h"
 #include "test_print.h"
 
+#if NANESPACE == std
+    #include <map>
+    #include <utility>
+#else
+    #include "map.h"
+    #include "pair.h"
+#endif
 
 void test_map_lookup_compare()
 {
@@ -16,14 +18,14 @@ void test_map_lookup_compare()
     // ===========================================================
     print_section("Setup data");
 
-    NAMESPACE::map<int, std::string> m;
-    m.insert(NAMESPACE::make_pair(10, "Ten"));
-    m.insert(NAMESPACE::make_pair(20, "Twenty"));
-    m.insert(NAMESPACE::make_pair(30, "Thirty"));
-    m.insert(NAMESPACE::make_pair(40, "Forty"));
-    m.insert(NAMESPACE::make_pair(50, "Fifty"));
+    ft::map<int, std::string> m;
+    m.insert(ft::make_pair(10, "Ten"));
+    m.insert(ft::make_pair(20, "Twenty"));
+    m.insert(ft::make_pair(30, "Thirty"));
+    m.insert(ft::make_pair(40, "Forty"));
+    m.insert(ft::make_pair(50, "Fifty"));
 
-    for (NAMESPACE::map<int, std::string>::iterator it = m.begin(); it != m.end(); ++it)
+    for (ft::map<int, std::string>::iterator it = m.begin(); it != m.end(); ++it)
         std::cout << "(" << it->first << ", " << it->second << ") ";
     std::cout << "\n\n";
 
@@ -32,9 +34,9 @@ void test_map_lookup_compare()
     // ===========================================================
     print_section("lower_bound / upper_bound");
 
-    typedef NAMESPACE::map<int, std::string>::iterator it_t;
-    it_t                                               low = m.lower_bound(25);
-    it_t                                               up = m.upper_bound(30);
+    typedef ft::map<int, std::string>::iterator it_t;
+    it_t                                        low = m.lower_bound(25);
+    it_t                                        up = m.upper_bound(30);
 
     print_it("lower_bound(25)", low, m.end());
     print_it("upper_bound(30)", up, m.end());
@@ -49,7 +51,7 @@ void test_map_lookup_compare()
     // ===========================================================
     print_section("equal_range");
 
-    NAMESPACE::pair<it_t, it_t> range = m.equal_range(30);
+    ft::pair<it_t, it_t> range = m.equal_range(30);
     print_it("equal_range.first (30)", range.first, m.end());
     print_it("equal_range.second (30)", range.second, m.end());
 
@@ -58,14 +60,14 @@ void test_map_lookup_compare()
     // ===========================================================
     print_section("key_compare / value_compare");
 
-    NAMESPACE::map<int, std::string>::key_compare key_comp = m.key_comp();
+    ft::map<int, std::string>::key_compare key_comp = m.key_comp();
     std::cout << std::boolalpha;
     std::cout << "key_comp(20, 30): " << key_comp(20, 30) << '\n';
     std::cout << "key_comp(30, 20): " << key_comp(30, 20) << '\n';
 
-    NAMESPACE::map<int, std::string>::value_compare val_comp = m.value_comp();
-    NAMESPACE::pair<const int, std::string>         v1(10, "Ten");
-    NAMESPACE::pair<const int, std::string>         v2(40, "Forty");
+    ft::map<int, std::string>::value_compare val_comp = m.value_comp();
+    ft::pair<const int, std::string>         v1(10, "Ten");
+    ft::pair<const int, std::string>         v2(40, "Forty");
     std::cout << "val_comp((10,Ten),(40,Forty)): " << val_comp(v1, v2) << '\n';
     std::cout << "val_comp((40,Forty),(10,Ten)): " << val_comp(v2, v1) << '\n';
 
@@ -74,10 +76,10 @@ void test_map_lookup_compare()
     // ===========================================================
     print_section("Comparison operators (==, !=, <, <=, >, >=)");
 
-    NAMESPACE::map<int, std::string> m_same(m);
-    NAMESPACE::map<int, std::string> m_diff(m);
+    ft::map<int, std::string> m_same(m);
+    ft::map<int, std::string> m_diff(m);
     m_diff.erase(40);
-    m_diff.insert(NAMESPACE::make_pair(60, "Sixty"));
+    m_diff.insert(ft::make_pair(60, "Sixty"));
 
     print_bool(m == m_same);
     print_bool(m != m_diff);

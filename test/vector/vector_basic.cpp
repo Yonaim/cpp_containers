@@ -1,9 +1,13 @@
 #include <iostream>
 #include <string>
-#include <vector>
 #include "test_config.h"
 #include "test_print.h"
-#include "vector.h"
+
+#if NANESPACE == std
+    #include <vector>
+#else
+    #include "vector.h"
+#endif
 
 void test_vector_basic()
 {
@@ -14,11 +18,11 @@ void test_vector_basic()
     // ===========================================================
     print_section("Constructors");
 
-    NAMESPACE::vector<int> v_default;
-    NAMESPACE::vector<int> v_filled(5, 42);
-    int                    arr[] = {1, 2, 3, 4};
-    NAMESPACE::vector<int> v_range(arr, arr + 4);
-    NAMESPACE::vector<int> v_copy(v_range);
+    ft::vector<int> v_default;
+    ft::vector<int> v_filled(5, 42);
+    int             arr[] = {1, 2, 3, 4};
+    ft::vector<int> v_range(arr, arr + 4);
+    ft::vector<int> v_copy(v_range);
 
     std::cout << "v_default.size(): " << v_default.size() << '\n';
     std::cout << "v_filled: ";
@@ -36,7 +40,7 @@ void test_vector_basic()
     // ===========================================================
     print_section("Assignment operator");
 
-    NAMESPACE::vector<int> v_assign;
+    ft::vector<int> v_assign;
     v_assign = v_filled;
     std::cout << "v_assign.size(): " << v_assign.size() << '\n';
     std::cout << "v_assign[2]: " << v_assign[2] << '\n';
@@ -56,7 +60,7 @@ void test_vector_basic()
     // ===========================================================
     print_section("Element access");
 
-    NAMESPACE::vector<std::string> v_str(3, "KU");
+    ft::vector<std::string> v_str(3, "KU");
     v_str[1] = "CSE";
     v_str.at(2) = "ft_containers";
     std::cout << "front: " << v_str.front() << '\n';

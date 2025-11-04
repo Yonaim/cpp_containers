@@ -1,8 +1,12 @@
-#include <iostream>
 #include <vector>
-#include "equal.h"
 #include "test_config.h"
 #include "test_print.h"
+
+#if NANESPACE == std
+    #include <algorithm>
+#else
+    #include "equal.h"
+#endif
 
 // named requirements의 일종인 'BinaryPredicate'를 만족해야함
 // https://en.cppreference.com/w/cpp/named_req/BinaryPredicate.html
@@ -26,21 +30,21 @@ void test_equal()
     std::vector<int> v2(arr2, arr2 + 4);
     std::vector<int> v3(arr3, arr3 + 4);
 
-    print_bool(NAMESPACE::equal(v1.begin(), v1.end(), v2.begin())); // true
-    print_bool(NAMESPACE::equal(v1.begin(), v1.end(), v3.begin())); // false
+    print_bool(ft::equal(v1.begin(), v1.end(), v2.begin())); // true
+    print_bool(ft::equal(v1.begin(), v1.end(), v3.begin())); // false
 
     // ===========================================================
     // 2. 사용자 정의 Predicate 사용
     // ===========================================================
     print_section("4-parameters (with Predicate)");
 
-    print_bool(NAMESPACE::equal(v1.begin(), v1.end(), v2.begin(), pred_equal)); // true
-    print_bool(NAMESPACE::equal(v1.begin(), v1.end(), v3.begin(), pred_even));  // true (짝/홀 비교)
+    print_bool(ft::equal(v1.begin(), v1.end(), v2.begin(), pred_equal)); // true
+    print_bool(ft::equal(v1.begin(), v1.end(), v3.begin(), pred_even));  // true (짝/홀 비교)
 
     // ===========================================================
     // 3. Empty range test
     // ===========================================================
     print_section("Empty range");
     std::vector<int> empty;
-    print_bool(NAMESPACE::equal(empty.begin(), empty.end(), empty.begin())); // true
+    print_bool(ft::equal(empty.begin(), empty.end(), empty.begin())); // true
 }

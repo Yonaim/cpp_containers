@@ -1,10 +1,13 @@
 #include <iostream>
 #include <string>
-#include <vector>
 #include "test_config.h"
 #include "test_print.h"
-#include "vector.h"
 
+#if NANESPACE == std
+    #include <vector>
+#else
+    #include "vector.h"
+#endif
 
 void test_vector_modifiers()
 {
@@ -15,7 +18,7 @@ void test_vector_modifiers()
     // ===========================================================
     print_section("push_back / pop_back");
 
-    NAMESPACE::vector<int> v;
+    ft::vector<int> v;
     for (int i = 1; i <= 5; ++i)
     {
         v.push_back(i * 10);
@@ -40,7 +43,7 @@ void test_vector_modifiers()
     // ===========================================================
     print_section("insert / erase");
 
-    NAMESPACE::vector<int>::iterator it = v.begin();
+    ft::vector<int>::iterator it = v.begin();
     it = v.insert(it + 1, 99); // 중간 삽입
     std::cout << "After insert(99) at index 1:\n";
     for (size_t i = 0; i < v.size(); ++i)
@@ -76,19 +79,18 @@ void test_vector_modifiers()
     // ===========================================================
     print_section("Iterators (begin, end, rbegin, rend)");
 
-    NAMESPACE::vector<std::string> vs;
+    ft::vector<std::string> vs;
     vs.push_back("A");
     vs.push_back("B");
     vs.push_back("C");
 
     std::cout << "Forward iteration: ";
-    for (NAMESPACE::vector<std::string>::iterator it = vs.begin(); it != vs.end(); ++it)
+    for (ft::vector<std::string>::iterator it = vs.begin(); it != vs.end(); ++it)
         std::cout << *it << " ";
     std::cout << '\n';
 
     std::cout << "Reverse iteration: ";
-    for (NAMESPACE::vector<std::string>::reverse_iterator rit = vs.rbegin(); rit != vs.rend();
-         ++rit)
+    for (ft::vector<std::string>::reverse_iterator rit = vs.rbegin(); rit != vs.rend(); ++rit)
         std::cout << *rit << " ";
     std::cout << '\n';
 
@@ -97,10 +99,10 @@ void test_vector_modifiers()
     // ===========================================================
     print_section("Comparison operators (==, !=, <, <=, >, >=)");
 
-    NAMESPACE::vector<int> v1(3, 10);
-    NAMESPACE::vector<int> v2(3, 10);
-    NAMESPACE::vector<int> v3(3, 20);
-    NAMESPACE::vector<int> v4(2, 10);
+    ft::vector<int> v1(3, 10);
+    ft::vector<int> v2(3, 10);
+    ft::vector<int> v3(3, 20);
+    ft::vector<int> v4(2, 10);
 
     print_bool(v1 == v2);
     print_bool(v1 != v3);

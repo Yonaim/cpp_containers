@@ -1,10 +1,13 @@
-#include <iostream>
-#include <map>
-#include <string>
-#include "map.h"
-#include "pair.h"
 #include "test_config.h"
 #include "test_print.h"
+
+#if NANESPACE == std
+    #include <map>
+    #include <utility>
+#else
+    #include "map.h"
+    #include "pair.h"
+#endif
 
 void test_map_basic()
 {
@@ -15,13 +18,13 @@ void test_map_basic()
     // ===========================================================
     print_section("Constructor / empty / insert");
 
-    NAMESPACE::map<int, std::string> m;
+    ft::map<int, std::string> m;
     print_bool(m.empty());
-    m.insert(NAMESPACE::make_pair(10, "Ten"));
-    m.insert(NAMESPACE::make_pair(5, "Five"));
-    m.insert(NAMESPACE::make_pair(20, "Twenty"));
-    m.insert(NAMESPACE::make_pair(15, "Fifteen"));
-    m.insert(NAMESPACE::make_pair(30, "Thirty"));
+    m.insert(ft::make_pair(10, "Ten"));
+    m.insert(ft::make_pair(5, "Five"));
+    m.insert(ft::make_pair(20, "Twenty"));
+    m.insert(ft::make_pair(15, "Fifteen"));
+    m.insert(ft::make_pair(30, "Thirty"));
 
     print_bool(!m.empty());
     print_tree(m, "After insertions");
@@ -30,8 +33,8 @@ void test_map_basic()
     // 2. insert (중복 키 테스트)
     // ===========================================================
     print_section("Duplicate key insert");
-    NAMESPACE::pair<typename NAMESPACE::map<int, std::string>::iterator, bool> ret;
-    ret = m.insert(NAMESPACE::make_pair(10, "Ten (again)"));
+    ft::pair<typename ft::map<int, std::string>::iterator, bool> ret;
+    ret = m.insert(ft::make_pair(10, "Ten (again)"));
     std::cout << "insert(10) success? " << (ret.second ? "true" : "false") << '\n';
     std::cout << "key=10 value: " << ret.first->second << '\n';
 
@@ -40,7 +43,7 @@ void test_map_basic()
     // ===========================================================
     print_section("find() / operator[]");
 
-    typename NAMESPACE::map<int, std::string>::iterator it;
+    typename ft::map<int, std::string>::iterator it;
     it = m.find(15);
     if (it != m.end())
         std::cout << "find(15): " << it->first << " => " << it->second << '\n';
@@ -56,8 +59,7 @@ void test_map_basic()
     // ===========================================================
     print_section("Iterator traversal (in-order)");
 
-    for (typename NAMESPACE::map<int, std::string>::iterator iter = m.begin(); iter != m.end();
-         ++iter)
+    for (typename ft::map<int, std::string>::iterator iter = m.begin(); iter != m.end(); ++iter)
         std::cout << iter->first << " -> " << iter->second << '\n';
 
     // ===========================================================
@@ -65,9 +67,9 @@ void test_map_basic()
     // ===========================================================
     print_section("Const iterator check");
 
-    const NAMESPACE::map<int, std::string> cm(m);
-    for (typename NAMESPACE::map<int, std::string>::const_iterator cit = cm.begin();
-         cit != cm.end(); ++cit)
+    const ft::map<int, std::string> cm(m);
+    for (typename ft::map<int, std::string>::const_iterator cit = cm.begin(); cit != cm.end();
+         ++cit)
         std::cout << cit->first << ":" << cit->second << " ";
     std::cout << '\n';
 

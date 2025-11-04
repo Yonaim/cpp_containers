@@ -1,9 +1,11 @@
-#include <iostream>
-#include <string>
-#include "is_integral.h"
 #include "test_config.h"
 #include "test_print.h"
 
+#if NANESPACE == std
+    #include <type_traits>
+#else
+    #include "is_integral.h"
+#endif
 
 void test_is_integral()
 {
@@ -15,29 +17,29 @@ void test_is_integral()
     // Integral types
     // ===========================================================
     print_section("Integral types");
-    std::cout << "int:               " << NAMESPACE::is_integral<int>::value << "\n";
-    std::cout << "const int:         " << NAMESPACE::is_integral<const int>::value << "\n";
-    std::cout << "volatile int:      " << NAMESPACE::is_integral<volatile int>::value << "\n";
-    std::cout << "unsigned long:     " << NAMESPACE::is_integral<unsigned long>::value << "\n";
-    std::cout << "long long:         " << NAMESPACE::is_integral<long long>::value << "\n";
-    std::cout << "bool:              " << NAMESPACE::is_integral<bool>::value << "\n";
-    std::cout << "char:              " << NAMESPACE::is_integral<char>::value << "\n";
-    std::cout << "wchar_t:           " << NAMESPACE::is_integral<wchar_t>::value << "\n";
+    std::cout << "int:               " << ft::is_integral<int>::value << "\n";
+    std::cout << "const int:         " << ft::is_integral<const int>::value << "\n";
+    std::cout << "volatile int:      " << ft::is_integral<volatile int>::value << "\n";
+    std::cout << "unsigned long:     " << ft::is_integral<unsigned long>::value << "\n";
+    std::cout << "long long:         " << ft::is_integral<long long>::value << "\n";
+    std::cout << "bool:              " << ft::is_integral<bool>::value << "\n";
+    std::cout << "char:              " << ft::is_integral<char>::value << "\n";
+    std::cout << "wchar_t:           " << ft::is_integral<wchar_t>::value << "\n";
 
     // ===========================================================
     // Floating-point types
     // ===========================================================
     print_section("Floating-point types");
-    std::cout << "float:             " << NAMESPACE::is_integral<float>::value << "\n";
-    std::cout << "double:            " << NAMESPACE::is_integral<double>::value << "\n";
-    std::cout << "long double:       " << NAMESPACE::is_integral<long double>::value << "\n";
+    std::cout << "float:             " << ft::is_integral<float>::value << "\n";
+    std::cout << "double:            " << ft::is_integral<double>::value << "\n";
+    std::cout << "long double:       " << ft::is_integral<long double>::value << "\n";
 
     // ===========================================================
     // Other types
     // ===========================================================
     print_section("Other types");
-    std::cout << "void:              " << NAMESPACE::is_integral<void>::value << "\n";
-    std::cout << "int*:              " << NAMESPACE::is_integral<int *>::value << "\n";
-    std::cout << "int&:              " << NAMESPACE::is_integral<int &>::value << "\n";
-    std::cout << "std::string:       " << NAMESPACE::is_integral<std::string>::value << "\n";
+    std::cout << "void:              " << ft::is_integral<void>::value << "\n";
+    std::cout << "int*:              " << ft::is_integral<int *>::value << "\n";
+    std::cout << "int&:              " << ft::is_integral<int &>::value << "\n";
+    std::cout << "std::string:       " << ft::is_integral<std::string>::value << "\n";
 }
