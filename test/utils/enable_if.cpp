@@ -11,6 +11,7 @@ Substitution Failure Is Not An Error (SFINAE)
 #include "is_floating_point.h"
 #include "is_integral.h"
 #include "test_config.h"
+#include "test_print.h"
 
 // =========================== use in Return Type ==============================
 
@@ -57,15 +58,26 @@ void printTypeParam(
 
 void test_enable_if()
 {
-    // 리턴 타입
+    FILE_BANNER();
+
+    // ===========================================================
+    // Return type specialization
+    // ===========================================================
+    print_section("Return type SFINAE");
     printType(42);
     printType((float)3.14);
 
-    // 파라미터 타입
+    // ===========================================================
+    // Parameter type specialization
+    // ===========================================================
+    print_section("Parameter type SFINAE");
     printTypeParam(42);
-    // printTypeParam((float)42.42);
+    // printTypeParam((float)42.42); // Error: not integral
 
-    // 템플릿 인자 타입
+    // ===========================================================
+    // Template argument type specialization
+    // ===========================================================
+    print_section("Template argument SFINAE (commented out)");
     // printTypeTemplate((int)42);
     // printTypeTemplate((float)42.42);
 }
