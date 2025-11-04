@@ -1,10 +1,10 @@
 .DEFAULT_GOAL	= all
 NAME			= containers
 
-# ******************* SETTINGS (NAMESPACE, STD VERSION) ********************** #
+# ================================= SETTINGS ================================= #
 
-NAMESPACE		?= ft
-CXXSTD			= c++98
+NAMESPACE		?= std
+CXXSTD			= c++11
 
 ifeq ($(NAMESPACE),ft)
     NAMESPACE_FLAGS = -DNAMESPACE=ft
@@ -12,7 +12,9 @@ else
     NAMESPACE_FLAGS = -DNAMESPACE=std
 endif
 
-# ****************************** COMPILE FLAGS ******************************* #
+MAKEFLAGS += --no-print-directory
+
+# ================================ COMPILER ================================== #
 
 CXX				= c++
 CXXSTD_FLAG		= -std=$(CXXSTD)
@@ -20,49 +22,92 @@ CXXFLAGS		= $(CXXSTD_FLAG) -MMD -MP -Wall -Wextra -Werror
 CXXFLAGS		+= $(NAMESPACE_FLAGS) $(SANITIZE_FLAGS)
 # SANITIZE_FLAGS  = -fsanitize=address
 
-CPPFLAGS		= -I./include -I./include/ft -I./include/utils
+CPPFLAGS		= -I./include -I./include/ft -I./test/include
 LDFLAGS			=
 LDLIBS			=
 
-# ******************************** FILE LIST ********************************* #
+# ============================= DIRECTORIES ================================== #
 
-TEST_FILE   	= \
-					pair \
-					equal \
-					lexicographical_compare \
-					enable_if \
-					is_integral \
-					iterator_traits \
-					reverse_iterator
-TEST_PREFIX	 	= ./src/test/
+SRC_DIR      	:= src
+TEST_DIR    	:= test
+OBJ_DIR      	:= obj
+BIN_DIR      	:= bin
 
-FILE        	= utils/print main
-PREFIX      	= ./src/
+# ============================ COMMON SOURCES ================================ #
 
-SRCS       		:= $(addprefix $(PREFIX),      $(addsuffix .cpp,$(FILE)))
-TEST_SRCS  		:= $(addprefix $(TEST_PREFIX), $(addsuffix .cpp,$(TEST_FILE)))
+BASE_SRCS 		:= $(wildcard $(SRC_DIR)/*.cpp)
+BASE_OBJS 		:= $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(BASE_SRCS))
 
-OBJS       		:= $(SRCS:.cpp=.o) $(TEST_SRCS:.cpp=.o)
-DEPS      		:= $(OBJS:.o=.d)
+# ============================= TEST SOURCES ================================= #
 
-# ********************************* MAKE RULES ******************************* #
+TEST_UTILS_SRCS  := $(wildcard $(TEST_DIR)/utils/*.cpp)
+TEST_VECTOR_SRCS := $(wildcard $(TEST_DIR)/vector/*.cpp)
+TEST_MAP_SRCS    := $(wildcard $(TEST_DIR)/map/*.cpp)
+TEST_STACK_SRCS  := $(wildcard $(TEST_DIR)/stack/*.cpp)
 
-all : $(NAME)
+TEST_SRCS := \
+	$(if $(TEST_UTILS),$(TEST_UTILS_SRCS)) \
+	$(if $(TEST_VECTOR),$(TEST_VECTOR_SRCS)) \
+	$(if $(TEST_MAP),$(TEST_MAP_SRCS)) \
+	$(if $(TEST_STACK),$(TEST_STACK_SRCS))
 
-$(NAME) : $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME) $(LDFLAGS) $(LDLIBS)
+# ================================== TARGETS ================================= #
 
-clean :
-	rm -f $(OBJS) $(DEPS) 
+all:
+	@$(MAKE) build TEST_NAME=all TEST_UTILS=1 TEST_VECTOR=1 TEST_MAP=1 TEST_STACK=1
+	@$(MAKE) run TEST_NAME=all
 
-fclean : clean
-	rm -f $(NAME)
+test_utils:
+	@$(MAKE) build TEST_NAME=utils TEST_UTILS=1
+	@$(MAKE) run TEST_NAME=utils
 
-re : fclean all
+test_vector:
+	@$(MAKE) build TEST_NAME=vector TEST_VECTOR=1
+	@$(MAKE) run TEST_NAME=vector
 
-%.o : %.cpp
-	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
+test_map:
+	@$(MAKE) build TEST_NAME=map TEST_MAP=1
+	@$(MAKE) run TEST_NAME=map
 
--include $(DEPS)
+test_stack:
+	@$(MAKE) build TEST_NAME=stack TEST_STACK=1
+	@$(MAKE) run TEST_NAME=stack
 
-.PHONY : all clean fclean re
+# ============================== BUILD / RUN ================================= #
+
+build:
+	@mkdir -p $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) \
+		$(addprefix -D, \
+			TEST_UTILS=$(or $(TEST_UTILS),0) \
+			TEST_VECTOR=$(or $(TEST_VECTOR),0) \
+			TEST_MAP=$(or $(TEST_MAP),0) \
+			TEST_STACK=$(or $(TEST_STACK),0)) \
+		$(BASE_SRCS) $(TEST_SRCS) \
+		$(CPPFLAGS) $(LDFLAGS) $(LDLIBS) \
+		-o $(BIN_DIR)/$(NAME)_$(NAMESPACE)_$(TEST_NAME)
+
+run:
+	@./$(BIN_DIR)/$(NAME)_$(NAMESPACE)_$(TEST_NAME)
+	@$(MAKE) clean -s
+
+# ======================= OBJECT BUILD RULE ======================= #
+
+$(OBJ_DIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	@$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
+
+clean:
+	rm -rf $(OBJ_DIR)
+
+fclean: clean
+	rm -rf $(BIN_DIR)
+	rm -f $(NAME)_*
+
+re: fclean all
+
+-include $(OBJS:.o=.d)
+
+.PHONY: all clean fclean re \
+		test_utils test_vector test_map test_stack build run
+	
