@@ -1,5 +1,5 @@
-#ifndef TEST_H
-#define TEST_H
+#ifndef TEST_UNITS_H
+#define TEST_UNITS_H
 
 // ===========================================================
 // Utils Part (1~2회차)
@@ -30,4 +30,4 @@ void test_map_lookup_compare();
 // ===========================================================
 void test_stack();
 
-#endif // TEST_H
+#endif
