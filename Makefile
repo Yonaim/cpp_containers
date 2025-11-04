@@ -3,7 +3,7 @@ NAME			= containers
 
 # ================================= SETTINGS ================================= #
 
-NAMESPACE		?= std
+NAMESPACE		?= ft
 CXXSTD			= c++11
 
 ifeq ($(NAMESPACE),ft)
@@ -35,7 +35,7 @@ BIN_DIR      	:= bin
 
 # ============================ COMMON SOURCES ================================ #
 
-BASE_SRCS 		:= $(wildcard $(SRC_DIR)/*.cpp)
+BASE_SRCS 		:= 
 BASE_OBJS 		:= $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(BASE_SRCS))
 
 # ============================= TEST SOURCES ================================= #
@@ -51,29 +51,49 @@ TEST_SRCS := \
 	$(if $(TEST_MAP),$(TEST_MAP_SRCS)) \
 	$(if $(TEST_STACK),$(TEST_STACK_SRCS))
 
+# =========================== TEST MAIN SOURCES ============================== #
+
+UNIT_MAIN   := $(TEST_DIR)/main_unit_test.cpp
+STRESS_MAIN := $(TEST_DIR)/main_stress_test.cpp
+
 # ================================== TARGETS ================================= #
 
 all:
-	@$(MAKE) build TEST_NAME=all TEST_UTILS=1 TEST_VECTOR=1 TEST_MAP=1 TEST_STACK=1
-	@$(MAKE) run TEST_NAME=all
+	$(MAKE) unit_all
+	$(MAKE) stress_all
 
-test_utils:
-	@$(MAKE) build TEST_NAME=utils TEST_UTILS=1
-	@$(MAKE) run TEST_NAME=utils
+# -------------------------- UNIT TEST TARGETS ------------------------------- #
 
-test_vector:
-	@$(MAKE) build TEST_NAME=vector TEST_VECTOR=1
-	@$(MAKE) run TEST_NAME=vector
+unit_all:
+	$(MAKE) build TEST_MAIN=$(UNIT_MAIN) TEST_NAME=unit_all TEST_UTILS=1 TEST_VECTOR=1 TEST_MAP=1 TEST_STACK=1
 
-test_map:
-	@$(MAKE) build TEST_NAME=map TEST_MAP=1
-	@$(MAKE) run TEST_NAME=map
+unit_utils:
+	$(MAKE) build TEST_MAIN=$(UNIT_MAIN) TEST_NAME=unit_utils TEST_UTILS=1
 
-test_stack:
-	@$(MAKE) build TEST_NAME=stack TEST_STACK=1
-	@$(MAKE) run TEST_NAME=stack
+unit_vector:
+	$(MAKE) build TEST_MAIN=$(UNIT_MAIN) TEST_NAME=unit_vector TEST_VECTOR=1
 
-# ============================== BUILD / RUN ================================= #
+unit_map:
+	$(MAKE) build TEST_MAIN=$(UNIT_MAIN) TEST_NAME=unit_map TEST_MAP=1
+
+unit_stack:
+	$(MAKE) build TEST_MAIN=$(UNIT_MAIN) TEST_NAME=unit_stack TEST_STACK=1
+
+# ------------------------- STRESS TEST TARGETS ------------------------------ #
+
+stress_all:
+	$(MAKE) build TEST_MAIN=$(STRESS_MAIN) TEST_NAME=stress_all TEST_VECTOR=1 TEST_MAP=1 TEST_STACK=1
+
+stress_vector:
+	$(MAKE) build TEST_MAIN=$(STRESS_MAIN) TEST_NAME=stress_vector TEST_VECTOR=1
+
+stress_map:
+	$(MAKE) build TEST_MAIN=$(STRESS_MAIN) TEST_NAME=stress_map TEST_MAP=1
+
+stress_stack:
+	$(MAKE) build TEST_MAIN=$(STRESS_MAIN) TEST_NAME=stress_stack TEST_STACK=1
+
+# ================================= BUILD ==================================== #
 
 build:
 	@mkdir -p $(BIN_DIR)
@@ -83,19 +103,16 @@ build:
 			TEST_VECTOR=$(or $(TEST_VECTOR),0) \
 			TEST_MAP=$(or $(TEST_MAP),0) \
 			TEST_STACK=$(or $(TEST_STACK),0)) \
-		$(BASE_SRCS) $(TEST_SRCS) \
+		$(TEST_MAIN) $(TEST_SRCS) \
 		$(CPPFLAGS) $(LDFLAGS) $(LDLIBS) \
 		-o $(BIN_DIR)/$(NAME)_$(NAMESPACE)_$(TEST_NAME)
 
-run:
-	@./$(BIN_DIR)/$(NAME)_$(NAMESPACE)_$(TEST_NAME)
-	@$(MAKE) clean -s
 
-# ======================= OBJECT BUILD RULE ======================= #
+# ============================ OBJECT BUILD RULE ============================= #
 
 $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
-	@$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
+	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $< -o $@
 
 clean:
 	rm -rf $(OBJ_DIR)
@@ -109,5 +126,6 @@ re: fclean all
 -include $(OBJS:.o=.d)
 
 .PHONY: all clean fclean re \
-		test_utils test_vector test_map test_stack build run
-	
+	unit_all unit_utils unit_vector unit_map unit_stack \
+	stress_all stress_vector stress_map stress_stack \
+	build
