@@ -62,7 +62,7 @@ all:
 	$(MAKE) unit_all
 	$(MAKE) stress_all
 
-# -------------------------- UNIT TEST TARGETS ------------------------------- #
+# =========================== UNIT TEST TARGETS ============================== #
 
 unit_all:
 	$(MAKE) build TEST_MAIN=$(UNIT_MAIN) TEST_NAME=unit_all TEST_UTILS=1 TEST_VECTOR=1 TEST_MAP=1 TEST_STACK=1
@@ -79,7 +79,7 @@ unit_map:
 unit_stack:
 	$(MAKE) build TEST_MAIN=$(UNIT_MAIN) TEST_NAME=unit_stack TEST_STACK=1
 
-# ------------------------- STRESS TEST TARGETS ------------------------------ #
+# ========================- STRESS TEST TARGETS ============================== #
 
 stress_all:
 	$(MAKE) build TEST_MAIN=$(STRESS_MAIN) TEST_NAME=stress_all TEST_VECTOR=1 TEST_MAP=1 TEST_STACK=1
@@ -106,7 +106,6 @@ build:
 		$(TEST_MAIN) $(TEST_SRCS) \
 		$(CPPFLAGS) $(LDFLAGS) $(LDLIBS) \
 		-o $(BIN_DIR)/$(NAME)_$(NAMESPACE)_$(TEST_NAME)
-
 
 # ============================ OBJECT BUILD RULE ============================= #
 
