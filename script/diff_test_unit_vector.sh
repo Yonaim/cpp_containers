@@ -1,3 +1,3 @@
 #!/bin/bash
-source ./common_diff_test.sh
+source ./diff_test_common.sh
 run_diff_test unit vector "$@"
