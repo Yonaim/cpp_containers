@@ -1,6 +1,7 @@
 containers*
 subject.pdf
 settings.json
+logs
 
 # Prerequisites
 *.d
