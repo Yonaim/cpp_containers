@@ -1,18 +1,20 @@
-// provided by Ecole42 official
+// ============================================================================
+//  Provided by Ecole42 (Modified version with safe macro guards and error logs)
+// ============================================================================
 
 #include <deque>
 #include <iostream>
 #include <string>
 
-#if NAMESPACE == std
+#ifdef STD_MDOE
     #include <map>
     #include <stack>
     #include <vector>
-namespace ft = std;
+    namespace ft = std;
 #else
-    #include <map.hpp>
-    #include <stack.hpp>
-    #include <vector.hpp>
+    #include <map.h>
+    #include <stack.h>
+    #include <vector.h>
 #endif
 
 #include <stdlib.h>
@@ -26,7 +28,7 @@ struct Buffer
     char buff[BUFFER_SIZE];
 };
 
-#define COUNT (MAX_RAM / (int)sizeof(Buffer)) // about one milion
+#define COUNT (MAX_RAM / (int)sizeof(Buffer)) // about one million
 
 // ====================== TEST FLAG DEFINITIONS ====================== //
 #ifndef TEST_VECTOR
@@ -68,9 +70,9 @@ int main(int argc, char **argv)
 {
     if (argc != 2)
     {
-        std::cerr << "Usage: ./test seed" << std::endl;
+        std::cerr << "Usage: ./test <seed>" << std::endl;
         std::cerr << "Provide a seed please" << std::endl;
-        std::cerr << "Count value:" << COUNT << std::endl;
+        std::cerr << "Count value: " << COUNT << std::endl;
         return 1;
     }
 
@@ -78,6 +80,8 @@ int main(int argc, char **argv)
     srand(seed);
 
 #if TEST_VECTOR
+    std::cout << "[RUNNING TEST_VECTOR]" << std::endl;
+
     ft::vector<std::string>               vector_str;
     ft::vector<int>                       vector_int;
     ft::vector<Buffer>                    vector_buffer;
@@ -104,11 +108,13 @@ int main(int argc, char **argv)
     }
     catch (const std::exception &e)
     {
-        // 정상 동작
+        std::cerr << "Caught expected exception: " << e.what() << std::endl;
     }
 #endif // TEST_VECTOR
 
 #if TEST_MAP
+    std::cout << "[RUNNING TEST_MAP]" << std::endl;
+
     ft::map<int, int> map_int;
     for (int i = 0; i < COUNT; ++i)
         map_int.insert(ft::make_pair(rand(), rand()));
@@ -123,18 +129,20 @@ int main(int argc, char **argv)
 
     {
         ft::map<int, int> copy = map_int;
+        (void)copy;
     }
 #endif // TEST_MAP
 
 #if TEST_STACK
+    std::cout << "[RUNNING TEST_STACK]" << std::endl;
+
     MutantStack<char> iterable_stack;
     for (char letter = 'a'; letter <= 'z'; letter++)
         iterable_stack.push(letter);
 
     for (MutantStack<char>::iterator it = iterable_stack.begin(); it != iterable_stack.end(); ++it)
-    {
         std::cout << *it;
-    }
+
     std::cout << std::endl;
 #endif // TEST_STACK
 

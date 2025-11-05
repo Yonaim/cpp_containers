@@ -1,12 +1,12 @@
 #include "test_config.h"
 #include "test_print.h"
 
-#if NANESPACE == std
+#ifdef STD_MODE
     #include <map>
     #include <utility>
 #else
-    #include "map.h"
-    #include "pair.h"
+    #include <map.h>
+    #include <pair.h>
 #endif
 
 void test_map_basic()

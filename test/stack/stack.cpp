@@ -1,7 +1,7 @@
 #include "test_config.h"
 #include "test_print.h"
 
-#if NANESPACE == std
+#ifdef STD_MODE
     #include <stack>
     #include <utility>
 #else

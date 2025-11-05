@@ -1,11 +1,7 @@
 #ifndef TEST_CONFIG_H
 #define TEST_CONFIG_H
 
-#ifndef NAMESPACE
-#define NAMESPACE ft
-#endif
-
-#if NANESPACE == std
+#ifdef STD_MDOE
     namespace ft = std;
 #endif
 

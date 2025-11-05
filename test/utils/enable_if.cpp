@@ -9,12 +9,12 @@ Substitution Failure Is Not An Error (SFINAE)
 #include "test_config.h"
 #include "test_print.h"
 
-#if NANESPACE == std
+#ifdef STD_MODE
     #include <type_traits>
 #else
-    #include "enable_if.h"
-    #include "is_floating_point.h"
-    #include "is_integral.h"
+    #include <enable_if.h>
+    #include <is_floating_point.h>
+    #include <is_integral.h>
 #endif
 
 // =========================== use in Return Type ==============================
