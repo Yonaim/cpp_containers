@@ -5,7 +5,7 @@ NAME			= containers
 
 NAMESPACE		?= ft
 CXXSTD			:= c++98
-CONTAINERS_PATH	= include/ft
+CONTAINERS_PATH	= include/ft # 구현한 컨테이너 템플릿 헤더의 경로
 
 ifeq ($(NAMESPACE),std)
     NAMESPACE_FLAG = -DSTD_MODE=1
@@ -45,7 +45,7 @@ STRESS_MAIN := $(TEST_DIR)/main_stress_test.cpp
 
 # ============================= UNIT TEST SOURCES ============================ #
 
-UNIT_UTILS_NAMES  := enable_if equal is_integral iterator_traits lexicographical_compare pair reverse_iterator
+UNIT_UTILS_NAMES  := enable_if equal is_integral iterator_traits  pair reverse_iterator
 UNIT_VECTOR_NAMES := vector_basic vector_modifiers
 UNIT_MAP_NAMES    := map_basic map_lookup_compare map_modifiers
 UNIT_STACK_NAMES  := stack
