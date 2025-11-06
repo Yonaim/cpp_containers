@@ -6,11 +6,11 @@
 #include <iostream>
 #include <string>
 
-#ifdef STD_MDOE
+#ifdef STD_MODE
     #include <map>
     #include <stack>
     #include <vector>
-    namespace ft = std;
+namespace ft = std;
 #else
     #include "map.h"
     #include "stack.h"
@@ -19,7 +19,7 @@
 
 #include <stdlib.h>
 
-#define MAX_RAM 4294967296 // 4GB
+#define MAX_RAM (1ULL << 32) // 4GB
 #define BUFFER_SIZE 4096
 
 struct Buffer
@@ -78,19 +78,22 @@ int main(int argc, char **argv)
 
     const int seed = atoi(argv[1]);
     srand(seed);
+    std::cout << "Test start with input seed " << seed << "\n\n";
 
 #if TEST_VECTOR
     std::cout << "[RUNNING TEST_VECTOR]" << std::endl;
 
-    ft::vector<std::string>               vector_str;
-    ft::vector<int>                       vector_int;
-    ft::vector<Buffer>                    vector_buffer;
-    ft::stack<Buffer, std::deque<Buffer>> stack_deq_buffer;
+    ft::vector<std::string> vector_str;
+    ft::vector<int>         vector_int;
+    ft::vector<Buffer>      vector_buffer;
+    ft::stack<Buffer, std::deque<Buffer> >
+        stack_deq_buffer; // Dummy declaration - ensures ft::stack compiles/link correctly even in
+                          // vector-only builds.
 
-    for (int i = 0; i < COUNT; i++)
+    for (size_t i = 0; i < COUNT; i++)
         vector_buffer.push_back(Buffer());
 
-    for (int i = 0; i < COUNT; i++)
+    for (size_t i = 0; i < COUNT; i++)
     {
         const int idx = rand() % COUNT;
         vector_buffer[idx].idx = 5;
@@ -99,7 +102,7 @@ int main(int argc, char **argv)
 
     try
     {
-        for (int i = 0; i < COUNT; i++)
+        for (size_t i = 0; i < COUNT; i++)
         {
             const int idx = rand() % COUNT;
             vector_buffer.at(idx);
