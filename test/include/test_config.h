@@ -1,8 +1,8 @@
 #ifndef TEST_CONFIG_H
 #define TEST_CONFIG_H
 
-#ifndef NAMESPACE
-#define NAMESPACE ft
+#ifdef STD_MODE
+    namespace ft = std;
 #endif
 
 // 전처리기는 한 단계 치환만 수행하기 때문에 이렇게 단계를 거쳐 수행을 원하는 경우 단계별로 매크로를 둬야함

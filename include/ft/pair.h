@@ -5,7 +5,8 @@ namespace ft
 {
     // template<class T1>, template<typename T1>
     // C++98에서는 둘다 가능! 원래는 전자만 됐음.
-    template <class T1, class T2> struct pair
+    template <class T1, class T2>
+    struct pair
     {
         // 템플릿 파라미터는 외부에서 접근할 수가 없으므로, 외부에서 접근할 수 있도록 typedef
         // 템플릿 파라미터는 템플릿 정의 내에서만 유효한 타입 이름
@@ -32,8 +33,22 @@ namespace ft
         // ============ copy assignment operator =============
         pair &operator=(const pair &other)
         {
-            first = other.first; // copy assignment operator 호출
+            first = other.first;   // copy assignment operator 호출
             second = other.second; // copy assignment operator 호출
+            return *this;
+        }
+        // ============ conversion constructor =============
+        template <class U1, class U2>
+        pair(const pair<U1, U2> &p) : first(p.first), second(p.second)
+        {
+        }
+        // ============ conversion assignment operator =============
+        template <class U1, class U2>
+        pair &operator=(const pair<U1, U2> &other)
+        {
+            first = other.first;
+            second = other.second;
+            return *this;
         }
         // ============ destructor =============
         ~pair() // T1, T2의 default destructor들이 호출됨
@@ -41,7 +56,11 @@ namespace ft
         }
     };
 
-    template <class T1, class T2> pair<T1, T2> make_pair(T1 x, T2 y) { return pair<T1, T2>(x, y); }
+    template <class T1, class T2>
+    pair<T1, T2> make_pair(T1 x, T2 y)
+    {
+        return pair<T1, T2>(x, y);
+    }
 
     // ============ operators (==, !=, <, <=, >, >=) =============
     template <class T1, class T2, class U1, class U2>
