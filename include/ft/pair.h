@@ -1,5 +1,5 @@
-#ifndef PAIR_H
-#define PAIR_H
+#ifndef FT_PAIR_H
+#define FT_PAIR_H
 
 namespace ft
 {

@@ -1,5 +1,5 @@
-#ifndef ENABLE_IF
-#define ENABLE_IF
+#ifndef FT_ENABLE_IF
+#define FT_ENABLE_IF
 
 /*
 template <bool B, class T = void>

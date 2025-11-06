@@ -1,5 +1,5 @@
-#ifndef IS_FLOATING_POINT_H
-#define IS_FLOATING_POINT_H
+#ifndef FT_IS_FLOATING_POINT_H
+#define FT_IS_FLOATING_POINT_H
 
 #include "bool_type.h" // 컴파일 타임 평가
 

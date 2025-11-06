@@ -1,5 +1,5 @@
-#ifndef LEXICOGRAPHIUCAL_H
-#define LEXICOGRAPHIUCAL_H
+#ifndef FT_LEXICOGRAPHIUCAL_H
+#define FT_LEXICOGRAPHIUCAL_H
 
 // 두 시퀀스를 사전식(lexicographical)으로 비교한다.
 // 첫번째 구간의 원소가 두번째 구간의 원소보다 작으면 true

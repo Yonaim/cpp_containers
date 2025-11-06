@@ -1,5 +1,5 @@
-#ifndef IS_INTEGRAL_H
-#define IS_INTEGRAL_H
+#ifndef FT_IS_INTEGRAL_H
+#define FT_IS_INTEGRAL_H
 
 #include "bool_type.h" // 컴파일 타임 평가
 #include "remove_cv.h"
