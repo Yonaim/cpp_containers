@@ -4,10 +4,10 @@
 #ifdef STD_MODE
     #include <stack>
     #include <utility>
+    namespace ft = std;
 #else
     #include "pair.h"
     #include "stack.h"
-
 #endif
 
 void test_stack()
@@ -31,8 +31,8 @@ void test_stack()
     for (int i = 1; i <= 5; ++i)
     {
         s.push(i * 10);
-        std::cout << "push(" << i * 10 << ") → top = " << s.top() << ", size = " << s.size()
-                  << '\n';
+        std::cout << "push(" << i * 10 << ") → top = " << s.top()
+                  << ", size = " << s.size() << '\n';
     }
 
     print_section("After push()");
@@ -40,7 +40,8 @@ void test_stack()
     std::cout << "Top element: " << s.top() << '\n';
 
     s.pop();
-    std::cout << "After pop(): top = " << s.top() << ", size = " << s.size() << '\n';
+    std::cout << "After pop(): top = " << s.top()
+              << ", size = " << s.size() << '\n';
 
     // ===========================================================
     // 3. 여러 자료형 테스트
@@ -54,7 +55,8 @@ void test_stack()
 
     std::cout << "Top: " << s_str.top() << '\n';
     s_str.pop();
-    std::cout << "After pop(): top = " << s_str.top() << ", size = " << s_str.size() << '\n';
+    std::cout << "After pop(): top = " << s_str.top()
+              << ", size = " << s_str.size() << '\n';
 
     // ===========================================================
     // 4. 비교 연산자
@@ -76,22 +78,4 @@ void test_stack()
     print_bool(s2 > s1);
     print_bool(s1 <= s2);
     print_bool(s2 >= s1);
-
-    // ===========================================================
-    // 5. std::stack과의 동작 비교
-    // ===========================================================
-    print_section("Compare behavior with std::stack");
-
-    std::stack<int> std_s;
-    ft::stack<int>  ft_s;
-
-    for (int i = 1; i <= 3; ++i)
-    {
-        std_s.push(i);
-        ft_s.push(i);
-    }
-
-    std::cout << "std::stack top: " << std_s.top() << '\n';
-    std::cout << "ft::stack  top: " << ft_s.top() << '\n';
-    print_bool(std_s.size() == ft_s.size());
 }

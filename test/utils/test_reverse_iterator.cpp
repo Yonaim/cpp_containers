@@ -19,7 +19,7 @@ void test_reverse_iterator()
     ft::reverse_iterator<std::vector<int>::iterator> rend(v.begin());
 
     // ===========================================================
-    // 1. 기본 순회
+    // 1. Basic reverse iteration
     // ===========================================================
     print_section("Basic reverse iteration");
     for (ft::reverse_iterator<std::vector<int>::iterator> it = rbegin; it != rend; ++it)
@@ -27,7 +27,7 @@ void test_reverse_iterator()
     std::cout << '\n';
 
     // ===========================================================
-    // 2. 연산자 테스트
+    // 2. Operator tests
     // ===========================================================
     print_section("Operator tests");
     ft::reverse_iterator<std::vector<int>::iterator> it1 = rbegin;

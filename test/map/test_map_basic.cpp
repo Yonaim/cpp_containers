@@ -5,8 +5,8 @@
     #include <map>
     #include <utility>
 #else
-    #include "map.h"
     #include "pair.h"
+    #include "map.h"
 #endif
 
 void test_map_basic()

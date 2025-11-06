@@ -1,4 +1,3 @@
-#include "SomeTypes.h"
 #include "test_config.h"
 #include "test_print.h"
 
@@ -7,6 +6,57 @@
 #else
     #include "pair.h"
 #endif
+
+// ===========================================================
+//  Custom Struct: SomeType1
+//  - 테스트용 사용자 정의 타입
+//  - 생성자 / 복사 생성자 / 대입 연산자 로그 출력
+// ===========================================================
+struct SomeType1
+{
+    int value;
+    SomeType1() { std::cout << "SomeType1: Default constructor" << '\n'; }
+    SomeType1(int v) : value(v)
+    {
+        std::cout << "SomeType1: Value constructor, " << "value: " << value << '\n';
+    }
+    SomeType1(const SomeType1 &orig) : value(orig.value)
+    {
+        std::cout << "SomeType1: Copy constructor" << '\n';
+    }
+    SomeType1 &operator=(const SomeType1 &orig)
+    {
+        if (this != &orig)
+            value = orig.value;
+        std::cout << "SomeType1: Copy assignment\n";
+        return *this;
+    }
+};
+
+// ===========================================================
+//  Custom Struct: SomeType2
+//  - SomeType1과 동일 구조의 테스트용 타입
+// ===========================================================
+struct SomeType2
+{
+    int value;
+    SomeType2() { std::cout << "SomeType2: Default constructor" << '\n'; }
+    SomeType2(int v) : value(v)
+    {
+        std::cout << "SomeType2: Value constructor, " << "value: " << value << '\n';
+    }
+    SomeType2(const SomeType2 &orig) : value(orig.value)
+    {
+        std::cout << "SomeType2: Copy constructor" << '\n';
+    }
+    SomeType2 &operator=(const SomeType2 &orig)
+    {
+        if (this != &orig)
+            value = orig.value;
+        std::cout << "SomeType2: Copy assignment\n";
+        return *this;
+    }
+};
 
 // generic function: 타입에 상관없이 동작하는 일반화된 함수 (자동으로 타입 P 추론)
 template <class P>
