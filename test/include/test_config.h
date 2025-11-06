@@ -1,7 +1,7 @@
 #ifndef TEST_CONFIG_H
 #define TEST_CONFIG_H
 
-#ifdef STD_MDOE
+#ifdef STD_MODE
     namespace ft = std;
 #endif
 
