@@ -12,9 +12,9 @@
     #include <vector>
     namespace ft = std;
 #else
-    #include <map.h>
-    #include <stack.h>
-    #include <vector.h>
+    #include "map.h"
+    #include "stack.h"
+    #include "vector.h"
 #endif
 
 #include <stdlib.h>
