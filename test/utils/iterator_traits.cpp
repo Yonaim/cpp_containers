@@ -3,7 +3,7 @@
 #include "test_print.h"
 #include "type_name_string.h"
 
-#if NAMESPACE == std
+#ifdef STD_MODE
     #include <iterator>
 #else
     #include "iterator_traits.h"
@@ -36,8 +36,7 @@ void test_iterator_traits()
     print_section("const pointer specialization");
 
     typedef typename ft::iterator_traits<const int *>::value_type const_value_t;
-    std::cout << "const pointer value_type: "
-              << type_name_string<const_value_t>::value() << '\n';
+    std::cout << "const pointer value_type: " << type_name_string<const_value_t>::value() << '\n';
 
     // ===========================================================
     // 3. vector<int>::iterator test

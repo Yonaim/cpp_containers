@@ -2,7 +2,7 @@
 #include "test_config.h"
 #include "test_print.h"
 
-#if NAMESPACE == std
+#ifdef STD_MODE
     #include <iterator>
 #else
     #include "reverse_iterator.h"
