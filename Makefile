@@ -4,13 +4,13 @@ NAME			= containers
 # ================================= SETTINGS ================================= #
 
 NAMESPACE		?= ft
-CXXSTD			= c++98
+CXXSTD			:= c++98
 CONTAINERS_PATH	= include/ft
 
-ifeq ($(NAMESPACE),ft)
-    NAMESPACE_FLAG = 
-else
+ifeq ($(NAMESPACE),std)
     NAMESPACE_FLAG = -DSTD_MODE=1
+else
+    NAMESPACE_FLAG = 
 endif
 
 MAKEFLAGS += --no-print-directory
@@ -22,7 +22,7 @@ CXXSTDFLAG		= -std=$(CXXSTD)
 CXXFLAGS		= $(CXXSTDFLAG) -MMD -MP -Wall -Wextra -Werror $(NAMESPACE_FLAG) $(SANITIZE_FLAG)
 # SANITIZE_FLAG  = -fsanitize=address
 
-CPPFLAGS		= -I.$(CONTAINERS_PATH) -I./test/include
+CPPFLAGS		= -I./$(CONTAINERS_PATH) -I./test/include
 LDFLAGS			=
 LDLIBS			=
 
@@ -38,6 +38,11 @@ BIN_DIR      	:= bin
 BASE_SRCS 		:=
 BASE_OBJS 		:= $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(BASE_SRCS))
 
+# =========================== TEST MAIN SOURCES ============================== #
+
+UNIT_MAIN   := $(TEST_DIR)/main_unit_test.cpp
+STRESS_MAIN := $(TEST_DIR)/main_stress_test.cpp
+
 # ============================= UNIT TEST SOURCES ============================ #
 
 UNIT_UTILS_NAMES  := enable_if equal is_integral iterator_traits lexicographical_compare pair reverse_iterator
@@ -45,21 +50,20 @@ UNIT_VECTOR_NAMES := vector_basic vector_modifiers
 UNIT_MAP_NAMES    := map_basic map_lookup_compare map_modifiers
 UNIT_STACK_NAMES  := stack
 
-UNIT_UTILS_SRCS  := $(addprefix $(TEST_DIR)/utils/, $(addsuffix .cpp, $(UNIT_UTILS_NAMES)))
-UNIT_VECTOR_SRCS := $(addprefix $(TEST_DIR)/vector/, $(addsuffix .cpp, $(UNIT_VECTOR_NAMES)))
-UNIT_MAP_SRCS    := $(addprefix $(TEST_DIR)/map/, $(addsuffix .cpp, $(UNIT_MAP_NAMES)))
-UNIT_STACK_SRCS  := $(addprefix $(TEST_DIR)/stack/, $(addsuffix .cpp, $(UNIT_STACK_NAMES)))
+UNIT_UTILS_SRCS  := $(addprefix $(TEST_DIR)/utils/, $(addsuffix .cpp, $(addprefix test_, $(UNIT_UTILS_NAMES))))
+UNIT_VECTOR_SRCS := $(addprefix $(TEST_DIR)/vector/, $(addsuffix .cpp, $(addprefix test_, $(UNIT_VECTOR_NAMES))))
+UNIT_MAP_SRCS    := $(addprefix $(TEST_DIR)/map/, $(addsuffix .cpp, $(addprefix test_, $(UNIT_MAP_NAMES))))
+UNIT_STACK_SRCS  := $(addprefix $(TEST_DIR)/stack/, $(addsuffix .cpp, $(addprefix test_, $(UNIT_STACK_NAMES))))
 
-UNIT_TEST_SRCS := \
+UNIT_SRCS := \
 	$(if $(TEST_UTILS),$(UNIT_UTILS_SRCS)) \
 	$(if $(TEST_VECTOR),$(UNIT_VECTOR_SRCS)) \
 	$(if $(TEST_MAP),$(UNIT_MAP_SRCS)) \
 	$(if $(TEST_STACK),$(UNIT_STACK_SRCS))
 
-# =========================== TEST MAIN SOURCES ============================== #
+# ============================ STRESS TEST SOURCES =========================== #
 
-UNIT_MAIN   := $(TEST_DIR)/main_unit_test.cpp
-STRESS_MAIN := $(TEST_DIR)/main_stress_test.cpp
+STRESS_SRCS := $(STRESS_MAIN)
 
 # ================================== TARGETS ================================= #
 
@@ -83,10 +87,10 @@ define run_build
 endef
 
 make_unit:
-	$(call run_build,$(UNIT_MAIN),$(UNIT_TEST_SRCS),$(TEST_NAME))
+	$(call run_build,$(UNIT_MAIN),$(UNIT_SRCS),$(TEST_NAME))
 
 make_stress:
-	$(call run_build,$(STRESS_MAIN),$(UNIT_TEST_SRCS),$(TEST_NAME))
+	$(call run_build,,$(STRESS_SRCS),$(TEST_NAME))
 
 # =========================== UNIT TEST TARGETS ============================== #
 
