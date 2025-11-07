@@ -1,8 +1,18 @@
 #ifndef FT_ALLOCATOR_H
 #define FT_ALLOCATOR_H
 
+#include <cstddef>
+#include <limits>
+
 namespace ft
 {
+    /*
+    std::allocator
+    - 단순히 ::operator new/delete의 wrapper
+    - stateless함
+    - 실제 메모리 관리 책임은 OS에 있음
+    - memory management & object lifetime
+    */
     template <class T>
     struct allocator
     {
@@ -23,33 +33,79 @@ namespace ft
             typedef allocator<U> other;
         };
 
-        // -------------------- constructors -------------------- //
-        allocator() throw();
-        allocator(const allocator &other) throw();
+        // -------------------- constructors --------------------
+
+        // default allocator는 stateless하므로 아무런 동작을 하지 않는다.
+        allocator() throw() {}
+
+        allocator(const allocator &other) throw() {}
+
         template <class U>
-        allocator(const allocator<U> &other) throw();
-        ~allocator();
+        allocator(const allocator<U> &other) throw()
+        {
+        }
 
+        ~allocator() {}
 
-        // ---------------- other member functions ---------------- //
+        // ---------------- other member functions ----------------
 
         // operator&가 오버로딩 되었을 경우를 대비한 우회용 함수
-        pointer       address(reference x) const;
-        const_pointer address(const_reference x) const;
+        // built-in 타입은 operator 오버로딩이 불가한 점을 이용,
+        // char의 &연산자 결과를 이용하여 리턴한다
+        pointer address(reference x) const
+        {
+            // volatile은 최적화에 의한 생략 방지
+            // reinterpret_cast: raw 메모리 그대로 해석만 바꾼다
+            // const_cast: const/volatile 제거
+            const volatile char &x_char = reinterpret_cast<const volatile char &>(x);
+            return reinterpret_cast<T *>(const_cast<char>(&x_char));
+        }
+        const_pointer address(const_reference x) const
+        {
+            const volatile char &x_char = reinterpret_cast<const volatile char &>(x);
+            return reinterpret_cast<const T *>(&x_char);
+        }
 
         // memory
-        pointer   allocate(size_type n, const void *hint = 0);
-        void      deallocate(T *p, std::size_t n);
-        size_type max_size() const throw();
-        void      construct(pointer p, const_reference val);
-        void      destroy(pointer p);
+        pointer allocate(size_type n, const void *hint = 0)
+        {
+            return ::operator new(sizeof(T) * n);
+        }
+        void deallocate(T *p, std::size_t n)
+        {
+            // destructor는 deallocate 호출 이전 사용자가 명시적으로 호출
+            ::operator delete(p);
+        }
+        size_type max_size() const throw()
+        {
+            return std::numeric_limits<size_type>::max() / sizeof(T);
+        }
+        void construct(pointer p, const_reference val)
+        {
+            // 'placement new'
+            // new ptr typename(value)
+            // 대표 사용 용례: new int(42);
+            // 중간에 포인터(ptr) 삽입하여 특정 메모리 위치에 객체를 생성 가능
+            // ::operator new와 다름
+            // 내부적으로 할당 + 객체 생성자 호출 두 과정을 포함
+            //
+            new ((void *)p) T(val);
+        }
+        void destroy(pointer p) { p->~T(); }
     };
 
     // default allocator는 stateless하므로 비교 연산 반환값은 고정
     template <class T1, class T2>
-    bool operator==(const allocator<T1> &lhs, const allocator<T2> &rhs) throw();
+    bool operator==(const allocator<T1> &lhs, const allocator<T2> &rhs) throw()
+    {
+        return true;
+    }
     template <class T1, class T2>
-    bool operator!=(const allocator<T1> &lhs, const allocator<T2> &rhs) throw();
+    bool operator!=(const allocator<T1> &lhs, const allocator<T2> &rhs) throw()
+    {
+        return false;
+    }
+
 } // namespace ft
 
 #endif
