@@ -2,6 +2,7 @@
 #define FT_VECTOR_H
 
 #include <memory> // TODO: ft::allocator로 교체
+// TODO: bool 타입에 대한 partial specialization 추가
 
 /*
 Except for the std::vector<bool> partial specialization, the elements are stored contiguously, which
@@ -48,14 +49,42 @@ namespace ft
 
         // -------------------- constructors -------------------- //
 
-        // vector() : vector(Allocator()) {} // delegating constructor 사용 (C++11)
+        // delegating constructor 사용 (C++11)
+        // delegating constructor: 자신의 다른 생성자를 초기화 리스트에서 호출할 수 있다.
+        // vector() : vector(Allocator()) {}
+
+        // Default constructor
         explicit vector(const Allocator &alloc = Allocator());
+
+        // Fill constructors: Default-inserted elements (C++98에는 없었다)
+        // T는 기본 생성자를 통해 자동 생성
+        explicit vector(size_type count, const Alloc &alloc = Allocator());
+
+        // Fill constructors: Fill constructor with specified value
         explicit vector(size_type count, const T &value = T(),
                         const Allocator &alloc = Allocator());
+
+        /*
+        C++98 시절에는 Default-inserted elements가 없었기 때문에, count를 지정하면서 Allocator를
+        커스텀하고 싶다면 두 번째 인자에 직접 기본 생성자를 포함해야했다.
+        ex) vector(42, MyType(), MyAlloc<MyType>());
+        */
+
+        // Range constructor: iterator-based
+        // c++23에서는 std::ranges based도 추가됨
         template <class InputIt>
         vector(InputIt first, InputIt last, const Allocator &alloc = Allocator());
         template <class InputIt>
         vector(InputIt first, InputIt last, const Allocator &alloc = Allocator());
+
+        // Copy constructor
+        // class scope 내부이므로 template argument는 적지 않아도 무방 (외부일시 적어야 함)
+        vector(const vector &other);
+
+        // Copy assignment constructor
+        vector &operator=(const vector &other);
+
+        // destructor
         ~vector();
 
         // -------------------- element access -------------------- //
