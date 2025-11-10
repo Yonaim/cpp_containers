@@ -189,6 +189,27 @@ namespace ft
         size_type max_size() const { return _allocator.max_size(); }
         size_type capacity() const { return capacity; }
         bool      empty() const { return (size == 0); }
+        void      reserve(size_type new_cap);
+
+        // -------------------- modifiers -------------------- //
+
+        void     push_back(const T &value);
+        void     pop_back();
+        iterator insert(const_iterator pos, const T &value);
+        iterator insert(const_iterator pos, size_type count, const T &value);
+        template <class InputIt>
+        iterator insert(const_iterator pos, InputIt first, InputIt last);
+        void     resize(size_type count) void resize(size_type count, const value_type &value);
+
+        // -------------------- iterators -------------------- //
+        iterator               begin();
+        const_iterator         begin() const;
+        iterator               end();
+        const_iterator         end() const;
+        reverse_iterator       rbegin();
+        const_reverse_iterator rbegin() const;
+        reverse_iterator       rend();
+        const_reverse_iterator rend() const;
 
       private:
         Alloc<T> _allocator;
@@ -204,6 +225,27 @@ namespace ft
             _size = 0;
         }
     };
+
+    // -------------------- operators -------------------- //
+
+    template <class T, class Alloc>
+    bool operator==(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs);
+
+    template <class T, class Alloc>
+    bool operator!=(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs);
+
+    template <class T, class Alloc>
+    bool operator<(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs);
+
+    template <class T, class Alloc>
+    bool operator<=(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs);
+
+    template <class T, class Alloc>
+    bool operator>(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs);
+
+    template <class T, class Alloc>
+    bool operator>=(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs);
+
 } // namespace ft
 
 #endif // FT_VECTOR_H
