@@ -25,10 +25,10 @@ Through this project, developers gain a deeper understanding of STL internals, t
 ---
 
 ### 11/02 ~ 11/08 (3회차) — Vector Part 1
-- [ ] 내부 동적 배열 + allocator  
-- [ ] 생성자 / 소멸자 / 대입 연산자  
-- [ ] size, capacity, max_size, empty  
-- [ ] operator[], at, front, back  
+- [x] 내부 동적 배열 + allocator  
+- [x] 생성자 / 소멸자 / 대입 연산자  
+- [x] size, capacity, max_size, empty  
+- [x] operator[], at, front, back  
 
 ---
 
