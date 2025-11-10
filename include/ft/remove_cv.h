@@ -1,5 +1,5 @@
-#ifndef REMOVE_CV_H
-#define REMOVE_CV_H
+#ifndef FT_REMOVE_CV_H
+#define FT_REMOVE_CV_H
 
 // const, volatile이 붙어있을 때 떼어내는 용도로 사용한다.
 

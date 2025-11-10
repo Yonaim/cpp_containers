@@ -1,5 +1,5 @@
-#ifndef EQUAL_H
-#define EQUAL_H
+#ifndef FT_EQUAL_H
+#define FT_EQUAL_H
 
 // second가 더 짧은 경우: UB로 간주. 보호되지 않는다.
 
