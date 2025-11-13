@@ -37,7 +37,7 @@ namespace ft
         {
             if (comp(*first1, *first2))
                 return true;
-            else if (comp(*first1, *first2))
+            else if (comp(*first2, *first1))
                 return false;
         }
         return (first1 == last1) && (first2 != last2);
