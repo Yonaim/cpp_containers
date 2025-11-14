@@ -6,6 +6,15 @@ iterator 카테고리 (아래로 갈수록 권한이 더 많음)
 - random access iterator: 여러번 읽기 가능, 임의 접근 가능(it + n, it[n], it1 - it2 가능)
 */
 
+/*
+[Tag Dispatch]
+- iterator 카테고리는 빈 struct임.
+- 이러한 빈 struct를 tag라고 부른다.
+- 컴파일러가 tag에 따라 특정 오버로드를 선택하도록 만드는 기술을 Tag Dispatch라고 함.
+- 템플릿을 사용하는 generic code에서 분기 처리를 할때 사용할 수 있다.
+- 런타임 분기(if/else)와 다르게, 컴파일 타임 분기가 된다는 것이 가장 큰 특징
+*/
+
 #include <forward_list>
 #include <iostream>
 #include <iterator>
