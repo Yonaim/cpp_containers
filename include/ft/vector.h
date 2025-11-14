@@ -41,7 +41,7 @@ namespace ft
 
     // T: The type of the elements (must be CopyAssignable & CopyConstructible)
     // Allocator: customizable (default one is std::allocator)
-    template <class T, class Allocator = std::allocator<T>>
+    template <class T, class Allocator = std::allocator<T> >
     class vector
     {
       public:
@@ -233,6 +233,14 @@ namespace ft
 
         // -------------------- Modifiers -------------------- //
 
+        // 모든 원소 destroy 후 _size = 0으로 설정 (메모리 공간은 해제하지 않는다)
+        void clear()
+        {
+            for (size_type i = 0; i < _size; ++i)
+                _allocator.destroy(_data + i);
+            _size = 0;
+        }
+
         // adds an element to the end (복사본 저장)
         // growth policy: 1.5배 혹은 2배
         void push_back(const T &value)
@@ -268,7 +276,10 @@ namespace ft
 
             if (_size == _capacity)
                 reserve(_capacity == 0 ? 1 : _capacity * 2);
-            for (size_type i = _size - 1; i >= idx; --i)
+
+            // size 타입 초기화를 _size - 1로 할때, overflow 주의 (_size = 0)
+            // for (size_type i = _size - 1; i >= idx; --i)
+            for (size_type i = _size; i-- > idx;) // 이 라인에서 (--) 연산을 함
             {
                 _allocator.construct(_data + i + 1, _data[i]);
                 _allocator.destroy(_data + i);
@@ -291,11 +302,11 @@ namespace ft
             {
                 size_type new_cap = (_capacity == 0 ? count : _capacity);
                 while (new_cap < _size + count)
-                    new_cap *= 2;
+                    new_cap *= 1.5;
                 reserve(new_cap);
             }
             // 뒤에서부터 원본 백업
-            for (size_type i = _size - 1; i >= idx; --i)
+            for (size_type i = _size; i-- > idx;)
             {
                 _allocator.construct(_data + i + count, _data[i]);
                 _allocator.destroy(_data + i);
@@ -324,34 +335,63 @@ namespace ft
         */
         template <class InputIt>
         iterator insert(const_iterator pos, InputIt first, InputIt last,
-                        typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type *= 0)
+                        typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type * = 0)
         {
             if (first == last)
                 return const_cast<iterator>(pos);
 
-            const size_type count = static_cast<size_type>(last - first);
-            const size_type idx = pos - begin();
+            typedef typename ft::iterator_traits<InputIt>::iterator_category category;
+            // category()는 category 타입으로 만드는 임시 객체 (오버로딩 분기용)
+            return _range_insert(pos, first, last, category());
+        }
+
+        // Input iterator (single-pass)
+        // pos는 random access 보장됨
+        template <class InputIt>
+        iterator _range_insert(const_iterator cpos, InputIt first, InputIt last,
+                               std::input_iterator_tag)
+        {
+            const size_type idx = cpos - begin();
+            iterator        pos;
+
+            // single-pass라서 distance 계산이 불가 -> 하나씩 insert
+            pos = begin() + idx;
+            for (; first != last; ++first)
+            {
+                // insert 내부에서 reserve 호출시 기존 itertor는 무효화되므로,
+                // 반드시 리턴을 받아 사용
+                pos = insert(pos, *first);
+                ++pos;
+            }
+            return begin() + idx;
+        }
+
+        // Forward & Bidirectional iterator (double-pass)
+        // 상속 구조에 의해, Bidirectional은 이 함수로 dispatch
+        // Random Access도 여기서 처리 (std::distance가 내부적으로 dispatch)
+        template <class InputIt>
+        iterator _range_insert(const_iterator cpos, InputIt first, InputIt last,
+                               std::forward_iterator_tag)
+        {
+            const size_type idx = cpos - begin();
+            const size_type count = std::distance(first, last);
+
             if (_size + count > _capacity)
             {
                 size_type new_cap = (_capacity == 0 ? count : _capacity);
                 while (new_cap < _size + count)
-                    new_cap *= 2;
+                    new_cap *= 1.5;
                 reserve(new_cap);
             }
             // 뒤에서부터 원본 백업
-            for (size_type i = _size - 1; i >= idx; --i)
+            for (size_type i = _size; i-- > idx;)
             {
                 _allocator.construct(_data + i + count, _data[i]);
                 _allocator.destroy(_data + i);
             }
             // 새 값 삽입
-            for (size_type i = 0; i < count; ++i)
-            {
+            for (size_type i = 0; first != last; ++first, ++i)
                 _allocator.construct(_data + idx + i, *first);
-                ++first;
-                // InputIt가 Random Access iterator가 아닐시, 포인터를 숫자 증감할 수 없으므로 포인터 자체를 뒤로 옮겨버린다
-                // 
-            }
             _size += count;
             return begin() + idx;
         }
@@ -363,17 +403,18 @@ namespace ft
                 삭제 구간 이후의 모든 iterator는 무효화된다.
         */
         // erases elements
-        // 삭제한 위치 이후의 원소들을 앞으로 옮기고, 남은 공간은 destory로 소멸
+        // 단일 삭제
         iterator erase(iterator pos)
         {
-            size_type idx = pos - begin();
+            const size_type idx = pos - begin();
 
-            for (size_type i = idx; i <= _size; ++i)
+            // 삭제 대상 위치 뒤쪽의 원소들을 앞으로 옮김
+            for (size_type i = idx; i < _size; ++i)
             {
-                _allocator.destroy(_data + i);
-                _allocator.construct(_data + i, _data[i + 1]);
+                _allocator.destroy(_data + i);                 // 현재 원소 삭제
+                _allocator.construct(_data + i, _data[i + 1]); // 바로 뒤 원소를 복사
             }
-            // 마지막 꼬리 제거
+            // 마지막 원소 제거
             _allocator.destroy(_data + _size - 1);
             --_size;
 
@@ -381,9 +422,24 @@ namespace ft
             // 따라서 주소가 같을지라도 새 iterator를 반환해야한다
             return begin() + idx;
         }
+        // 범위 삭제
         iterator erase(iterator first, iterator last)
         {
-            // TODO
+            if (first == last)
+                return first;
+
+            const size_type idx = first - begin(); // 삭제 시작 위치
+            const size_type count = last - first;
+
+            // 삭제 대상 위치 뒤쪽의 원소들을 앞으로 옮김
+            for (size_type i = idx; i + count < _size; ++i)
+            {
+                _allocator.destroy(_data + i);                         // 현재 원소 삭제
+                _allocator.construct(_data + i, *(_data + i + count)); // count 거리 뒤 원소를 복사
+            }
+            for (size_type i = _size - count; i < _size; ++i)
+                _allocator.destroy(_data + i);
+            _size -= count;
             return first;
         }
 
@@ -400,7 +456,7 @@ namespace ft
             {
                 // add copies of T() (or value)
                 if (count > _capacity)
-                    reserve(_capacity);
+                    reserve(count);
                 while (_size < count)
                     _allocator.construct(_data + (_size++), value_type());
             }
@@ -417,7 +473,7 @@ namespace ft
             {
                 // add copies of T() (or value)
                 if (count > _capacity)
-                    reserve(_capacity);
+                    reserve(count);
                 while (_size < count)
                     _allocator.construct(_data + (_size++), value);
             }
@@ -442,14 +498,6 @@ namespace ft
         pointer        _data;
         size_type      _size;
         size_type      _capacity;
-
-        // 모든 원소 destroy 후 _size = 0으로 설정 (메모리 공간은 해제하지 않는다)
-        void clear()
-        {
-            for (size_type i = 0; i < _size; ++i)
-                _allocator.destroy(_data + i);
-            _size = 0;
-        }
     };
 
     // -------------------- Non-member operators -------------------- //
