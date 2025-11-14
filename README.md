@@ -33,11 +33,11 @@ Through this project, developers gain a deeper understanding of STL internals, t
 ---
 
 ### 11/09 ~ 11/15 (4회차) — Vector Part 2
-- [ ] push_back, pop_back  
+- [x] push_back, pop_back  
 - [ ] insert, erase, clear  
-- [ ] resize, reserve  
-- [ ] 반복자 (begin, end, rbegin, rend)  
-- [ ] 비교 연산자 (==, <, …)  
+- [x] resize, reserve  
+- [x] 반복자 (begin, end, rbegin, rend)  
+- [x] 비교 연산자 (==,!=,<,<=,>,>=,<=>)  
 
 ---
 
