@@ -485,9 +485,12 @@ namespace ft
         iterator       end() { return _data + _size; }
         const_iterator end() const { return _data + _size; }
 
-        // 타입명과 생성자명이 reverse_iterator (const reverse_iterator)로 같은 상황
-        // 그러나 컴파일러는 문맥상으로 알맞게 판별한다
-        // 반환 타입은 선언 문맥으로, return 뒤의 괄호 호출은 값 생성(표현식)으로 해석
+        /*
+        타입명과 생성자명이 같지만, 컴파일러는 문맥상으로 알맞게 판별한다
+            - 반환 타입은 선언 문맥으로 해석
+            - return 뒤의 괄호 호출은 값 생성(표현식)으로 해석
+        아래의 reverse_iterator 그리고 const reverse_iterator가 그 예시
+        */
         reverse_iterator       rbegin() { return reverse_iterator(end()); }
         const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
         reverse_iterator       rend() { return reverse_iterator(begin()); }
