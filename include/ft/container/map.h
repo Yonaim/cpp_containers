@@ -79,24 +79,27 @@ namespace ft
             {
                 returm comp(lhs.first, rhs.first);
             }
-        }
+        };
 
-        // =========================== Member types ============================
+      private:
+        // Representative type: 실제 구현을 대표(represent)하는 타입
+        typedef _Rb_tree<key_type, value_type, Select1st<value_type, key_type, key_compare>>
+                  _Rep_type;
+        _Rep_type _tree;
 
-        typedef typename allocator_type::size_type       size_type;
-        typedef typename allocator_type::difference_type difference_type;
-
-        typedef value_type       &reference;
-        typedef const value_type &const_reference;
-
-        typedef typename allocator_type::pointer       pointer;
-        typedef typename allocator_type::const_pointer const_pointer;
-
-        typedef _Rb_tree_iterator<value_type>             iterator;
-        typedef _Rb_tree_const_iterator<const value_type> const_iterator;
-
-        typedef std::reverse_iterator<iterator>       reverse_iterator;
-        typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+      public:
+        // _Rep_type의 내부의 typedef을 그대로 가져와 재사용
+        typedef typename _Rep_type::pointer                pointer;
+        typedef typename _Rep_type::const_pointer          const_pointer;
+        typedef typename _Rep_type::reference              reference;
+        typedef typename _Rep_type::const_reference        const_reference;
+        typedef typename _Rep_type::iterator               iterator;
+        typedef typename _Rep_type::const_iterator         const_iterator;
+        typedef typename _Rep_type::reverse_iterator       reverse_iterator;
+        typedef typename _Rep_type::const_reverse_iterator const_reverse_iterator;
+        typedef typename _Rep_type::size_type              size_type;
+        typedef typename _Rep_type::difference_type        difference_type;
+        typedef typename _Rep_type::allocator_type         allocator_type;
 
         // =========================== Constructors ============================
 
