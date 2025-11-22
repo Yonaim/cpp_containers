@@ -223,8 +223,56 @@ namespace ft
         const_iterator lower_bound(const Key &key) const { return _tree.lower_bound(key); }
         iterator       upper_bound(const Key &key) { return _tree.upper_bound(key); }
         const_iterator upper_bound(const Key &key) const { return _tree.upper_bound(key); }
+
+        // friend declaration for non-member function
+        /*
+            friend 선언을 사용하는 이유:
+            - private 멤버인 _tree에 접근할 수 있도록 하기 위해서
+            - getter를 pulic API로 제공하기엔, 캡슐화가 심하게 깨짐
+        */
+        // non-member function이므로 반드시 template으로 제공
+        template <class K1, class T1, class C1, class A1>
+        friend bool operator==(const map<K1, T1, C1, A1> &lhs, const map<K1, T1, C1, A1> &rhs);
+
+        template <class K1, class T1, class C1, class A1>
+        friend bool operator>(const map<K1, T1, C1, A1> &lhs, const map<K1, T1, C1, A1> &rhs);
     };
 
+    template <class K1, class T1, class C1, class A1>
+    bool operator==(const map<K1, T1, C1, A1> &lhs, const map<K1, T1, C1, A1> &rhs)
+    {
+        return lhs._tree == rhs._tree;
+    }
+
+    template <class K1, class T1, class C1, class A1>
+    bool operator>(const map<K1, T1, C1, A1> &lhs, const map<K1, T1, C1, A1> &rhs)
+    {
+        return lhs._tree > rhs._tree;
+    }
+
+    template <class K1, class T1, class C1, class A1>
+    bool operator!=(const map<K1, T1, C1, A1> &lhs, const map<K1, T1, C1, A1> &rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    template <class K1, class T1, class C1, class A1>
+    bool operator<(const map<K1, T1, C1, A1> &lhs, const map<K1, T1, C1, A1> &rhs)
+    {
+        return rhs > lhs;
+    }
+
+    template <class K1, class T1, class C1, class A1>
+    bool operator<=(const map<K1, T1, C1, A1> &lhs, const map<K1, T1, C1, A1> &rhs)
+    {
+        return !(lhs > rhs);
+    }
+
+    template <class K1, class T1, class C1, class A1>
+    bool operator>=(const map<K1, T1, C1, A1> &lhs, const map<K1, T1, C1, A1> &rhs)
+    {
+        return !(lhs < rhs);
+    }
 } // namespace ft
 
 #endif
