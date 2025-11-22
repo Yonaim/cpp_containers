@@ -1,5 +1,3 @@
-// https://github.com/gcc-mirror/gcc/blob/master/libstdc%2B%2B-v3/include/bits/stl_tree.h#L247
-
 #ifndef FT_STL_TREE_H
 #define FT_STL_TREE_H
 
@@ -49,7 +47,7 @@ namespace ft
     /*
         - STL Bidirectional Iterator의 규칙을 만족
         - ++, --, *, ->, ==, !=
-        - 중위 순회 알고리즘
+        - 중위 순회 알고리즘 (inorder traversal)
         - dereference (*, ->) 연산 때문에 타입 T를 알아야 함
             => 템플릿 사용
     */
@@ -74,6 +72,7 @@ namespace ft
 
         // ================== operators ==================
         // TODO
+        // 순회 이동 연산 구현
         _Rb_tree_iterator &operator++() {};
         _Rb_tree_iterator  operator++(int) {};
         _Rb_tree_iterator &operator--() {};
