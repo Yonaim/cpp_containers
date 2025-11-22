@@ -101,25 +101,35 @@ namespace ft
         typedef typename _Rep_type::difference_type        difference_type;
         typedef typename _Rep_type::allocator_type         allocator_type;
 
-        // =========================== Constructors ============================
+        // =========================== allocation/deallocation ============================
 
         // Constructs an empty container
-        map();
-        explicit map(const Compare &comp, const Allocator &alloc = Allocator());
+        map() : _tree(Compare(), Allocator()) {};
+        explicit map(const Compare &comp, const Allocator &alloc = Allocator())
+            : _tree(comp, alloc) {};
 
         // Constructs the container with the contents of the range [first, last)
         template <class InputIt>
-        map(InputIt first, InputIt last, const Compare &comp = Compare(),
-            const Allocator &alloc = Allocator());
+        map(InputIt first, InputIt last, const Compare &comp, const Allocator &alloc = Allocator())
+        {
+            _tree.insert_unique(first, last);
+        };
+
+        // 문서에는 없으나 편의상 구현
+        template <class InputIt>
+        map(InputIt first, InputIt last) : _tree(Compare(), Allocator())
+        {
+            _tree.insert_unique(first, last);
+        };
 
         // Constructs the container with the copy of the contents of other
-        map(const map &other);
+        map(const map &other) : _tree(other._tree) {}
 
-        map &operator=(const map &other);
-        // Returns the allocator associated with the container.
-        allocator_type get_allocator() const;
-
-        ~map();
+        map &operator=(const map &other)
+        {
+            _tree = other._tree;
+            return *this;
+        }
 
         // ========================== Element access ===========================
 
