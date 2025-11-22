@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <functional>
 #include "pair.h"
+#include "select1st.h"
 #include "stl_tree.h"
 
 /*
@@ -17,20 +18,6 @@
 - Maps are usually implemented as Red–black trees.
 */
 
-/*
-map
- ├─ compare
- ├─ allocator
- └─ rb_tree
-       ├─ header
-       │    ├─ root
-       │    ├─ leftmost (begin)
-       │    ├─ rightmost (max)
-       │    ├─ nil (sentinel)
-       │    └─ node_count
-       └─ tree algorithms (insert, erase, rotate, fixup, find...)
-*/
-
 namespace ft
 {
     // map은 tree의 thin wrapper
@@ -38,14 +25,8 @@ namespace ft
               class Allocator = std::allocator<std::pair<const Key, T>>>
     class map
     {
-      private:
-        // red-black tree representing map
-        typedef _Rb_tree <
-            typedef _Rb_tree<key_type, value_type, _Select1st<value_type>, key_compare, _Alloc>
-                  _Rep_type;
-        _Rep_type _tree;
-
       public:
+        // typedefs:
         typedef Key                     key_type;
         typedef T                       mapped_type;
         typedef std::pair<const Key, T> value_type;
@@ -54,6 +35,7 @@ namespace ft
 
         // value의 key(first)끼리 비교하는 함수 객체 타입
         // binary_function: 인자 2개인 함수 객체 (functor) 어댑터
+        // nested class
         class value_compare : std::binary_function<value_type, value_type, bool>
         {
           public:
@@ -131,75 +113,116 @@ namespace ft
             return *this;
         }
 
-        // ========================== Element access ===========================
+        // ========================== Accessors ===========================
 
-        T       &at(const Key &key);
-        const T &at(const Key &key) const;
-        T       &operator[](const Key &key);
+        allocator_type get_allocator() const { return _tree.get_allocator(); }
+
+        // observers
+        key_compare   key_comp() const { return _tree.key_comp(); }
+        value_compare value_comp() const { return _tree.value_comp(); }
+
+        // element access
+        // Returns a reference to the mapped value of the element with specified key. If no such
+        // element exists, an exception of type std::out_of_range is thrown.
+        T &at(const Key &key)
+        {
+            iterator it = _tree.find(key);
+            if (it == _tree.end())
+        }
+        const T &at(const Key &key) const
+        {
+            iterator it = _tree.find(key);
+            if (it == _tree.end())
+        }
+
+        /*
+        - operator[] must run in logarithmic time
+        - 탐색에 O(logN)의 시간이 걸림
+        - 삽입을 위해 재탐색을 한다면 비효율적이므로, 힌트 기반 삽입을 사용
+        - 힌트 기반 삽입의 가능성이 있으므로 find가 아닌 lower_bound가 적절
+        */
+        T &operator[](const Key &key)
+        {
+            iterator it = _tree.lower_bound(key);
+            /*
+                lower_bound: '처음으로' 해당 키보다 큰 키가 나오면 반환
+                - end()가 반환될 시, 맨 끝을 의미 (해당 key와 같은 것은 없다)
+                - 반환된 위치의 key가 주어진 key와 일치하는지 추가확인을 통해 존재여부 파악 가능
+            */
+            // key not found -> insert
+            // key_comp()는 functor 객체 (오버로딩된 operator()를 호출)
+            if (it == _tree.end() || key_comp()(it->first, key))
+                it = _tree.insert(it, value_type(key, mapped_type()));
+            return it->second;
+        }
 
         // ========================== Iterators ===========================
-        iterator       begin();
-        const_iterator begin() const;
-        // C++11
-        const_iterator cbegin() const noexcept;
-        iterator       end();
-        const_iterator end() const;
-        // C++11
-        const_iterator cend() const noexcept;
+
+        // cbegin, cend는 C++11
+        iterator       begin() { return _tree.begin(); }
+        const_iterator begin() const { return _tree.begin(); }
+        const_iterator rbegin() const noexcept { return _tree.rbegin(); }
+        iterator       end() { return _tree.end(); }
+        const_iterator end() const { return _tree.end(); }
+        const_iterator rend() const noexcept { return _tree.rend(); }
 
         // ========================== Capacity ===========================
-        bool      empty() const;
-        size_type size() const
-        {
-            return std::distance(begin(), end());
-            size_type max_size() const;
-        }
+        bool      empty() const { return _tree.empty(); }
+        size_type size() const { return _tree.size(); }
+        size_type max_size() const { return _tree.max_size(); }
+
         // ========================== Modifiers ===========================
-        void clear();
+
+        void clear() { _tree.clear(); };
 
         // Inserts value
-        std::pair<iterator, bool> insert(const value_type &value);
+        std::pair<iterator, bool> insert(const value_type &value)
+        {
+            return _tree.insert_unique(value);
+        }
 
         // Inserts value in the position as close as possible to the position just prior to pos.
-        iterator insert(iterator pos, const value_type &value);
+        iterator insert(iterator pos, const value_type &value)
+        {
+            return _tree.insert_unique(pos, value);
+        }
 
         // Inserts elements from range [first, last)
         template <class InputIt>
-        void insert(InputIt first, InputIt last);
+        void insert(InputIt first, InputIt last)
+        {
+            return _tree.insert_unique(first, last);
+        }
 
         // Removes the element at pos.
-        iterator erase(iterator pos);
+        void erase(iterator pos) { _tree.erase(pos); }
 
         // Removes the elements in the range [first, last)
-        iterator erase(iterator first, iterator last);
+        void erase(iterator first, iterator last) { _tree.erase(first, last); }
 
         // Removes the element (if one exists) with the key equivalent to key
-        size_type erase(const Key &key);
+        size_type erase(const Key &key) { return _tree.erase(key); }
 
         // Exchanges the contents of the container with those of other
-        void swap(map &other);
+        void swap(map &other) { _tree.swap(other._tree); }
 
         // ========================== Lookup ===========================
 
-        size_type count(const Key &key) const;
+        // 중복 키가 존재하지 않으므로 반환 값은 0 혹은 1
+        size_type count(const Key &key) const { return (_tree.find(key) == _tree.end() ? 0 : 1); }
 
-        iterator       find(const Key &key);
-        const_iterator find(const Key &key) const;
+        iterator       find(const Key &key) const { return _tree.find(key); }
+        const_iterator find(const Key &key) const { return _tree.find(key); }
 
-        std::pair<iterator, iterator>             equal_range(const Key &key);
-        std::pair<const_iterator, const_iterator> equal_range(const Key &key) const;
-        iterator                                  lower_bound(const Key &key);
-        const_iterator                            lower_bound(const Key &key) const;
-        iterator                                  upper_bound(const Key &key);
-        const_iterator                            upper_bound(const Key &key) const;
-
-        // ========================== Observers ===========================
-
-        key_compare   key_comp() const;
-        value_compare value_comp() const;
-
-      private:
-        /* data */
+        std::pair<iterator, iterator> equal_range(const Key &key) { return _tree.equal_range(key); }
+        std::pair<const_iterator, const_iterator> equal_range(const Key &key) const
+        {
+            return _tree.equal_range(key);
+        }
+        iterator       lower_bound(const Key &key) { return _tree.lower_bound(key); }
+        const_iterator lower_bound(const Key &key) const { return _tree.lower_bound(key); }
+        iterator       upper_bound(const Key &key) { return _tree.upper_bound(key); }
+        const_iterator upper_bound(const Key &key) const { return _tree.upper_bound(key); }
     };
 
 } // namespace ft
