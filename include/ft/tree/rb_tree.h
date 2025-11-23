@@ -190,7 +190,7 @@ namespace ft
     {
         return lhs._base_node == rhs._base_node;
     }
-    
+
     // 4)
     template <class _Value>
     bool operator==(const _Rb_tree_iterator<_Value, _Value &, _Value *>             &lhs,
@@ -241,7 +241,7 @@ namespace ft
         typedef _Rb_tree_const_iterator const_iterator;
 
         // ==================== API ====================
-        // constructors
+        // allocation/deallocation
         _Rb_tree();
         _Rb_tree(const _Compare &, const allocator_type &);
         ~_Rb_tree();
