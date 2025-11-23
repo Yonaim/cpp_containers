@@ -6,6 +6,24 @@ The project replicates the behavior and interface of standard containers such as
 All functionality is implemented from scratch using C++98, emphasizing template programming, allocator usage, and iterator design.  
 Through this project, developers gain a deeper understanding of STL internals, template metaprogramming, and container performance characteristics.
 
+# Structure
+
+| 디렉토리        | 역할                          |
+| ----------- | --------------------------- |
+| algorithm   | 절차/알고리즘 (equal, lex cmp)    |
+| functional  | 비교 functor, policy 객체 (런타임 호출)  |
+| type_traits | 컴파일타임 타입 판정                 |
+| iterator    | 반복자 구조 및 traits             |
+| tree        | RB-tree 자료구조 구현             |
+| allocator   | 메모리 관리 객체                   |
+| utility     | pair 등 유틸 타입                |
+| container   | vector/map/stack 같은 실제 컨테이너 |
+
+- container는 iterator / tree / functional / type_traits / allocator / utility에 의존함
+- tree는 functional(Select1st, less)와 allocator에 의존함
+- algorithm은 iterator_traits만 의존하고 다른 디렉토리에 종속되지 않음
+- functional과 type_traits는 어떤 컨테이너에도 종속되지 않음 (독립적)
+
 # Schedule
 
 ### 10/03 (1회차) — 환경 세팅 / Utils Part 1
@@ -34,7 +52,7 @@ Through this project, developers gain a deeper understanding of STL internals, t
 
 ### 11/09 ~ 11/15 (4회차) — Vector Part 2
 - [x] push_back, pop_back  
-- [ ] insert, erase, clear  
+- [x] insert, erase, clear  
 - [x] resize, reserve  
 - [x] 반복자 (begin, end, rbegin, rend)  
 - [x] 비교 연산자 (==,!=,<,<=,>,>=,<=>)  
@@ -68,3 +86,8 @@ Through this project, developers gain a deeper understanding of STL internals, t
 - [ ] 내부 컨테이너 ft::vector 연결  
 - [ ] push, pop, top, empty, size  
 - [ ] 비교 연산자  
+
+# References
+
+- CppReference.com (C++11 이후 정리된 interface를 보여줌)
+- https://github.com/gcc-mirror/gcc/tree/releases/gcc-3.0/libstdc%2B%2B-v3/include
