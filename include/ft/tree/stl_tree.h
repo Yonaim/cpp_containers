@@ -159,47 +159,45 @@ namespace ft
             return tmp;
         }
 
-        // 비교 연산자는 외부에 정의 ()
-        bool operator==(const _Rb_tree_iterator &other) {};
-        bool operator!=(const _Rb_tree_iterator &other) {};
+        /*
+            비교 연산자는 외부에 정의한다.
+            1) iterator와 const_iterator(템플릿 인자가 다른 경우)의 비교를 지원
+            2) 양방향 비교의 허용 (코드 중복을 줄인다.)
+        */
     };
 
+    // 템플릿 인자가 다름 -> 완전히 다른 타입으로 취급
+    // 따라서 별도의 operator 정의가 필요하다.
     /*
-    reverse_iterator와 달리 const_iterator 타입을 따로 선언해야하는 이유:
-
-    1) 상속한 클래스에서 type alias를 overriding 할 수 없다.
-
-    2) value_type(=iterator가 가리키는 값 타입)이 다르다
-        - reverse_iterator는 애초에 iterator의 wrapper라서 Iter가 Template 인자
-            -> 걍 Iter를 바꿔끼면 됨
-        - 반면 iterator는 iterator가 가리키는 value_type 자체가 다름 (const 한정자가 붙는 것)
-        - 따라서 const_iterator가 별도로 필요하다.
-
-        (표준) 일반 iterator와 const iterator 타입을 별도로 선언, 코드 중복 발생
-        (대안) 템플릿 파라미터가 const 유무 표기하는 인자를 두기
+        1) iterator == iterator
+        2) const_iterator == const_iterator
+        3) const_iterator == iterator
+        4) iterator == const_iterator
     */
-    /*
-        '_Tp' 타입 자체에 const를 걸지 않는다.
-        1) 원칙적으로 const iterator는 '읽기 전용' 이터레이터라서,
-            iterator<T>와 const_iterator<T>의 T는 같아야 의미가 있음
-        2) map의 경우 value가 pair<const Key, T>인데 const가 이중으로 걸려버림
-    */
-    template <class _Tp>
-    struct _Rb_tree_const_iterator
+
+    // 1), 2) 둘다 커버하기 위해 템플릿 인자를 3개 사용
+    template <class _Value, class _Ref, class _Ptr>
+    bool operator==(const _Rb_tree_iterator<_Value, _Ref, _Ptr> &lhs,
+                    const _Rb_tree_iterator<_Value, _Ref, _Ptr> &rhs)
     {
-        typedef const _Tp  value_type;
-        typedef const _Tp &reference;
-        typedef const _Tp *pointer;
+        return lhs._base_node == rhs._base_node;
+    }
 
-        typedef bidirectional_iterator_tag iterator_category;
-        typedef ptrdiff_t                  difference_type;
-
-        typedef _Rb_tree_node_base::_Base_ptr _Base_ptr; // 내부 alias 존중
-        typedef const _Rb_tree_node<_Tp>     *_node_ptr;
-
-        // 순회 상태 저장
-        _node_ptr _node;
-    };
+    // 3)
+    template <class _Value>
+    bool operator==(const _Rb_tree_iterator<_Value, const _Value &, const _Value *> &lhs,
+                    const _Rb_tree_iterator<_Value, _Value &, _Value *>             &rhs)
+    {
+        return lhs._base_node == rhs._base_node;
+    }
+    
+    // 4)
+    template <class _Value>
+    bool operator==(const _Rb_tree_iterator<_Value, _Value &, _Value *>             &lhs,
+                    const _Rb_tree_iterator<_Value, const _Value &, const _Value *> &rhs)
+    {
+        return lhs._base_node == rhs._base_node;
+    }
 
     // =============================== Rb_tree =================================
 
@@ -303,7 +301,6 @@ namespace ft
         static _Node_ptr _minimum(_Node_ptr x);
         static _Node_ptr _maximum(_Node_ptr x);
     };
-
 } // namespace ft
 
 #endif
