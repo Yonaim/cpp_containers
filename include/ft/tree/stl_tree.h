@@ -3,6 +3,7 @@
 
 // #include <memory> // TODO: ft::allocator로 교체
 #include "allocator.h"
+#include "iterator_tags.h"
 
 /*
 - STL 구현상 tree는 map, set에서만 쓰임
@@ -27,11 +28,26 @@ namespace ft
 
     struct _Rb_tree_node_base
     {
-        typedef _Rb_tree_node_base *_base_ptr;
-        _base_ptr                   parent;
-        _base_ptr                   left;
-        _base_ptr                   right;
-        _Rb_tree_color              color; // Red & Black
+        typedef _Rb_tree_node_base *_Base_ptr;
+        typedef _Rb_tree_color      _Color_type;
+        _Color_type                 color; // Red & Black
+        _Base_ptr                   parent;
+        _Base_ptr                   left;
+        _Base_ptr                   right;
+
+        static _Base_ptr _minumum(_Base_ptr ptr)
+        {
+            while (ptr->left != 0)
+                ptr = ptr->left;
+            return ptr;
+        }
+
+        static _Base_ptr _maximum(_Base_ptr ptr)
+        {
+            while (ptr->right != 0)
+                ptr = ptr->right;
+            return ptr;
+        }
     };
 
     // ================= node<Value> =================
@@ -52,31 +68,32 @@ namespace ft
             => 템플릿 사용
     */
 
+    // base iterator가 따로 존재하는 이유: iterator의 동작 자체는 value_type과 무관하기 때문
+    struct _Rb_tree_base_iterator
+    {
+        typedef _Rb_tree_node_base::_Base_ptr _Base_ptr; // 내부 alias 존중
+        typedef bidirectional_iterator_tag    iterator_category;
+        typedef ptrdiff_t                     difference_type;
+
+        // 순회 상태 저장
+        _Base_ptr _base_node;
+
+        void _increment();
+        void _decrement();
+    };
+
     // iterator는 class로 구현하는 것이 일반적 (private가 필요한 경우가 있음 & 일관적으로)
     // 구현체 따라 다르긴 함. GNU는 struct로 구현했으며 이 구현체에서도 이를 따름
     template <class _Tp>
-    struct _Rb_tree_iterator
+    struct _Rb_tree_iterator : public _Rb_tree_base_iterator
     {
-        typedef _Tp  value_type;
-        typedef _Tp &reference;
-        typedef _Tp *pointer;
-
-        typedef bidirectional_iterator_tag iterator_category;
-        typedef ptrdiff_t                  difference_type;
-
-        typedef _Rb_tree_node_base::_base_ptr _base_ptr; // 내부 alias 존중
-        typedef _Rb_tree_node<_Tp>           *_node_ptr;
-
-        // 순회 상태 저장
-        _node_ptr _node;
+        typedef _Tp                           value_type;
+        typedef _Tp                          &reference;
+        typedef _Tp                          *pointer;
+        typedef _Rb_tree_node<_Tp>           *_Node_ptr;
+        typedef _Rb_tree_iterator<value_type> _Self;
 
         // ================== operators ==================
-        // TODO
-        // 순회 이동 연산 구현
-        _Rb_tree_iterator &operator++() {};
-        _Rb_tree_iterator  operator++(int) {};
-        _Rb_tree_iterator &operator--() {};
-        _Rb_tree_iterator  operator--(int) {};
 
         // * : 참조 반환
         // -> : 포인터 반환 (체이닝 o)
@@ -89,10 +106,34 @@ namespace ft
 
             포인터를 반환하는 이유: 기본 포인터의 역할(체이닝 + 접근 가능)을 그대로 수행하기 위함
         */
-        // iterator 값
-        reference operator*() {};
-        pointer   operator->() {};
+        reference operator*() const { return _Node_ptr(_base_node)->value; }
+        pointer   operator->() const { return &(operator*()) };
 
+        // 순회 이동 연산 구현
+        _Rb_tree_iterator &operator++()
+        {
+            _increment();
+            return *this;
+        }
+        _Rb_tree_iterator operator++(int)
+        {
+            _Rb_tree_iterator<value_type> tmp = *this;
+            _increment();
+            return tmp;
+        }
+        _Rb_tree_iterator &operator--()
+        {
+            _decrement();
+            return *this;
+        }
+        _Rb_tree_iterator operator--(int)
+        {
+            _Rb_tree_iterator<value_type> tmp = *this;
+            _decrement();
+            return tmp;
+        }
+
+        // 비교 연산자는 외부에 정의 ()
         bool operator==(const _Rb_tree_iterator &other) {};
         bool operator!=(const _Rb_tree_iterator &other) {};
     };
@@ -127,7 +168,7 @@ namespace ft
         typedef bidirectional_iterator_tag iterator_category;
         typedef ptrdiff_t                  difference_type;
 
-        typedef _Rb_tree_node_base::_base_ptr _base_ptr; // 내부 alias 존중
+        typedef _Rb_tree_node_base::_Base_ptr _Base_ptr; // 내부 alias 존중
         typedef const _Rb_tree_node<_Tp>     *_node_ptr;
 
         // 순회 상태 저장
@@ -139,13 +180,14 @@ namespace ft
     // Helper type to manage default initialization of node count and header.
     struct _Rb_tree_header
     {
-        typedef _Rb_tree_node_base *_base_ptr;
-        _base_ptr                   root;
+        typedef _Rb_tree_node_base *_Base_ptr;
+        _Base_ptr                   root;
         size_t                      count;
     };
 
     // _KeyOfValue: value에서 key를 뽑는 정책 (함수 객체)
     // KeyOfValue 덕분에 associative array까지 커버하는 '범용 트리 엔진'
+    // value = pair<key, mapped>임. mapped_type과는 다르니 헷갈리지 말 것!
     template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
               typename _Alloc = allocator<_Val>>
     class _Rb_tree
@@ -186,7 +228,7 @@ namespace ft
         iterator       end();
         const_iterator end() const;
         bool           empty() const;
-        size_type      size() const;
+        size_type      size() const { return std::distance(begin(), end()); }
 
         // find
         iterator       find(const key_type &k);
