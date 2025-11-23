@@ -84,14 +84,39 @@ namespace ft
 
     // iterator는 class로 구현하는 것이 일반적 (private가 필요한 경우가 있음 & 일관적으로)
     // 구현체 따라 다르긴 함. GNU는 struct로 구현했으며 이 구현체에서도 이를 따름
-    template <class _Tp>
+    /*
+        템플릿 인자가 3개나 있는 이유:
+        iterator, const_iterator 두 타입을 하나의 템플릿에서 생성하기 위해
+    */
+    template <class _Value, class _Ref, class _Ptr>
     struct _Rb_tree_iterator : public _Rb_tree_base_iterator
     {
-        typedef _Tp                           value_type;
-        typedef _Tp                          &reference;
-        typedef _Tp                          *pointer;
-        typedef _Rb_tree_node<_Tp>           *_Node_ptr;
-        typedef _Rb_tree_iterator<value_type> _Self;
+        // ================== typedef ==================
+        typedef _Value value_type;
+        typedef _Ref   reference;
+        typedef _Ptr   pointer;
+        // itertor
+        // _Value가 적절하지 않은 타입일 경우 typedef 처리 중 컴파일 에러
+        typedef _Rb_tree_iterator<_Value, _Value &, _Value *> iterator;
+        /*
+            - 이미 const인 타입이 인자로 들어오는 경우, const가 2번 붙지만 하나의 const로
+               정규화되므로 정상 처리됨
+            - cv-qualification(const/volatile)은 중복되면 자동으로 하나만 있는 것으로 처리
+            - 이미 const인 타입이 인자로 들어온다면 iterator와 const_iterator는 똑같다
+        */
+        typedef _Rb_tree_iterator<_Value, const _Value &, const _Value *> const_iterator;
+        typedef _Rb_tree_node<_Value>                                    *_Node_ptr;
+
+        // 현재의 타입이 iterator인지 const_iterator인지 상관하지 않고 동일한 코드로 처리하기
+        // 위해 define
+        typedef _Rb_tree_iterator<_Value, _Ref, _Ptr> _Self;
+
+        // ================== allocation ==================
+
+        _Rb_tree_iterator() {}
+        // POD라서 생성자 호출이 필요없으므로 초기화 리스트를 사용하지 않아도 무빙
+        _Rb_tree_iterator(_Node_ptr n) { _base_node = n; }
+        _Rb_tree_iterator(const iterator &it) { _base_node = it._node; }
 
         // ================== operators ==================
 
@@ -104,7 +129,8 @@ namespace ft
             1) iterator의 연산자 오버로딩 ->에 의해 포인터가 반환
             2) pointer의 연산자(기본) ->에 의해 value에 접근
 
-            포인터를 반환하는 이유: 기본 포인터의 역할(체이닝 + 접근 가능)을 그대로 수행하기 위함
+            포인터를 반환하는 이유: 기본 포인터의 역할(체이닝 + 접근 가능)을 그대로 수행하기
+           위함
         */
         reference operator*() const { return _Node_ptr(_base_node)->value; }
         pointer   operator->() const { return &(operator*()) };
