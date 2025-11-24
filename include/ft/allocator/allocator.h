@@ -4,14 +4,29 @@
 #include <cstddef>
 #include <limits>
 
+/*
+The std::allocator class template is the default Allocator used by all standard library containers
+if no user-specified allocator is provided.
+*/
+
+/*
+- custum allocator는 std::allocator를 상속해서 선언하는게 아님
+- 필수 allocator API만 갖추면 된다
+    - typedef
+    - 생성자
+    - allocate / deallocate
+    - construct / destroy
+    - rebind
+*/
+
 namespace ft
 {
     /*
     std::allocator
-    - 단순히 ::operator new/delete의 wrapper
-    - stateless함
-    - 실제 메모리 관리 책임은 OS에 있음
-    - memory management & object lifetime
+        - 단순히 ::operator new/delete의 wrapper
+        - stateless함
+        - 실제 메모리 관리 책임은 OS에 있음
+        - memory management & object lifetime
     */
     template <class T>
     struct allocator
@@ -24,9 +39,14 @@ namespace ft
         typedef std::size_t    size_type;
         typedef std::ptrdiff_t difference_type;
 
-        // 기존 allocator의 정책을 유지한 채 template argument의 타입을 변경
-        // std보다는 커스텀 allocator일때 유용
-        // ex. typedef yona::allocator<orig>::rebind<converted>::other convertedAllocator;
+        /*
+            rebind
+            - 기존 allocator의 정책을 유지한 채 template argument의 타입을 변경
+                - policy: 메모리 할당 위치, alignment, stateful 유무 등
+            - 'std::allocator'는, policy가 고정되어 있으므로 크게 의미는 없다.
+                rebind는 custum allocator에서 의미를 가짐
+            - ex. typedef yona::allocator<orig>::rebind<converted>::other convertedAllocator;
+        */
         template <class U>
         struct rebind
         {
