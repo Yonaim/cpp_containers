@@ -83,16 +83,16 @@ namespace ft
     {
       public:
         // Alloc은 이미 value_type에 대한 allocator이므로 allocator_type은 value_type에 관함
-        typedef Alloc allocator_type;
-        typedef T     value_type;
+        typedef _Alloc allocator_type;
+        typedef _Tp    value_type;
 
         /*
             rebind는 내부 템플릿 구조체(nested class template) 멤버
             템플릿 멤버인 점을 명시하기 위해 template 키워드 사용
         */
         // <_Rb_tree_node<value_type> > : 말 그대로 value_type을 T로 삼는 노드 타입
-        typedef Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
-        typedef _Rb_tree_node<value_type>                                node_type;
+        typedef _Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
+        typedef _Rb_tree_node<value_type>                                 node_type;
 
         /*
             - 표준에 명시된 컨테이너의 요구사항에 의해,
@@ -111,7 +111,7 @@ namespace ft
 
       protected:
         node_allocator_type _node_allocator;
-        _Rb_tree_header    *_header; // header node
+        _Rb_tree_header     _header; // header node
 
         /*
             - raw memory 확보 / 해제
@@ -135,15 +135,15 @@ namespace ft
     class _Rb_tree_alloc_base<_Tp, _Alloc, true>
     {
       public:
-        typedef Alloc allocator_type;
-        typedef T     value_type;
+        typedef _Alloc allocator_type;
+        typedef _Tp    value_type;
 
-        typedef Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
-        typedef _Rb_tree_node<value_type>                                node_type;
+        typedef _Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
+        typedef _Rb_tree_node<value_type>                                 node_type;
 
         allocator_type get_allocator() const { return allocator_type(); }
 
-        _Rb_tree_alloc_base(const allocator_type &a) : _node_allocator(a), _header(0) {}
+        _Rb_tree_alloc_base(const allocator_type &a) : _header(0) {}
 
       protected:
         // node_allocator_type은 empty class (instanceless한 Alloator이므로)
@@ -162,7 +162,7 @@ namespace ft
         void _put_node(node_type *p)
         {
             node_allocator_type a;
-            return a._node_allocator.deallocate(p, 1);
+            return a.deallocate(p, 1);
         }
     };
 
@@ -173,7 +173,7 @@ namespace ft
     template <class _Tp, class _Alloc>
     class _Rb_tree_base : private _Rb_tree_alloc_base<_Tp, _Alloc, is_instanceless<_Alloc>::value>
     {
-        typedef _Rb_tree_alloc_base < _Tp, _Alloc, is_instanceless<_Alloc> base;
+        typedef _Rb_tree_alloc_base<_Tp, _Alloc, is_instanceless<_Alloc>>::value base;
 
         // 얘도 base 클래스라서 상속 받게할거임
       protected:
@@ -184,15 +184,19 @@ namespace ft
         // alloc_base의 get, put 함수를 멤버 재노출 (현재 클래스의 scope로 끌어옴)
         using Base::_get_node;
         using Base::_put_node;
+        using Base::get_allocator;
 
       public:
-        _Rb_tree_base(const _Alloc &alloc = _Alloc())
+        // Base(alloc): 상속 받은 클래스 타입의 생성자 호출
+        _Rb_tree_base(const _Alloc &alloc = _Alloc()) : Base(alloc)
         {
-            _header = _get_node();
             _header->root = 0;
             _header->count = 0;
         }
-        ~_Rb_tree_base() { _put_node(_header); }
+        ~_Rb_tree_base() {}
+
+        _Rb_tree_header       &header() { return _header; }
+        const _Rb_tree_header &header() const { return _header; }
     };
 
     // =============================== Rb_tree =================================
