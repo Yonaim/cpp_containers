@@ -30,6 +30,66 @@ namespace ft
         size_t                      count;
     };
 
+    /*
+        stateless한 allocator라면 굳이 멤버로 들고 있을 필요 없음
+        해당 경우에 대해 specialization한다.
+    */
+    // instanceless = '이 인스턴스를 보관할 필요가 있는가'
+    // stateless != instanceless
+    // _Alloc = allocator<value_type>
+    template <class _Tp, class _Alloc, bool _instanceless>
+    class _Rb_tree_alloc_base
+    {
+      public:
+        // Alloc은 이미 value_type에 대한 allocator이므로 allocator_type은 value_type에 관함
+        typedef Alloc allocator_type;
+        typedef T     value_type;
+
+        /*
+            rebind는 내부 템플릿 구조체(nested class template) 멤버
+            템플릿 멤버인 점을 명시하기 위해 template 키워드 사용
+        */
+        // <_Rb_tree_node<value_type> > : 말 그대로 value_type을 T로 삼는 노드 타입
+        typedef Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
+        typedef _Rb_tree_node<value_type>                                node_type;
+
+        /*
+            - 표준에 명시된 컨테이너의 요구사항에 의해,
+                모든 컨테이너는 get_allocator() 함수를 가져야하며 반환형은 컨테이너의 value_type에
+           대한 allocator여야함.
+            - 이때 allocator의 내부 상태를 보존한 복사본을 반환해야한다.
+            - 복사생성자 사용하여 반환하는 이유:
+                - 내부 allocator는 node 기반임
+                - 따라서 value_type으로 변환하기 위해 rebind 필요
+        */
+        allocator_type get_allocator() const { return allocator_type(_node_allocator); }
+
+        // 생성자: 외부에서 받은 allocator로 초기화
+        // node_allocator_type(a)꼴로 생성자 호출
+        _Rb_tree_alloc_base(const allocator_type &a) : _node_allocator(a), _header(0) {}
+
+      protected:
+        node_allocator_type _node_allocator;
+        _Rb_tree_header    *_header; // header node
+
+        /*
+            - raw memory 확보 / 해제
+                - get_node(): allocate
+                - put_node(): deallocate (put back: 돌려놓는다)
+            - value 객체 생성자 호출 / 소멸자 호출
+                - construct()
+                - destroy()
+        */
+        /*
+            raw memory와 value 객체 생성, 파괴를 분리해야하는 이유?
+            -> node와 value는 별개이다.
+            node 자체는 그대로 냅두고 value만 건드는 경우도 있음 (node 재활용)
+        */
+        node_type *_get_node() { return _node_allocator.allocate(1); }
+        void       _put_node(node_type *p) { return _node_allocator.deallocate(p, 1); }
+    };
+
+
     // _KeyOfValue: value에서 key를 뽑는 정책 (함수 객체)
     // KeyOfValue 덕분에 associative array까지 커버하는 '범용 트리 엔진'
     // value = pair<key, mapped>임. mapped_type과는 다르니 헷갈리지 말 것!
