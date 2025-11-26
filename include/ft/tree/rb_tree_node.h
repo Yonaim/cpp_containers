@@ -13,6 +13,9 @@ namespace ft
         BLACK = true
     };
 
+    // value 미포함
+    // 일반 노드 클래스는 이 base를 상속받음
+    // header 노드의 경우 value 미포함이므로 이 base를 상속받는다
     struct _Rb_tree_node_base
     {
         typedef _Rb_tree_node_base *_Base_ptr;
@@ -39,6 +42,7 @@ namespace ft
 
     // ================= node<Value> =================
 
+    // value를 포함한 일반 노드 타입
     template <class Value>
     struct _Rb_tree_node : public _Rb_tree_node_base
     {
