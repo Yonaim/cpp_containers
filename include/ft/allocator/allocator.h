@@ -52,6 +52,9 @@ namespace ft
         {
             typedef allocator<U> other;
         };
+        // 단순히 타입 alias용 구조체 -> empty class
+        // 객체를 생성한다고 해도 메모리에 실체하지 않음
+        // 단지 컴파일 타임시 AST, 타입 테이블에 반영
 
         // -------------------- constructors --------------------
 
@@ -91,6 +94,8 @@ namespace ft
         {
             return ::operator new(sizeof(T) * n);
         }
+        // ::operator delete 자체가 사이즈 정보가 필요 없으므로 std::allocator에서는 n이 쓰이지 않음
+        // 커스텀 allocator에 n이 쓰일 수 있기 때문에 명세상으로 파라미터 n이 존재
         void deallocate(T *p, std::size_t n)
         {
             // destructor는 deallocate 호출 이전 사용자가 명시적으로 호출
