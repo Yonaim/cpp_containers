@@ -81,7 +81,7 @@ namespace ft
             // reinterpret_cast: raw 메모리 그대로 해석만 바꾼다
             // const_cast: const/volatile 제거
             const volatile char &x_char = reinterpret_cast<const volatile char &>(x);
-            return reinterpret_cast<T *>(const_cast<char>(&x_char));
+            return reinterpret_cast<T *>(const_cast<char *>(&x_char));
         }
         const_pointer address(const_reference x) const
         {
