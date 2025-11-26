@@ -2,7 +2,9 @@
 #define FT_RB_TREE_H
 
 // #include <memory> // TODO: ft::allocator로 교체
+#include "pair.h"
 #include "allocator.h"
+#include "distance.h"
 #include "iterator_tags.h"
 #include "rb_tree_node.h"
 #include "rb_tree_iterator.h"
@@ -60,6 +62,12 @@ namespace ft
         typedef _Rb_tree_node_base *_Base_ptr;
         _Base_ptr                   root;
         size_t                      count;
+
+        _Rb_tree_header()
+        {
+            root = 0;
+            count = 0;
+        }
     };
 
     // =============================== Rb_tree_alloc_base =================================
@@ -91,8 +99,9 @@ namespace ft
             템플릿 멤버인 점을 명시하기 위해 template 키워드 사용
         */
         // <_Rb_tree_node<value_type> > : 말 그대로 value_type을 T로 삼는 노드 타입
-        typedef _Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
-        typedef _Rb_tree_node<value_type>                                 node_type;
+        typedef
+            typename _Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
+        typedef _Rb_tree_node<value_type>                                      node_type;
 
         /*
             - 표준에 명시된 컨테이너의 요구사항에 의해,
@@ -107,11 +116,11 @@ namespace ft
 
         // 생성자: 외부에서 받은 allocator로 초기화
         // node_allocator_type(a)꼴로 생성자 호출
-        _Rb_tree_alloc_base(const allocator_type &a) : _node_allocator(a), _header(0) {}
+        // _header(): 명시적으로 기본 생성자 호출 (성능에는 영향x)
+        _Rb_tree_alloc_base(const allocator_type &a) : _node_allocator(a) {}
 
       protected:
         node_allocator_type _node_allocator;
-        _Rb_tree_header     _header; // header node
 
         /*
             - raw memory 확보 / 해제
@@ -138,12 +147,13 @@ namespace ft
         typedef _Alloc allocator_type;
         typedef _Tp    value_type;
 
-        typedef _Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
-        typedef _Rb_tree_node<value_type>                                 node_type;
+        typedef
+            typename _Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
+        typedef _Rb_tree_node<value_type>                                      node_type;
 
         allocator_type get_allocator() const { return allocator_type(); }
 
-        _Rb_tree_alloc_base(const allocator_type &a) : _header(0) {}
+        _Rb_tree_alloc_base(const allocator_type &a) {}
 
       protected:
         // node_allocator_type은 empty class (instanceless한 Alloator이므로)
@@ -173,7 +183,7 @@ namespace ft
     template <class _Tp, class _Alloc>
     class _Rb_tree_base : private _Rb_tree_alloc_base<_Tp, _Alloc, is_instanceless<_Alloc>::value>
     {
-        typedef _Rb_tree_alloc_base<_Tp, _Alloc, is_instanceless<_Alloc>>::value base;
+        typedef _Rb_tree_alloc_base<_Tp, _Alloc, is_instanceless<_Alloc>::value> Base;
 
         // 얘도 base 클래스라서 상속 받게할거임
       protected:
@@ -188,11 +198,7 @@ namespace ft
 
       public:
         // Base(alloc): 상속 받은 클래스 타입의 생성자 호출
-        _Rb_tree_base(const _Alloc &alloc = _Alloc()) : Base(alloc)
-        {
-            _header->root = 0;
-            _header->count = 0;
-        }
+        _Rb_tree_base(const _Alloc &alloc = _Alloc()) : Base(alloc), _header() {}
         ~_Rb_tree_base() {}
 
         _Rb_tree_header       &header() { return _header; }
@@ -244,7 +250,7 @@ namespace ft
         iterator       end();
         const_iterator end() const;
         bool           empty() const;
-        size_type      size() const { return std::distance(begin(), end()); }
+        size_type      size() const { return ft::distance(begin(), end()); }
 
         // find
         iterator       find(const key_type &k);
