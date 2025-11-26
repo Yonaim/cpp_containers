@@ -8,19 +8,51 @@
 #include "rb_tree_iterator.h"
 
 /*
-- STL 구현상 tree는 map, set에서만 쓰임
-- RBT(Red Black Tree)만 사용
-- 따라서 stl_map.h = 사실상 RBT 구현
-- map, set의 내부 처리
-    - 트리 알고리즘 자체는 동일
-    - value 처리만 다르다 (compare를 어떤 타입에서 하고, 어떤 부분을 복사하는지 등)
+    - STL 구현상 tree는 map, set에서만 쓰임
+    - RBT(Red Black Tree)만 사용
+    - 따라서 stl_map.h = 사실상 RBT 구현 $
+    - map, set의 내부 처리
+        - 트리 알고리즘 자체는 동일
+        - value 처리만 다르다 (compare를 어떤 타입에서 하고, 어떤 부분을 복사하는지 등)
+*/
+
+/*
+    - Rb_tree_header: 헤더 노드
+    - Rb_tree_alloc_base: 노드 메모리 할당 / 해제만 담당(역할 분리)
+        - instance 버전 (allocator를 멤버로 가짐)
+        - instanceless 버전 (allocator를 멤버로 가지지 않음)
+    - Rb_tree_base: intanceless 최적화를 위해 존재, 분기 처리하여 해당하는 alloc_base 상속 받음
+    - Rb_tree: 메인 엔진
+*/
+
+/*
+    EBO(Empty Base Optimization)
+    : 빈 클래스(empty class)를 상속받을 때, 그 클래스가 차지하는 메모리를 0바이트로 최적화.
+
+    원래는, 빈 클래스라도 기본적으로 1바이트가 필요함!!!
+    객체는 고유한 주소를 가져야하기 때문이다.
+
+    그런데 '상속' 구조에서는 이를 최적화할 수 있다. 상속 받는 클래스가 어차피 메모리를 차지하고 있기
+   때문에 고유한 주소를 이미 갖고 있음.
+    -> empty class에 대해 메모리를 할당할 필요가 x.
 */
 
 #include <cstddef>
+#include <type_traits>
 
 namespace ft
 {
-    // =============================== Rb_tree =================================
+    template <class T>
+    struct is_instanceless
+    {
+        // 객체 생성 없이 바로 타입 정보를 캐낼 수 있도록 static 멤버
+        // 어차피 판별하고 싶은 타입의 정보가 템플릿 인자임
+        static const bool value = std::is_empty<T>::value;
+        // std::is_empty는 컴파일 타임에서 타입 정보를 알기 위한 type traits
+        // type traits의 결과는 value에 담기는 것이 컨벤션
+    };
+
+    // =============================== Rb_tree_header =================================
 
     // Helper type to manage default initialization of node count and header.
     struct _Rb_tree_header
@@ -30,15 +62,24 @@ namespace ft
         size_t                      count;
     };
 
-    /*
-        stateless한 allocator라면 굳이 멤버로 들고 있을 필요 없음
-        해당 경우에 대해 specialization한다.
-    */
-    // instanceless = '이 인스턴스를 보관할 필요가 있는가'
-    // stateless != instanceless
+    // =============================== Rb_tree_alloc_base =================================
+
     // _Alloc = allocator<value_type>
     template <class _Tp, class _Alloc, bool _instanceless>
-    class _Rb_tree_alloc_base
+    class _Rb_tree_alloc_base;
+
+    /*
+        - instanceless: '이 인스턴스를 보관할 필요가 있는가'
+        - stateless한 allocator라면 굳이 멤버로 들고 있을 필요 없음!!
+            => 메모리를 아끼기 위해 specialization하자.
+        - 개념상으론, stateless != instanceless
+            - 근데 state가 없으면 보통 instance를 들고 있을 필요가 없곤하다.
+                (이 경우도 해당)
+    */
+
+    // specialization for instance-required
+    template <class _Tp, class _Alloc>
+    class _Rb_tree_alloc_base<_Tp, _Alloc, false>
     {
       public:
         // Alloc은 이미 value_type에 대한 allocator이므로 allocator_type은 value_type에 관함
@@ -87,6 +128,42 @@ namespace ft
         */
         node_type *_get_node() { return _node_allocator.allocate(1); }
         void       _put_node(node_type *p) { return _node_allocator.deallocate(p, 1); }
+    };
+
+    // specialization for instanceless
+    template <class _Tp, class _Alloc>
+    class _Rb_tree_alloc_base<_Tp, _Alloc, true>
+    {
+      public:
+        typedef Alloc allocator_type;
+        typedef T     value_type;
+
+        typedef Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
+        typedef _Rb_tree_node<value_type>                                node_type;
+
+        allocator_type get_allocator() const { return allocator_type(); }
+
+        _Rb_tree_alloc_base(const allocator_type &a) : _node_allocator(a), _header(0) {}
+
+      protected:
+      // node_allocator_type은 empty class (instanceless한 Alloator이므로)
+      /*
+        c++은 empty class에 대해 '아무 일도 하지 않음'을 보장한다.
+            - sizeof(empty class) = 1 (만약 EBO 적용시, 0바이트)
+            - 생성/복사/파괴 비용은 0
+        컴파일 언어이기 때문에 가능한 최적화.
+        따라서 아래와 같이 코드를 작성해도 node_allocator_type을 매번 할당하는 일은 x.
+      */
+        node_type *_get_node()
+        {
+            node_allocator_type a;
+            return a.allocate(1);
+        }
+        void _put_node(node_type *p)
+        {
+            node_allocator_type a;
+            return a._node_allocator.deallocate(p, 1);
+        }
     };
 
 
