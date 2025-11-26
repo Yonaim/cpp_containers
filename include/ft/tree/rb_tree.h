@@ -146,14 +146,14 @@ namespace ft
         _Rb_tree_alloc_base(const allocator_type &a) : _node_allocator(a), _header(0) {}
 
       protected:
-      // node_allocator_type은 empty class (instanceless한 Alloator이므로)
-      /*
-        c++은 empty class에 대해 '아무 일도 하지 않음'을 보장한다.
-            - sizeof(empty class) = 1 (만약 EBO 적용시, 0바이트)
-            - 생성/복사/파괴 비용은 0
-        컴파일 언어이기 때문에 가능한 최적화.
-        따라서 아래와 같이 코드를 작성해도 node_allocator_type을 매번 할당하는 일은 x.
-      */
+        // node_allocator_type은 empty class (instanceless한 Alloator이므로)
+        /*
+          c++은 empty class에 대해 '아무 일도 하지 않음'을 보장한다.
+              - sizeof(empty class) = 1 (만약 EBO 적용시, 0바이트)
+              - 생성/복사/파괴 비용은 0
+          컴파일 언어이기 때문에 가능한 최적화.
+          따라서 아래와 같이 코드를 작성해도 node_allocator_type을 매번 할당하는 일은 x.
+        */
         node_type *_get_node()
         {
             node_allocator_type a;
@@ -166,6 +166,36 @@ namespace ft
         }
     };
 
+    // =============================== Rb_tree_base =================================
+
+    // private 상속: 상속 받은 멤버들을 모두 private 멤버로 둠
+    // 굳이 외부에 공개할 필요가 없으므로 private 상속 받음
+    template <class _Tp, class _Alloc>
+    class _Rb_tree_base : private _Rb_tree_alloc_base<_Tp, _Alloc, is_instanceless<_Alloc>::value>
+    {
+        typedef _Rb_tree_alloc_base < _Tp, _Alloc, is_instanceless<_Alloc> base;
+
+        // 얘도 base 클래스라서 상속 받게할거임
+      protected:
+        typedef typename Base::node_type node_type;
+
+        _Rb_tree_header *_header;
+
+        // alloc_base의 get, put 함수를 멤버 재노출 (현재 클래스의 scope로 끌어옴)
+        using Base::_get_node;
+        using Base::_put_node;
+
+      public:
+        _Rb_tree_base(const _Alloc &alloc = _Alloc())
+        {
+            _header = _get_node();
+            _header->root = 0;
+            _header->count = 0;
+        }
+        ~_Rb_tree_base() { _put_node(_header); }
+    };
+
+    // =============================== Rb_tree =================================
 
     // _KeyOfValue: value에서 key를 뽑는 정책 (함수 객체)
     // KeyOfValue 덕분에 associative array까지 커버하는 '범용 트리 엔진'
@@ -184,7 +214,7 @@ namespace ft
         typedef const value_type &const_reference;
 
         // allocator
-        typedef _Alloc                   allocator_type;
+        typedef _Alloc                           allocator_type;
         typedef typename _Alloc::difference_type difference_type;
         typedef typename _Alloc::size_type       size_type;
 
