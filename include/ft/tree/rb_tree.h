@@ -60,12 +60,17 @@ namespace ft
     struct _Rb_tree_header
     {
         typedef _Rb_tree_node_base *_Base_ptr;
-        _Base_ptr                   root;
-        size_t                      count;
+        _Base_ptr                   _base_ptr;
+        // header != root
+        // header->parent: 트리의 root
+        // header->left: leftmost
+        // header->right: rightmost
+        // leftmost, rightmost는 자주 쓰므로 저장해둔다.
+        size_t count;
 
         _Rb_tree_header()
         {
-            root = 0;
+            _base_ptr = 0;
             count = 0;
         }
     };
@@ -73,6 +78,11 @@ namespace ft
     // =============================== Rb_tree_alloc_base =================================
 
     // _Alloc = allocator<value_type>
+    /*
+        표준 요구사항:
+            모든 컨테이너는 allocator_object 를 이용하여 value_type 에 대한 메모리를 할당하고
+            필요하다면 rebind을 통해 다른 타입을 위한 allocator를 얻을 수 있어야 한다.
+    */
     template <class _Tp, class _Alloc, bool _instanceless>
     class _Rb_tree_alloc_base;
 
@@ -112,6 +122,7 @@ namespace ft
                 - 내부 allocator는 node 기반임
                 - 따라서 value_type으로 변환하기 위해 rebind 필요
         */
+        // 컨테이너 요구사항에 포함된 공식 API이므로 언더바를 붙이지 않는다
         allocator_type get_allocator() const { return allocator_type(_node_allocator); }
 
         // 생성자: 외부에서 받은 allocator로 초기화
@@ -189,7 +200,7 @@ namespace ft
       protected:
         typedef typename Base::node_type node_type;
 
-        _Rb_tree_header *_header;
+        _Rb_tree_header _header;
 
         // alloc_base의 get, put 함수를 멤버 재노출 (현재 클래스의 scope로 끌어옴)
         using Base::_get_node;
@@ -200,24 +211,21 @@ namespace ft
         // Base(alloc): 상속 받은 클래스 타입의 생성자 호출
         _Rb_tree_base(const _Alloc &alloc = _Alloc()) : Base(alloc), _header() {}
         ~_Rb_tree_base() {}
-
-        _Rb_tree_header       &header() { return _header; }
-        const _Rb_tree_header &header() const { return _header; }
     };
 
     // =============================== Rb_tree =================================
 
-    // _KeyOfValue: value에서 key를 뽑는 정책 (함수 객체)
+    // _KeyOfValue: value에서 key를 뽑는 정책 (함수 객체, functor)
     // KeyOfValue 덕분에 associative array까지 커버하는 '범용 트리 엔진'
     // value = pair<key, mapped>임. mapped_type과는 다르니 헷갈리지 말 것!
-    template <typename _Key, typename _Val, typename _KeyOfValue, typename _Compare,
-              typename _Alloc = allocator<_Val>>
-    class _Rb_tree
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc = allocator<_Value>>
+    class _Rb_tree : protected _Rb_tree_base<_Value, _Alloc>
     {
       public:
         // key & value
         typedef _Key              key_type;
-        typedef _Val              value_type;
+        typedef _Value            value_type;
         typedef value_type       *pointer;
         typedef const value_type *const_pointer;
         typedef value_type       &reference;
@@ -229,16 +237,17 @@ namespace ft
         typedef typename _Alloc::size_type       size_type;
 
         // node
-        typedef _Rb_tree_node<_Val> _Node;
-        typedef _Rb_tree_node_base  _Base;
-        typedef _Node              *_Node_ptr;
-        typedef _Base              *_Base_ptr;
+        typedef _Base                *_Base_ptr;
+        typedef _Rb_tree_node<_Value> _Rb_tree_node;
+        typedef _Rb_tree_color        _Color_type;
+        typedef _Rb_tree_node_base    _Base;
+        typedef _Rb_tree_node        *_Node_ptr;
 
         // iterator
-        typedef _Rb_tree_iterator<_Val, _Val &, _Val *>             iterator;
-        typedef _Rb_tree_iterator<_Val, const _Val &, const _Val *> const_iterator;
+        typedef _Rb_tree_iterator<_Value, _Value &, _Value *>             iterator;
+        typedef _Rb_tree_iterator<_Value, const _Value &, const _Value *> const_iterator;
 
-        // ==================== API ====================
+        // ================================ API ================================
         // allocation/deallocation
         _Rb_tree();
         _Rb_tree(const _Compare &, const allocator_type &);
@@ -283,20 +292,114 @@ namespace ft
         size_type erase(const key_type &k);
         void      erase(iterator first, iterator last);
 
-      private:
-        _Rb_tree_header _header;
+        // -------------------------- getter ---------------------------
 
+        _Node_ptr &_root() const { return (_Node_ptr &)_header._base_ptr->_parent; }
+        _Node_ptr &_leftmost() const { return (_Node_ptr &)_header._base_ptr->_left; }
+        _Node_ptr &_rightmost() const { return (_Node_ptr &)_header._base_ptr->_right; }
+
+        /*
+            [반환형을 _Node_ptr로 통일하는 이유]
+            - 트리 조작 로직에서 내부적으로 _Node_ptr, _Base_ptr 둘다 씀
+                - _Base_ptr: 트리 구조 조작용
+                - _Node_ptr: value 접근용
+                - _Node_ptr의 기능이 더 강력함
+            - getter에 의해 반환된 값은 여러 목적으로 쓰일 수 있음
+                -> 좀더 강력한 _Node_ptr 타입으로 반환한다!! (반환형 통일)
+                - 위험성? -> header 노드가 value 관련 작업을 시도하지 않음을 로직상 보장하면 OK
+            - header 노드를 감안하여 _Base_ptr로 반환할 수도 있으면 좋았겠지만...
+                c++에서의 함수 오버로딩은 파라미터에 의해서만 가능하다.
+        */
+
+        /*
+            [왜 _Node_ptr 버전 / _Base_ptr 버전을 따로 두는가?]
+
+            - Base가 Node의 베이스 클래스이므로 사실 Base 버전만 있어도 기능상으로는 문제가 없다.
+                - 그러나, 업캐스팅 과정에서 실제 타입 정보가 사라짐.
+                - reinterpret_cast를 사용하면 문법적으로는 문제가 없으나,
+                    공격적인 최적화가 어려워짐 (최적화 비용 증가)
+
+            - 따라서 libstdc++는 역할을 분리하여
+                _S_left(_Node_ptr) : 캐스팅 없음, 최적화 최고
+                _S_left(_Base_ptr) : sentinel/header 등 Base-only 노드용
+            두 버전으로 설계했다.
+
+            - 파라미터의 implicit conversion 과정에서는 비용이 0
+        */
+
+        /*
+            [reinterpret_cast의 연산 비용]
+            - 실행 시 비용(즉 CPU가 명령을 수행하는 비용) 자체는 0이다.
+                - CPU 입장에서는 할 일이 없음. 컴파일러 레벨에서 끝남!
+            - 근데 타입이 확실하지 않으므로, 컴파일러의 공격적인(aggressive) 최적화가 어려워진다.
+                즉 최적화 측면에서 비용이 발생한다고 할 수 있음.
+        */
+
+        // getter for _Node_ptr
+        static _Node_ptr &_left(_Node_ptr n) { return (_Node_ptr &)(n->left); }
+        static _Node_ptr &_right(_Node_ptr n) { return (_Node_ptr &)(n->right); }
+        static _Node_ptr &_parent(_Node_ptr n) { return (_Node_ptr &)(n->parent); }
+        static reference  _value(_Node_ptr n) { return n->value; }
+        // _KeyOfValue 타입의 객체(functor) 생성 후 operator() 호출
+        static const key_type &_key(_Node_ptr n) { return _KeyOfValue()(n->value); }
+        static _Color_type    &_color(_Node_ptr n) { return (_Color_type &)n->color; }
+
+        // getter for _Base_ptr
+        static _Node_ptr &_left(_Base_ptr b) { return (_Node_ptr &)(b->left); }
+        static _Node_ptr &_right(_Base_ptr b) { return (_Node_ptr &)(b->right); }
+        static _Node_ptr &_parent(_Base_ptr b) { return (_Node_ptr &)(b->parent); }
+        static reference  _value(_Base_ptr b) { return reinterpret_cast<_Node_ptr>(b)->value; }
+        // _KeyOfValue 타입의 객체(functor) 생성 후 operator() 호출
+        static const key_type &_key(_Base_ptr b) { return _KeyOfValue()(_value(b)); }
+        static _Color_type    &_color(_Base_ptr b) { return (_Color_type &)b->color; }
+
+      private:
         // node create & destroy
-        _Node_ptr _create_node(const value_type &v);
-        void      _destroy_node(_Node_ptr);
+        _Node_ptr _create_node(const value_type &v)
+        {
+            _Node_ptr n_ptr = _get_node();
+            try
+            {
+                // &(n_ptr->value) = &n_ptr->value
+                get_allocator().construct(&n_ptr->value, v);
+            }
+            catch (...)
+            {
+                _put_node(n_ptr);
+            }
+            return n_ptr;
+        }
+
+        // 주의: parent는 복사하지 않는다
+        _Node_ptr _clone_node(_Node_ptr orig)
+        {
+            _Node_ptr n_ptr = _create_node(orig->value);
+            n_ptr->color = orig->color;
+            n_ptr->left = orig->left;
+            n_ptr->right = orig->right;
+            // n_ptr->parent = orig->parent;
+            return n_ptr;
+        }
+
+        void _destroy_node(_Node_ptr n_ptr)
+        {
+            get_allocator().destroy(n_ptr);
+            _put_node(n_ptr);
+        }
 
         // balancing (fixup)
         void _insert_fixup(_Base_ptr x);
         void _erase_fixup(_Base_ptr x, _Base_ptr x_parent);
 
         // find min / max node (stateless)
-        static _Node_ptr _minimum(_Node_ptr x);
-        static _Node_ptr _maximum(_Node_ptr x);
+        static _Node_ptr _minimum(_Node_ptr x)
+        {
+            return (_Node_ptr)_Rb_tree_node_base::_minumum(x);
+        }
+        static _Node_ptr _maximum(_Node_ptr x)
+        {
+            return (_Node_ptr)_Rb_tree_node_base::_maximum(x);
+        }
     };
 
 } // namespace ft
