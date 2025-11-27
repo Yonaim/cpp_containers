@@ -3,10 +3,22 @@
 #include <algorithm>
 
 /*
-    Function Object type (함수 객체 타입)
-    - operator()를 오버로딩한 클래스
-    - callable(호출 가능 객체)의 일종이다.
-        - callable : functor, function pointer, lambda
+    Function Object (functor)
+    - operator()를 가진 객체
+    - callable(호출 가능 객체)의 일종
+        (callable : functor, function pointer, lambda)
+    - 상태(state)를 가질 수 있는 함수 객체
+    - 함수의 동작 자체를 타입으로 표현할 수 있다 (템플릿 인자, generic programming)
+
+    1) state가 없을 경우 -> 최적화가 극대화.
+        - '객체'라고는 하지만, 컴파일 단계에서 사실상 객체가 아니게 됨
+        - 즉 empty type이며 런타임 객체는 생성되지 않음
+        - 메모리 오버헤드 사실상 0 (1바이트 혹은 EBO에 의해 0바이트)
+        - operator() 호출에 대해 inline 가능성 매우 높음
+    
+    2) state가 있을 경우 -> 최적화 제한
+        - 런타임 객체가 생성됨
+        - inline 최적화 되더라도 state에 대한 메모리 접근 필요
 */
 
 /*
@@ -15,7 +27,6 @@
 
     1) static 함수는 state를 가질 수 없다.
     2) 템플릿 인자에 함수 포인터를 전달할 수가 없다. 타입을 넘겨야한다.
-
 */
 
 // functor1
