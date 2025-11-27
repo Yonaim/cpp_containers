@@ -59,20 +59,32 @@ namespace ft
     // Helper type to manage default initialization of node count and header.
     struct _Rb_tree_header
     {
+        /*
+            왜 base 객체를 그대로 멤버로 가지지 않고 포인터를 멤버로 가지는걸까?
+            ->
+
+        */
         typedef _Rb_tree_node_base *_Base_ptr;
         _Base_ptr                   _base_ptr;
-        // header != root
-        // header->parent: 트리의 root
-        // header->left: leftmost
-        // header->right: rightmost
-        // leftmost, rightmost는 자주 쓰므로 저장해둔다.
+
+        /*
+            - header는 노드가 아님 !!!! 트리의 데이터를 보관하는 용.
+                - header->parent: 트리의 root
+                - header->left: leftmost (begin())
+                - header->right: rightmost (end())
+            - leftmost, rightmost
+                - 없어도 기능상으로는 문제가 없는데, 자주 쓰므로 저장해둠
+                - begin(), end() 즉 iterator로 사용되기 때문에, 절대 NULL이면 안됨!!!
+                - 트리가 비워져 있는 상태일 때, leftmost == rightmost 보장
+                - NULL이어선 안됨 & 트리가 empty 상태일 때 같은 값인 것을 보장해야한다
+                    -> header의 주소를 leftmost, rightmost에 넣어 초기화
+        */
         size_t count;
 
-        _Rb_tree_header()
-        {
-            _base_ptr = 0;
-            count = 0;
-        }
+        /*
+            - 트리는 여러 번 리셋될 수 있는 구조이므로 생성자, 소멸자에서 작업해도 의미가 없음
+            - 그런 상황에서 헤더 노드를 재생성 / 삭제하지 않고 기존 헤더를 재활용하기 때문
+        */
     };
 
     // =============================== Rb_tree_alloc_base =================================
@@ -218,11 +230,17 @@ namespace ft
     // _KeyOfValue: value에서 key를 뽑는 정책 (함수 객체, functor)
     // KeyOfValue 덕분에 associative array까지 커버하는 '범용 트리 엔진'
     // value = pair<key, mapped>임. mapped_type과는 다르니 헷갈리지 말 것!
+    // _Compare: Funcion Object
     template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
               typename _Alloc = allocator<_Value>>
     class _Rb_tree : protected _Rb_tree_base<_Value, _Alloc>
     {
+        typedef _Rb_tree_base<_Value, _Alloc> _Base;
+
       public:
+        //==========================================================================
+        // Public API
+        //==========================================================================
         // key & value
         typedef _Key              key_type;
         typedef _Value            value_type;
@@ -231,17 +249,13 @@ namespace ft
         typedef value_type       &reference;
         typedef const value_type &const_reference;
 
-        // allocator
         typedef _Alloc                           allocator_type;
         typedef typename _Alloc::difference_type difference_type;
         typedef typename _Alloc::size_type       size_type;
-
-        // node
-        typedef _Base                *_Base_ptr;
-        typedef _Rb_tree_node<_Value> _Rb_tree_node;
-        typedef _Rb_tree_color        _Color_type;
-        typedef _Rb_tree_node_base    _Base;
-        typedef _Rb_tree_node        *_Node_ptr;
+        typedef _Rb_tree_node_base              *_Base_ptr;
+        typedef _Rb_tree_node<_Value>            _Rb_tree_node;
+        typedef _Rb_tree_node                   *_Node_ptr;
+        typedef _Rb_tree_color                   _Color_type;
 
         // iterator
         typedef _Rb_tree_iterator<_Value, _Value &, _Value *>             iterator;
@@ -249,6 +263,7 @@ namespace ft
 
         // ================================ API ================================
         // allocation/deallocation
+        _Rb_tree() : _Rb_tree(const _Compare &, const allocator_type &);
         ~_Rb_tree() { clear(); };
 
         void clear()
@@ -279,13 +294,15 @@ namespace ft
         pair<iterator, iterator>             equal_range(const key_type &k);
         pair<const_iterator, const_iterator> equal_range(const key_type &k) const;
 
+        // ================================ insert / erase API ================================
+
         // insert
         pair<iterator, bool> insert_unique(const value_type &v);
         iterator             insert_equal(const value_type &v);
         iterator             insert_unique(iterator position, const value_type &v);
         iterator             insert_equal(iterator position, const value_type &v);
 
-        // erase
+        // erase: 원소 1개 제거
         /*
             왜 하필 이름이 erase?
             - remove는 std::remove에서 사용됨.
@@ -298,9 +315,14 @@ namespace ft
         size_type erase(const key_type &k);
         void      erase(iterator first, iterator last);
 
+      protected:
+        //==========================================================================
+        // Internal helpers
+        //==========================================================================
         // _Compare: stateful 함수 객체이므로 멤버로 둠
         _Compare _key_compare;
 
+        // root, leftmost, rightmost 접근 함수
         _Node_ptr &_root() const { return (_Node_ptr &)_header._base_ptr->_parent; }
         _Node_ptr &_leftmost() const { return (_Node_ptr &)_header._base_ptr->_left; }
         _Node_ptr &_rightmost() const { return (_Node_ptr &)_header._base_ptr->_right; }
@@ -342,21 +364,22 @@ namespace ft
                 즉 최적화 측면에서 비용이 발생한다고 할 수 있음.
         */
 
-        // getter for _Node_ptr
-        static _Node_ptr &_left(_Node_ptr n) { return (_Node_ptr &)(n->left); }
-        static _Node_ptr &_right(_Node_ptr n) { return (_Node_ptr &)(n->right); }
-        static _Node_ptr &_parent(_Node_ptr n) { return (_Node_ptr &)(n->parent); }
-        static reference  _value(_Node_ptr n) { return n->value; }
-        // _KeyOfValue 타입의 객체(functor) 생성 후 operator() 호출
-        static const key_type &_key(_Node_ptr n) { return _KeyOfValue()(n->value); }
-        static _Color_type    &_color(_Node_ptr n) { return (_Color_type &)n->color; }
+        // static helper 함수들
+        static _Node_ptr      &_left(_Node_ptr n) { return (_Node_ptr &)(n->left); }
+        static _Node_ptr      &_right(_Node_ptr n) { return (_Node_ptr &)(n->right); }
+        static _Node_ptr      &_parent(_Node_ptr n) { return (_Node_ptr &)(n->parent); }
+        static reference       _value(_Node_ptr n) { return n->value; }
+        static const key_type &_key(_Node_ptr n)
+        {
+            // _KeyOfValue 타입의 객체(functor) 생성 후 operator() 호출
+            return _KeyOfValue()(n->value);
+        }
+        static _Color_type &_color(_Node_ptr n) { return (_Color_type &)n->color; }
 
-        // getter for _Base_ptr
-        static _Node_ptr &_left(_Base_ptr b) { return (_Node_ptr &)(b->left); }
-        static _Node_ptr &_right(_Base_ptr b) { return (_Node_ptr &)(b->right); }
-        static _Node_ptr &_parent(_Base_ptr b) { return (_Node_ptr &)(b->parent); }
-        static reference  _value(_Base_ptr b) { return reinterpret_cast<_Node_ptr>(b)->value; }
-        // _KeyOfValue 타입의 객체(functor) 생성 후 operator() 호출
+        static _Node_ptr      &_left(_Base_ptr b) { return (_Node_ptr &)(b->left); }
+        static _Node_ptr      &_right(_Base_ptr b) { return (_Node_ptr &)(b->right); }
+        static _Node_ptr      &_parent(_Base_ptr b) { return (_Node_ptr &)(b->parent); }
+        static reference       _value(_Base_ptr b) { return reinterpret_cast<_Node_ptr>(b)->value; }
         static const key_type &_key(_Base_ptr b) { return _KeyOfValue()(_value(b)); }
         static _Color_type    &_color(_Base_ptr b) { return (_Color_type &)b->color; }
 
