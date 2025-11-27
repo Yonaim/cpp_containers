@@ -298,7 +298,8 @@ namespace ft
         size_type erase(const key_type &k);
         void      erase(iterator first, iterator last);
 
-        // -------------------------- getter ---------------------------
+        // _Compare: stateful 함수 객체이므로 멤버로 둠
+        _Compare _key_compare;
 
         _Node_ptr &_root() const { return (_Node_ptr &)_header._base_ptr->_parent; }
         _Node_ptr &_leftmost() const { return (_Node_ptr &)_header._base_ptr->_left; }
