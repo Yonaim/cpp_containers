@@ -5,18 +5,26 @@
 #include <limits>
 
 /*
-The std::allocator class template is the default Allocator used by all standard library containers
-if no user-specified allocator is provided.
+    The std::allocator class template is the default Allocator used by all standard library containers
+    if no user-specified allocator is provided.
 */
 
 /*
-- custum allocator는 std::allocator를 상속해서 선언하는게 아님
-- 필수 allocator API만 갖추면 된다
-    - typedef
-    - 생성자
-    - allocate / deallocate
-    - construct / destroy
-    - rebind
+    - custum allocator는 std::allocator를 상속해서 선언하는게 아님
+    - 필수 allocator API만 갖추면 된다
+        - typedef
+        - 생성자
+        - allocate / deallocate
+        - construct / destroy
+        - rebind
+*/
+
+/*
+    allocator가 static이 아닌 이유:
+        - std의 경우에는 stateless지만 모든 allocator가 그런 것은 아님
+        - 같은 템플릿 인자 타입의 allocator라도 각 instance에서 policy가 다를 수 있는,
+            policy object (정책 객체)이므로 호출하는 쪽에서는 무조건
+            '객체(인스턴스)를 통한 호출'을 해야한다.
 */
 
 namespace ft
@@ -113,8 +121,8 @@ namespace ft
             // 중간에 포인터(ptr) 삽입하여 특정 메모리 위치에 객체를 생성 가능
             // ::operator new와 다름
             // 내부적으로 할당 + 객체 생성자 호출 두 과정을 포함
-            //
             new ((void *)p) T(val);
+            // p 위치에 T(val)을 넣는다
         }
         void destroy(pointer p) { p->~T(); }
     };
