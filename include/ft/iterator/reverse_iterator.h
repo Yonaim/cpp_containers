@@ -22,9 +22,8 @@ rend() = begin()
 - 즉 reverse_iterator 자체가 템플릿.
 
 ex)
-    reverse_iterator<iterator>
-    reverse_iterator<const_iterator>
-
+    typedef reverse_iterator<iterator>             reverse_iterator;
+    typedef reverse_iterator<const_iterator>       const_reverse_iterator;
 */
 
 namespace ft
@@ -39,7 +38,7 @@ namespace ft
         // 사용자가 직접 접근하지는 못하지만, 상속 클래스는 접근 가능하도록 protected로
 
       public:
-        typedef Iter                                              iterator_type;
+        typedef Iter iterator_type;
         // iterator_traits를 사용하는 이유: Iter 타입에서 ㅊ타입 정보 갖고오는 정책을 일관화
         typedef typename iterator_traits<Iter>::value_type        value_type;
         typedef typename iterator_traits<Iter>::difference_type   difference_type;
