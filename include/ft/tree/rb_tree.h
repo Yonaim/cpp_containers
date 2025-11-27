@@ -249,9 +249,15 @@ namespace ft
 
         // ================================ API ================================
         // allocation/deallocation
-        _Rb_tree();
-        _Rb_tree(const _Compare &, const allocator_type &);
-        ~_Rb_tree();
+        ~_Rb_tree() { clear(); };
+
+        void clear()
+        {
+            if (_header->count == 0)
+                return;
+            _erase_subtree(_root());
+            _leftmost() = &_header;
+        }
 
         // iterators
         iterator       begin();
