@@ -260,6 +260,8 @@ namespace ft
         // iterator
         typedef _Rb_tree_iterator<_Value, _Value &, _Value *>             iterator;
         typedef _Rb_tree_iterator<_Value, const _Value &, const _Value *> const_iterator;
+        typedef reverse_iterator<iterator>                                reverse_iterator;
+        typedef reverse_iterator<const_iterator>                          const_reverse_iterator;
 
         // ================================ API ================================
         // allocation/deallocation
@@ -275,12 +277,16 @@ namespace ft
         }
 
         // iterators
-        iterator       begin();
-        const_iterator begin() const;
-        iterator       end();
-        const_iterator end() const;
-        bool           empty() const;
-        size_type      size() const { return ft::distance(begin(), end()); }
+        iterator               begin() { return _leftmost(); }
+        const_iterator         begin() const { return _leftmost(); }
+        iterator               end() { return _rightmost(); }
+        const_iterator         end() const { return _rightmost(); }
+        reverse_iterator       rbegin() { return _leftmost(); }
+        const_reverse_iterator rbegin() const { return _leftmost(); }
+        reverse_iterator       rend() { return _rightmost(); }
+        const_reverse_iterator rend() const { return _rightmost(); }
+        bool                   empty() const { return _header.count == 0; }
+        size_type              size() const { return _header.count; }
 
         // find
         iterator       find(const key_type &k);
