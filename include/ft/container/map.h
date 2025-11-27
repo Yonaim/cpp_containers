@@ -7,7 +7,7 @@
 #include <functional>
 #include "pair.h"
 #include "select1st.h"
-#include "stl_tree.h"
+#include "rb_tree.h"
 
 /*
 - A sorted associative container that contains key-value pairs with 'unique' keys.
