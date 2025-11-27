@@ -5,6 +5,7 @@
 #include "pair.h"
 #include "allocator.h"
 #include "distance.h"
+#include "reverse_iterator.h"
 #include "iterator_tags.h"
 #include "rb_tree_node.h"
 #include "rb_tree_iterator.h"
@@ -389,7 +390,29 @@ namespace ft
         static const key_type &_key(_Base_ptr b) { return _KeyOfValue()(_value(b)); }
         static _Color_type    &_color(_Base_ptr b) { return (_Color_type &)b->color; }
 
+        // find min / max node
+        static _Node_ptr _minimum(_Node_ptr x)
+        {
+            return (_Node_ptr)_Rb_tree_node_base::_minumum(x);
+        }
+        static _Node_ptr _maximum(_Node_ptr x)
+        {
+            return (_Node_ptr)_Rb_tree_node_base::_maximum(x);
+        }
+
       private:
+        //==========================================================================
+        // Implementation details
+        //==========================================================================
+
+        void _empty_initialize()
+        {
+            _color(_header) = _Rb_tree_color::RED;
+            _root() = 0;
+            _leftmost() = _header._base_ptr;
+            _rightmost() = _header._base_ptr;
+        }
+
         // node create & destroy
         _Node_ptr _create_node(const value_type &v)
         {
@@ -427,17 +450,10 @@ namespace ft
         void _insert_fixup(_Base_ptr x);
         void _erase_fixup(_Base_ptr x, _Base_ptr x_parent);
 
-        // find min / max node (stateless)
-        static _Node_ptr _minimum(_Node_ptr x)
-        {
-            return (_Node_ptr)_Rb_tree_node_base::_minumum(x);
-        }
-        static _Node_ptr _maximum(_Node_ptr x)
-        {
-            return (_Node_ptr)_Rb_tree_node_base::_maximum(x);
-        }
+        // erase subtree
+        // GNU에서는 _M_erase라는 이름의 helper 함수 (너무 범용적인 이름이라 수정)
+        void _erase_subtree();
     };
-
 } // namespace ft
 
 #endif
