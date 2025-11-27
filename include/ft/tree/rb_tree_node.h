@@ -33,7 +33,7 @@ namespace ft
             base node 구조체에 연산을 정의하는 이유???
             -> value를 가지지 않는 노드(header)도 존재하므로, base 레벨에서 연산을 정의해야한다.
         */
-        static _Base_ptr _minumum(_Base_ptr ptr)
+        static _Base_ptr _minimum(_Base_ptr ptr)
         {
             while (ptr->left != 0)
                 ptr = ptr->left;
