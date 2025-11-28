@@ -30,6 +30,14 @@
 
 /*
     EBO(Empty Base Optimization)
+    : 빈 클래스(empty class)를 상속받을 때, 그 클래스가 차지하는 메모리를 0바이트로 최적화.
+
+    원래는, 빈 클래스라도 기본적으로 1바이트가 필요함!!!
+    객체는 고유한 주소를 가져야하기 때문이다.
+
+    그런데 '상속' 구조에서는 이를 최적화할 수 있다.
+    상속 받는 클래스가 어차피 메모리를 차지하고 있기 때문에 고유한 주소를 이미 갖고 있음.
+        -> empty class에 대해 메모리를 할당할 필요가 x.
 */
 
 #include <cstddef>
@@ -45,11 +53,27 @@ namespace ft
 
     // =============================== Rb_tree_header =================================
 
+    /*
+        [헤더 노드]
+        - header->parent->parent = parent라는 특이한 값을 가짐
+        - '이 werid한 구조 + color가 RED'를 header를 판별하는데 사용
+        - 각 멤버
+            - header->_M_parent = root
+            - header->_M_left   = leftmost (begin)
+            - header->_M_right  = rightmost (end - 1)
+            - header->_M_color  = RED     // 오직 header만 RED면서 weird한 구조
+            - root->_M_parent   = header  // header 판별 조건
+    */
+    /*
+         - 추후 노드 추가시, leftmost(begin) 값이 바뀜
+         - rightmost(end)는 늘 언제나 header와 동일
+             - end(끝) iterator는 rightmost이면서 header와 값이 동일
+    */
     struct _Rb_tree_header
     {
         typedef _Rb_tree_node_base *_Base_ptr;
         _Base_ptr                   _base_ptr;
-        size_t count;
+        size_t                      count;
     };
 
     // =============================== Rb_tree_alloc_base =================================
@@ -64,8 +88,9 @@ namespace ft
         typedef _Alloc allocator_type;
         typedef _Tp    value_type;
 
-        typedef typename _Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
-        typedef _Rb_tree_node<value_type>                                       node_type;
+        typedef
+            typename _Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
+        typedef _Rb_tree_node<value_type>                                      node_type;
 
         allocator_type get_allocator() const { return allocator_type(_node_allocator); }
 
@@ -85,8 +110,9 @@ namespace ft
         typedef _Alloc allocator_type;
         typedef _Tp    value_type;
 
-        typedef typename _Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
-        typedef _Rb_tree_node<value_type>                                       node_type;
+        typedef
+            typename _Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
+        typedef _Rb_tree_node<value_type>                                      node_type;
 
         allocator_type get_allocator() const { return allocator_type(); }
 
@@ -217,7 +243,7 @@ namespace ft
         static _Node_ptr _maximum(_Node_ptr x);
 
       private:
-        void _empty_initialize();
+        void      _empty_initialize();
         _Node_ptr _create_node(const value_type &v);
         _Node_ptr _clone_node(_Node_ptr orig);
         void      _destroy_node(_Node_ptr n_ptr);
