@@ -26,8 +26,60 @@ namespace ft
         // 순회 상태 저장
         _Base_ptr _base_node;
 
-        void _increment();
-        void _decrement();
+        /*
+            - end()는 마지막 원소의 뒤를 가리키는 이터레이터
+            - end()--; 는 마지막 원소를 가리켜야 함
+        */
+        void _increment()
+        {
+            // case 1: 오른쪽 서브트리 존재
+            if (_base_node->right != 0)
+            {
+                // 오른쪽 서브트리의 맨 좌측으로 이동
+                _base_node = _base_node->right;
+                while (_base_node->left != 0)
+                    _base_node = _base_node->left;
+            }
+            else
+            {
+                // case 2: 오른쪽 서브트리 없음
+                _Base_ptr parent = _base_node->parent;
+                // 위로 올라가면서 내가 부모의 오른쪽 자식인 동안 계속 climb
+                while (parent && _base_node == parent->right)
+                {
+                    _base_node = parent;
+                    parent = _base_node->parent;
+                }
+                _base_node = parent;
+            }
+        }
+        void _decrement()
+        {
+            // case 0: 현재 값이 end() (= header)
+            // 가장 마지막 원소(rightmost) 반환
+            if (_base_node->color == RED && _base_node == _base_node->parent->parent)
+                _base_node = _base_node->right; // header의 우측 노드는 rightmost
+            // case 1: 좌측 서브트리 존재
+            else if (_base_node->left != 0)
+            {
+                // 좌측 서브트리의 맨 우측으로 이동
+                _base_node = _base_node->left;
+                while (_base_node->right != 0)
+                    _base_node = _base_node->right;
+            }
+            else
+            {
+                // case 2: 오른쪽 서브트리 없음
+                _Base_ptr parent = _base_node->parent;
+                // 위로 올라가면서 내가 부모의 좌측 자식인 동안 계속 climb
+                while (parent && _base_node == parent->left)
+                {
+                    _base_node = parent;
+                    parent = _base_node->parent;
+                }
+                _base_node = parent; // 결정된 조상이 predecessor
+            }
+        }
     };
 
     // iterator는 class로 구현하는 것이 일반적 (private가 필요한 경우가 있음 & 일관적으로)
