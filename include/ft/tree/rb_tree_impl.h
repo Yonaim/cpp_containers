@@ -46,14 +46,14 @@ namespace ft
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::end()
     {
-        return iterator(_rightmost());
+        return iterator(_header._base_ptr);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::end() const
     {
-        return const_iterator(_rightmost());
+        return const_iterator(_header._base_ptr);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -74,14 +74,14 @@ namespace ft
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::reverse_iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rend()
     {
-        return reverse_iterator(_rightmost());
+        return reverse_iterator(_header._base_ptr);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_reverse_iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rend() const
     {
-        return const_reverse_iterator(_rightmost());
+        return const_reverse_iterator(_header._base_ptr);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -354,11 +354,10 @@ namespace ft
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_empty_initialize()
     {
-        this->_header._base_ptr = reinterpret_cast<_Base_ptr>(&this->_header);
-        this->_header._base_ptr->color = _Rb_tree_color::RED;
-        this->_header._base_ptr->parent = 0;
-        this->_header._base_ptr->left = this->_header._base_ptr;
-        this->_header._base_ptr->right = this->_header._base_ptr;
+        this->_header._base_ptr->parent = 0;                      // root initially null
+        this->_header._base_ptr->left = this->_header._base_ptr;  // leftmost = header
+        this->_header._base_ptr->right = this->_header._base_ptr; // rightmost = header
+        this->_header._base_ptr->color = _Rb_tree_color::RED;     // header color = red
         this->_header.count = 0;
     }
 
