@@ -22,9 +22,10 @@
 /*
     allocator가 static이 아닌 이유:
         - std의 경우에는 stateless지만 모든 allocator가 그런 것은 아님
-        - 같은 템플릿 인자 타입의 allocator라도 각 instance에서 policy가 다를 수 있는,
-            policy object (정책 객체)이므로 호출하는 쪽에서는 무조건
-            '객체(인스턴스)를 통한 호출'을 해야한다.
+        - allocator는 policy object임
+            - policy object: 각 인스턴스 별로 정책이 다를 수 있다 (인자 타입과는 별개!!)
+            - policy: 메모리 할당 위치, alignment, stateful 유무 등
+            - 따라서 객체(인스턴스)를 통한 호출'을 해야함
 */
 
 namespace ft
