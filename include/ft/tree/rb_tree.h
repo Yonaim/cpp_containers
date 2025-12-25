@@ -55,8 +55,10 @@ namespace ft
 
     /*
         [헤더 노드]
+        - 진짜 노드가 아닌 트리의 메타 정보를 저장하는 노드
+        - 멤버의 이름(parent, left, right)과 저장 데이터는 관계없음
         - header->parent->parent = parent라는 특이한 값을 가짐
-        - '이 werid한 구조 + color가 RED'를 header를 판별하는데 사용
+        - '이 weird한 구조 + color가 RED'를 header를 판별하는데 사용
         - 각 멤버
             - header->_M_parent = root
             - header->_M_left   = leftmost (begin)
@@ -154,6 +156,7 @@ namespace ft
 
     // =============================== Rb_tree =================================
 
+    // Compare(x, y): x < y의 결과를 bool로 반환
     template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
               typename _Alloc = allocator<_Value>>
     class _Rb_tree : protected _Rb_tree_base<_Value, _Alloc>
@@ -214,6 +217,11 @@ namespace ft
         iterator             insert_unique(iterator position, const value_type &v);
         iterator             insert_equal(iterator position, const value_type &v);
 
+        template <class _InputIterator>
+        void insert_unique(_InputIterator first, _InputIterator last);
+        template <class _InputIterator>
+        void insert_equal(_InputIterator first, _InputIterator last);
+
         void      erase(iterator position);
         size_type erase(const key_type &k);
         void      erase(iterator first, iterator last);
@@ -243,11 +251,17 @@ namespace ft
         static _Node_ptr _maximum(_Node_ptr x);
 
       private:
+        iterator  _insert(_Node_ptr x, _Node_ptr y, const value_type &v);
         void      _empty_initialize();
         _Node_ptr _create_node(const value_type &v);
         _Node_ptr _clone_node(_Node_ptr orig);
         void      _destroy_node(_Node_ptr n_ptr);
 
+        // rotate
+        void _rotate_left(_Base_ptr x);
+        void _rotate_right(_Base_ptr x);
+
+        // fixup
         void _insert_fixup(_Base_ptr x);
         void _erase_fixup(_Base_ptr x, _Base_ptr x_parent);
         void _erase_subtree(_Node_ptr x);

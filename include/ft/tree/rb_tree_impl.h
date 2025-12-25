@@ -559,7 +559,7 @@ namespace ft
 
     */
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _rotate_left(_Base_ptr x)
+    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_rotate_left(_Base_ptr x)
     {
         const _Base_ptr y = x->right; // y: x의 오른쪽 자식
 
@@ -585,7 +585,7 @@ namespace ft
     // rotate_right(x): x->left가 위로 올라감
     // rotate_left의 좌우대칭
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _rotate_right(_Base_ptr x)
+    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_rotate_right(_Base_ptr x)
     {
         const _Base_ptr y = x->left; // y: x의 왼쪽 자식
 
