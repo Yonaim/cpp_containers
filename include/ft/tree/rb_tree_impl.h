@@ -246,6 +246,12 @@ namespace ft
 
     /* =========================== insert / erase (skeleton) ===================== */
 
+    //
+    /*
+        insert: 새 노드를 RED로 삽입 -> Double RED 문제 발생
+
+
+    */
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     pair<typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator, bool>
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(const value_type &v)
@@ -476,9 +482,84 @@ namespace ft
     }
 
     /* rotate */
+    /*
+        1. 회전 후에도 in-order(중위)순회 결과는 그대로여야함
+        2. 색은 건들지 않고 부모-자식 포인터 관계만 재배치
+    */
+    // rotate_left(x): x->right가 위로 올라감
+    /*
+        예시 1) x가 루트인 경우
+
+        x                     y
+         \                   / \
+          y      ==>         x   c
+         / \                 \
+        b   c                 b
+
+    */
+    /*
+        예시 2) x가 루트가 아닌 경우
+
+        p                          p
+       / \                        / \
+      x   (… )     ==>           y   (… )
+     / \                        / \
+    A   y                      x   C
+       / \                    / \
+      B   C                  A   B
+
+    */
+    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+    void _rotate_left(_Base_ptr x)
+    {
+        const _Base_ptr y = x->right; // y: x의 오른쪽 자식
+
+        // 1) x의 오른쪽 자식 설정: y의 왼쪽 서브트리
+        x->right = y->left;
+        if (x->right)
+            x->right->parent = x;
+
+        // 2) y의 부모 설정: x의 부모
+        y->parent = x->parent;
+        if (x == _header._base_ptr->parent) // x = root
+            _header._base_ptr->parent = y;
+        else if (x = x->parent->left) // x는 부모의 좌측 자식
+            x->parent->left = y;
+        else
+            x->parent->right = y;
+
+        // 3) y의 왼쪽 자식 설정: x
+        y->left = x;
+        x->parent = y;
+    }
+
+    // rotate_right(x): x->left가 위로 올라감
+    // rotate_left의 좌우대칭
+    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+    void _rotate_right(_Base_ptr x)
+    {
+        const _Base_ptr y = x->left; // y: x의 왼쪽 자식
+
+        // 1) x의 왼쪽 자식 설정: y의 우측 서브트리
+        x->left = y->right;
+        if (x->left)
+            x->left->parent = x;
+
+        // 2) y의 부모 설정: x의 부모
+        y->parent = x->parent;
+        if (x == _header._base_ptr->parent) // x = root
+            _header._base_ptr->parent = y;
+        else if (x = x->parent->left) // x는 부모의 좌측 자식
+            x->parent->left = y;
+        else
+            x->parent->right = y;
+
+        // 3) y의 우측 자식 설정: x
+        y->right = x;
+        x->parent = y;
+    }
 
     /* fixup */
-
     /*
         RED-BLACK 트리의 조건
 
@@ -507,7 +588,8 @@ namespace ft
     }
 
     /* subtree erase */
-
+    // 부모 노드를 맨 마지막에 지우는 것이 안전
+    // 즉 post-order (L-R-Root)
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_erase_subtree(_Node_ptr x)
     {
