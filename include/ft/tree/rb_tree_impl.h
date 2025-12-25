@@ -103,48 +103,129 @@ namespace ft
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const key_type &k)
     {
-        // TODO
-        return iterator(_rightmost());
+        _Node_ptr x = _root();           // current node (currently searching)
+        _Node_ptr y = _header._base_ptr; // last node which is not less than k
+
+        // lower_bound를 먼저 찾는다
+        while (x != NULL)
+        {
+            if (!_key_compare(_key(x), k)) // !(x < k) ?
+            {
+                y = x;
+                x = _left(x);
+            }
+            else
+                x = _right(x);
+        }
+        // 찾은 lower_bound가 k보다 작거나 같을시 -> 같은 값
+        // 찾은 lower_bound가 k보다 클시 -> 다른 값
+        iterator it = iterator(y);
+        return (it == end() || _key_compare(k, _key(y))) ? end() : iterator(y);
     }
 
+    // 찾는게 없으면 end() 리턴
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const key_type &k) const
     {
-        // TODO
-        return const_iterator(_rightmost());
+        _Node_ptr x = _root();           // current node (currently searching)
+        _Node_ptr y = _header._base_ptr; // last node which is not less than k
+
+        // lower_bound를 먼저 찾는다
+        while (x != NULL)
+        {
+            if (!_key_compare(_key(x), k)) // !(x < k) ?
+            {
+                y = x;
+                x = _left(x);
+            }
+            else
+                x = _right(x);
+        }
+        // 찾은 lower_bound가 k보다 작거나 같을시 -> 같은 값
+        // 찾은 lower_bound가 k보다 클시 -> 다른 값
+        iterator it = iterator(y);
+        return (it == end() || _key_compare(k, _key(y))) ? end() : const_iterator(y);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::lower_bound(const key_type &k)
     {
-        // TODO
-        return iterator(_rightmost());
+        _Node_ptr x = _root();           // current node (currently searching)
+        _Node_ptr y = _header._base_ptr; // last node which is not less than k
+
+        while (x != NULL)
+        {
+            if (!_key_compare(_key(x), k))
+            {
+                y = x;
+                x = _left(x);
+            }
+            else
+                x = _right(x);
+        }
+        return iterator(y);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::lower_bound(const key_type &k) const
     {
-        // TODO
-        return const_iterator(_rightmost());
+        _Node_ptr x = _root();           // current node (currently searching)
+        _Node_ptr y = _header._base_ptr; // last node which is not less than k
+
+        while (x != NULL)
+        {
+            if (!_key_compare(_key(x), k))
+            {
+                y = x;
+                x = _left(x);
+            }
+            else
+                x = _right(x);
+        }
+        return iterator(y);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::upper_bound(const key_type &k)
     {
-        // TODO
-        return iterator(_rightmost());
+        _Node_ptr x = _root();           // current node (currently searching)
+        _Node_ptr y = _header._base_ptr; // last node which is less than k
+
+        while (x != NULL)
+        {
+            if (_key_compare(_key(x), k))
+            {
+                y = x;
+                x = _left(x);
+            }
+            else
+                x = _right(x);
+        }
+        return iterator(y);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::upper_bound(const key_type &k) const
     {
-        // TODO
-        return const_iterator(_rightmost());
+        _Node_ptr x = _root();           // current node (currently searching)
+        _Node_ptr y = _header._base_ptr; // last node which is less than k
+
+        while (x != NULL)
+        {
+            if (_key_compare(_key(x), k))
+            {
+                y = x;
+                x = _left(x);
+            }
+            else
+                x = _right(x);
+        }
+        return iterator(y);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -152,7 +233,6 @@ namespace ft
          typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator>
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::equal_range(const key_type &k)
     {
-        // TODO
         return pair<iterator, iterator>(lower_bound(k), upper_bound(k));
     }
 
@@ -161,7 +241,6 @@ namespace ft
          typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator>
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::equal_range(const key_type &k) const
     {
-        // TODO
         return pair<const_iterator, const_iterator>(lower_bound(k), upper_bound(k));
     }
 
@@ -396,14 +475,30 @@ namespace ft
         this->_put_node(n_ptr);
     }
 
+    /* rotate */
+
     /* fixup */
 
+    /*
+        RED-BLACK 트리의 조건
+
+        1. 모든 노드는 RED 혹은 BLACK
+        2. 루트 노드는 BLACK
+        3. 모든 리프 노드(NIL)들은 BLACK
+        4. RED 노드의 자식은 BLACK
+        5. 모든 리프 노드에서 Black Depth는 같다
+            (Black Depth: 리프 노드에서 루트 노드까지의 경로에서 만나는 BLACK 노드의 개수)
+        6. 새로운 노드는 항상 RED
+    */
+
+    // insert: 새 노드를 RED로 삽입 -> Double RED 문제 발생
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_insert_fixup(_Base_ptr x)
     {
         // TODO
     }
 
+    // erase: 제거한 노드가 BLACK일 경우 -> Black Depth 불균형 문제 발생
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_erase_fixup(_Base_ptr x,
                                                                         _Base_ptr x_parent)
