@@ -466,21 +466,38 @@ namespace ft
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(iterator position)
     {
-        // TODO
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::size_type
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(const key_type &k)
     {
-        // TODO
-        return 0;
+        pair<iterator, iterator> p = equal_range(k);
+        size_type                n = distance(p.first, p.second);
+        erase(p.first, p.second);
+        return n;
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(iterator first, iterator last)
     {
-        // TODO
+        if (first == begin() && last == end())
+            clear();
+        else
+            // for문일시 first가 가리키는 노드가 지워진 후 ++을 시도하려 할 수 있음
+            // while문으로 작성하여 post increment(++)를 사용
+            while (first != last)
+                erase(first++);
+    }
+
+    // 포인터인 이유: 연속 메모리 배열의 시작 지점과 끝지점
+    // 값 경계(low/high)가 아니라 리스트를 받는 것임
+    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(const key_type *first,
+                                                                 const key_type *last)
+    {
+        while (first != last)
+            erase(*first++);
     }
 
     /* =========================== Internal helpers ============================== */
