@@ -246,12 +246,18 @@ namespace ft
 
     /* =========================== insert / erase ===================== */
 
+    /*
+        - 기본값: 우측(right) 방향에 삽입
+        - 일반 탐색 삽입이 아닌 힌트 insert의 경우, 좌측 삽입을 원할 수 있음
+        - 이를 위해 x를 플래그로 이용 (Null일시 일반 탐색 삽입으로 간주, non-Null일시 좌측 삽입)
+        - x는 Null 혹은 non-Null로만 구분하며 값은 중요하지 않음
+    */
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_insert(_Node_ptr x, _Node_ptr y,
                                                               const value_type &v)
     {
-        // x: 삽입할 위치 (현재는 NULL)
+        // x: 삽입할 위치 (사실상 플래그로 사용)
         // y: 삽입할 위치의 부모 노드
         // v: 삽입할 노드의 값
 
@@ -259,10 +265,6 @@ namespace ft
         // TODO
     }
 
-    //
-    /*
-        insert: 새 노드를 RED로 삽입 -> Double RED 문제 발생
-    */
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     pair<typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator, bool>
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(const value_type &v)
@@ -318,13 +320,59 @@ namespace ft
         return _insert(x, y, v);
     }
 
+    /*
+        [position 힌트 기반 삽입]
+
+        아래의 경우에 해당하면 O(1) 삽입이 가능하다.
+
+        1. position이 begin이고 v < begin
+        2. position이 end면 max < v
+        3. before < v < position
+
+        모두 해당되지 않으면 O(n) 탐색 필요 -> insert_unique
+    */
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(iterator          position,
                                                                     const value_type &v)
     {
-        // TODO
-        return iterator(_rightmost());
+        // 1. position = begin()
+        if (position._base_node == _header._base_ptr->left)
+        {
+            if (size() > 0 && _key_compare(_key(v), _key(position._base_node))) // v < begin
+                // v를 새로운 begin 삼는다 (left 삽입)
+                // first argument just needs to be non-null (별 의미 없음)
+                return _insert(position._base_node, position._base_node, v);
+            else
+                return insert_unique(v).first; // fallback
+        }
+        // 2. position = end()
+        else if (position._base_node == _header._base_ptr->right)
+        {
+            if (_key_compare(_key(_rightmost()), _key(v))) // end < v
+                // v를 새로운 max 삼는다
+                return _insert(NULL, _rightmost(), v);
+            else
+                return insert_unique(v).first; // fallback
+        }
+        // 3. before < v < position인지 확인
+        else
+        {
+            iterator before = position;
+            --before;
+            // before의 right child 혹은 position의 left child로 삽입 (탐색: O(1))
+            // 불가능한 경우 탐색이 필요하므로 fallback
+            if (_key_compare(_key(before._base_node), _key(v)) &&
+                _key_compare(_key(v), _key(position._base_node)))
+            {
+                if (before.right == NULL) // before의 right child
+                    return _insert(NULL, before._base_node, v);
+                else // position의 left child로 삽입
+                    return _insert(position._base_node, position._base_node, v);
+            }
+            else
+                return insert_unique(v).first; // fallback
+        }
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -332,8 +380,62 @@ namespace ft
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(iterator          position,
                                                                    const value_type &v)
     {
-        // TODO
-        return iterator(_rightmost());
+        // 1. position = begin()
+        if (position._base_node == _header._base_node->left)
+        {
+            if (size() > 0 && !_key_compare(_key(position._base_node),
+                                            _key(v))) // v <= begin
+                                                      // v를 새로운 begin 삼는다 (left 삽입)
+                // first argument just needs to be non-null (별 의미 없음)
+                return _insert(position._base_node, position._base_node, v);
+            else
+                return insert_equal(v).first; // fallback
+        }
+        // 2. position = end()
+        else if (position._base_node == _header._base_node->right)
+        {
+            if (!_key_compare(_key(_rightmost()), _key(v))) // v >= max
+                                                            // v를 새로운 max 삼는다
+                return _insert(NULL, _rightmost(), v);
+            else
+                return insert_equal(v).first; // fallback
+        }
+        // 3. before < v < position인지 확인
+        else
+        {
+            iterator before = --position;
+            // before의 right child 혹은 position의 left child로 삽입 (탐색: O(1))
+            // 불가능한 경우 탐색이 필요하므로 fallback
+            // before <= v <= position
+            if (!_key_compare(_key(v), _key(before)) &&
+                !_key_compare(_key(position._base_node), _key(v)))
+            {
+                if (before.right == NULL) // before의 right child
+                    return _insert(NULL, before._base_node, v);
+                else // position의 left child로 삽입
+                    return _insert(position._base_node, position._base_node, v);
+            }
+            else
+                return insert_equal(v).first; // fallback
+        }
+    }
+
+    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+    template <class _InputIterator>
+    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(_InputIterator first,
+                                                                         _InputIterator last)
+    {
+        for (; first != last; ++first)
+            insert_unique(*first);
+    }
+
+    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+    template <class _InputIterator>
+    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(_InputIterator first,
+                                                                        _InputIterator last)
+    {
+        for (; first != last; ++first)
+            insert_equal(*first);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
