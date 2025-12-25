@@ -759,23 +759,102 @@ namespace ft
         1. 모든 노드는 RED 혹은 BLACK
         2. 루트 노드는 BLACK
         3. 모든 리프 노드(NIL)들은 BLACK
-        4. RED 노드의 자식은 BLACK
+        4. RED 노드의 자식은 BLACK (지켜지지 않을시 Double Red)
         5. 모든 리프 노드에서 Black Depth는 같다
             (Black Depth: 리프 노드에서 루트 노드까지의 경로에서 만나는 BLACK 노드의 개수)
         6. 새로운 노드는 항상 RED
+        7. BLACK 노드의 자식은 RED, BLACK 모두 가능
     */
 
     // insert: 새 노드를 RED로 삽입 -> Double RED 문제 발생
+    /*
+        - 새로 삽입하는 노드가 RED이므로, 부모가 RED인 경우 문제 발생
+        - 삼촌이 Red면 recolor, 삼촌이 Black이면 회전 + Recolor로 해결
+    */
+    /*
+         rotate_right(G) : G를 내려보내고 P를 올리는 변화
+         rotate_right(P) : P를 내려보내고 X를 올리는 변화
+    */
+    // TODO: 비멤버 함수로 빼기
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_insert_fixup(_Base_ptr x)
+    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_rebalance_for_insert(_Base_ptr  x,
+                                                                                 _Base_ptr &root)
     {
-        // TODO
+        // x는 현재 가리키고 있는 커서
+        _Base_ptr p, g, u; // parent, grandparent, uncle
+
+        // Double RED 문제가 해결될 때까지 반복해서 수행
+        while (x != root && x->parent->color == _Rb_tree_color::RED)
+        {
+            p = x->parent;
+            g = x->parent->parent;
+            if (p == g->left) // p가 g의 왼쪽 자식 (u는 g의 오른쪽 자식) (LL, LR)
+            {
+                u = g->right;
+                if (u && u->color == _Rb_tree_color::RED) // Case 1: Uncle이 RED
+                {
+                    // parent와 uncle를 BLACK으로 바꿔주고 grandparent는 RED로 바꿔준다
+                    p->color = _Rb_tree_color::BLACK;
+                    u->color = _Rb_tree_color::BLACK;
+                    g->color = _Rb_tree_color::RED;
+                    x = g;
+                }
+                else // Case 2/3: Uncle이 BLACK (또는 null) -> 회전 필요
+                {
+                    if (x == p->right) // Case 2: x가 안쪽(inner)에 있음 (LR)
+                    {
+                        x = p;
+                        _rotate_left(x); // Case 3 형태로 바꿈
+                        p = x->parent;
+                        g = p->parent;
+                    }
+                    // Case 3: x가 바깥쪽(outer)에 있음 (LL)
+                    // recolor + 반대 회전
+                    // 부모(BLACK)을 위로 올림
+                    // grandparent(RED)는 부모의 우측 자식으로 내림
+                    p->color = _Rb_tree_color::BLACK;
+                    g->color = _Rb_tree_color::RED;
+                    _rotate_right(g);
+                }
+            }
+            else // p가 g의 오른쪽 자식 (u는 g의 왼쪽 자식) (RL, RR)
+            {
+                u = g->left;
+                if (u && u->color == _Rb_tree_color::RED) // Case 1: Uncle이 RED
+                {
+                    // parent와 uncle를 BLACK으로 바꿔주고 grandparent는 RED로 바꿔준다
+                    p->color = _Rb_tree_color::BLACK;
+                    u->color = _Rb_tree_color::BLACK;
+                    g->color = _Rb_tree_color::RED;
+                    x = g;
+                }
+                else // Case 2/3: Uncle이 BLACK (또는 null) -> 회전 필요
+                {
+                    if (x == p->left) // Case 2: x가 안쪽(inner)에 있음 (RL)
+                    {
+                        x = p;
+                        _rotate_right(x); // Case 3 형태로 바꿈
+                        p = x->parent;
+                        g = p->parent;
+                    }
+                    // Case 3: x가 바깥쪽(outer)에 있음 (RR)
+                    // recolor + 반대 회전
+                    // 부모(BLACK)을 위로 올림
+                    // grandparent(RED)를 부모의 좌측 자식으로 내림
+                    p->color = _Rb_tree_color::BLACK;
+                    g->color = _Rb_tree_color::RED;
+                    _rotate_left(g);
+                }
+            }
+        }
+        root->color = _Rb_tree_color::BLACK;
     }
 
     // erase: 제거한 노드가 BLACK일 경우 -> Black Depth 불균형 문제 발생
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_erase_fixup(_Base_ptr x,
-                                                                        _Base_ptr x_parent)
+    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Base_ptr
+    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_rebalance_for_erase(_Base_ptr x,
+                                                                           _Base_ptr x_parent)
     {
         // TODO
     }
