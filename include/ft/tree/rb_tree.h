@@ -162,6 +162,7 @@ namespace ft
     class _Rb_tree : protected _Rb_tree_base<_Value, _Alloc>
     {
         typedef _Rb_tree_base<_Value, _Alloc> _Base;
+        using _Base::_header;
 
       public:
         // key & value
@@ -182,8 +183,8 @@ namespace ft
 
         typedef _Rb_tree_iterator<_Value, _Value &, _Value *>             iterator;
         typedef _Rb_tree_iterator<_Value, const _Value &, const _Value *> const_iterator;
-        typedef reverse_iterator<iterator>                                reverse_iterator;
-        typedef reverse_iterator<const_iterator>                          const_reverse_iterator;
+        typedef ft::reverse_iterator<iterator>                            reverse_iterator;
+        typedef ft::reverse_iterator<const_iterator>                      const_reverse_iterator;
 
         // ================================ API ================================
         _Rb_tree();

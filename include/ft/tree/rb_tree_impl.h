@@ -74,14 +74,14 @@ namespace ft
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::reverse_iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rend()
     {
-        return reverse_iterator(_header._base_ptr);
+        return reverse_iterator(this->_header._base_ptr);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_reverse_iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rend() const
     {
-        return const_reverse_iterator(_header._base_ptr);
+        return const_reverse_iterator(this->_header._base_ptr);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -279,7 +279,7 @@ namespace ft
         else
         {
             y->right = z;
-            else if (y == _rightmost()) // 새로 삽입하는 노드가 제일 큼
+            if (y == _rightmost()) // 새로 삽입하는 노드가 제일 큼
                 _rightmost() = z;
         }
         z->parent = y;
@@ -716,7 +716,7 @@ namespace ft
         y->parent = x->parent;
         if (x == _header._base_ptr->parent) // x = root
             _header._base_ptr->parent = y;
-        else if (x = x->parent->left) // x는 부모의 좌측 자식
+        else if (x == x->parent->left) // x는 부모의 좌측 자식
             x->parent->left = y;
         else
             x->parent->right = y;
@@ -742,7 +742,7 @@ namespace ft
         y->parent = x->parent;
         if (x == _header._base_ptr->parent) // x = root
             _header._base_ptr->parent = y;
-        else if (x = x->parent->left) // x는 부모의 좌측 자식
+        else if (x == x->parent->left) // x는 부모의 좌측 자식
             x->parent->left = y;
         else
             x->parent->right = y;
