@@ -225,6 +225,7 @@ namespace ft
         void      erase(iterator position);
         size_type erase(const key_type &k);
         void      erase(iterator first, iterator last);
+        void      erase(const key_type *first, const key_type *last);
 
       protected:
         _Compare _key_compare;
@@ -233,6 +234,7 @@ namespace ft
         _Node_ptr &_leftmost() const;
         _Node_ptr &_rightmost() const;
 
+        // Node pointer helper
         static _Node_ptr      &_left(_Node_ptr n);
         static _Node_ptr      &_right(_Node_ptr n);
         static _Node_ptr      &_parent(_Node_ptr n);
@@ -240,6 +242,7 @@ namespace ft
         static const key_type &_key(_Node_ptr n);
         static _Color_type    &_color(_Node_ptr n);
 
+        // Base pointer helper
         static _Node_ptr      &_left(_Base_ptr b);
         static _Node_ptr      &_right(_Base_ptr b);
         static _Node_ptr      &_parent(_Base_ptr b);
@@ -262,9 +265,9 @@ namespace ft
         void _rotate_right(_Base_ptr x);
 
         // fixup
-        void _insert_fixup(_Base_ptr x);
-        void _erase_fixup(_Base_ptr x, _Base_ptr x_parent);
-        void _erase_subtree(_Node_ptr x);
+        void      _rebalance_for_insert(_Base_ptr x, _Base_ptr &root);
+        _Base_ptr _rebalance_for_erase(_Base_ptr x, _Base_ptr x_parent);
+        void      _erase_subtree(_Node_ptr x);
     };
 
 } // namespace ft
