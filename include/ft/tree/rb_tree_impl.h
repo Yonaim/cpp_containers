@@ -244,29 +244,78 @@ namespace ft
         return pair<const_iterator, const_iterator>(lower_bound(k), upper_bound(k));
     }
 
-    /* =========================== insert / erase (skeleton) ===================== */
+    /* =========================== insert / erase ===================== */
+
+    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
+    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_insert(_Node_ptr x, _Node_ptr y,
+                                                              const value_type &v)
+    {
+        // x: 삽입할 위치 (현재는 NULL)
+        // y: 삽입할 위치의 부모 노드
+        // v: 삽입할 노드의 값
+
+        // 노드 생성, 부모-자식 포인터 연결, fixup
+        // TODO
+    }
 
     //
     /*
         insert: 새 노드를 RED로 삽입 -> Double RED 문제 발생
-
-
     */
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     pair<typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator, bool>
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(const value_type &v)
     {
-        // TODO
+        _Node_ptr x = _root(); // currently searching
+        _Node_ptr y;           // parent of x
+        bool      comp = true;
 
-        return pair<iterator, bool>(iterator(_rightmost()), false);
+        // 1) lower_bound 탐색
+        // 부모 노드와 방향을 기억해야하므로 lower_bound()를 호출할 수 없음
+        while (x != NULL)
+        {
+            y = x;
+            comp = _key_compare(v, _key(x)); // v < x ?
+            x = comp ? x->left : x->right;
+        }
+
+        // 2) 중복 검사
+        iterator it = iterator(y);
+        if (comp) // v < y
+        {
+            // y보다 작은 것은 확실하므로, y 바로 이전의 원소를 찾아 비교
+            if (it == begin())
+                // 현재 원소가 하나 밖에 없으므로 바로 삽입
+                return pair<iterator, bool>(_insert(x, y, v), true);
+            else
+                --it;
+        }
+        // v와 *it가 같은지 확인 (v >= it)
+        // v <= it인 경우, 즉 !(it < v)가 참인 경우 v == it
+        if (compare_key_(_key(*it)), _key(v))
+            return pair<iterator, bool>(_insert(x, y, v), true);
+        // 중복 노드 존재로 삽입 실패
+        return pair<iterator, bool>(it, false); // 중복 노드의 이터레이터 반환
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(const value_type &v)
     {
-        // TODO
-        return iterator(_rightmost());
+        _Node_ptr x = _root(); // currently searching
+        _Node_ptr y;           // parent of x
+        bool      comp = true;
+
+        // lower_bound 탐색
+        while (x != NULL)
+        {
+            y = x;
+            comp = _key_compare(v, _key(x)); // v < x ?
+            x = comp ? x->left : x->right;   // 같은 경우 오른쪽으로 계속 내려감
+        }
+        // 중복 검사 없음: 항상 삽입
+        return _insert(x, y, v);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
