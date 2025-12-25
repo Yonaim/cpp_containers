@@ -252,17 +252,42 @@ namespace ft
         - 이를 위해 x를 플래그로 이용 (Null일시 일반 탐색 삽입으로 간주, non-Null일시 좌측 삽입)
         - x는 Null 혹은 non-Null로만 구분하며 값은 중요하지 않음
     */
+    // _insert: 이미 탐색한 위치에 붙이기 + fixup만 담당하는 하위 루틴
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_insert(_Node_ptr x, _Node_ptr y,
+    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_insert(_Node_ptr x_hint, _Node_ptr y,
                                                               const value_type &v)
     {
-        // x: 삽입할 위치 (사실상 플래그로 사용)
+        // x_hint: 강제 왼쪽 삽입 유무 플래그
         // y: 삽입할 위치의 부모 노드
-        // v: 삽입할 노드의 값
+        // z: 삽입할 노드
+        _Node_ptr z = _create_node(v);
 
-        // 노드 생성, 부모-자식 포인터 연결, fixup
-        // TODO
+        // 왼쪽에 달기
+        if (y == _header._base_ptr || x_hint != NULL || _key_compare(key(v), key(y)))
+        {
+            y->left = z;
+            if (y == _header.base_ptr) // 새로 삽입하는 노드가 루트
+            {
+                _root() = z;
+                _rightmost() = z;
+            }
+            else if (y == _leftmost()) // 새로 삽입하는 노드가 제일 작음
+                _leftmost() = z;
+        }
+        // 오른쪽에 달기
+        else
+        {
+            y->right = z;
+            else if (y == _rightmost()) // 새로 삽입하는 노드가 제일 큼
+                _rightmost() = z;
+        }
+        z->parent = y;
+        z->left = NULL;
+        z->right = NULL;
+        _rebalance_for_insert(z, _header._base_ptr->parent);
+        ++_header.count;
+        return iterator(z);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
