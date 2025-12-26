@@ -58,7 +58,6 @@ namespace ft
     {
         if (this->_header.count == 0)
             return;
-
         _erase_subtree(_root());
         _leftmost() = this->_header._base_ptr;
         _rightmost() = this->_header._base_ptr;
@@ -99,28 +98,28 @@ namespace ft
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::reverse_iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rbegin()
     {
-        return reverse_iterator(_leftmost());
+        return reverse_iterator(end());
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_reverse_iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rbegin() const
     {
-        return const_reverse_iterator(_leftmost());
+        return const_reverse_iterator(end());
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::reverse_iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rend()
     {
-        return reverse_iterator(this->_header._base_ptr);
+        return reverse_iterator(begin());
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_reverse_iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rend() const
     {
-        return const_reverse_iterator(this->_header._base_ptr);
+        return const_reverse_iterator(begin());
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
