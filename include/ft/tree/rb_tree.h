@@ -4,8 +4,10 @@
 // #include <memory> // TODO: ft::allocator로 교체
 #include "allocator.h"
 #include "distance.h"
+#include "equal.h"
 #include "is_empty.h"
 #include "iterator_tags.h"
+#include "lexicographical_compare.h"
 #include "pair.h"
 #include "rb_tree_iterator.h"
 #include "rb_tree_node.h"
@@ -45,6 +47,7 @@
 
 namespace ft
 {
+    // instanceless = 객체 인스턴스를 멤버로 하나도 들고 있지 않음
     template <class T>
     struct is_instanceless
     {
@@ -198,8 +201,13 @@ namespace ft
             _empty_initialize();
         }
 
+        void     swap(_Rb_tree &other);
         void     clear();
+
+        // 둘다 key값을 비교하는 객체
+        // value_comp는 value를 받아 거기서 key를 꺼내 비교
         _Compare key_comp() const { return _key_compare; }
+        _Compare value_comp() const { return _key_compare; }
 
         iterator               begin();
         const_iterator         begin() const;
@@ -277,7 +285,7 @@ namespace ft
 
         // fixup
         void      _rebalance_for_insert(_Base_ptr x, _Base_ptr &root);
-        _Base_ptr _rebalance_for_erase(_Base_ptr x, _Base_ptr x_parent);
+        _Base_ptr _rebalance_for_erase(_Base_ptr z);
         void      _erase_subtree(_Base_ptr x);
     };
 
