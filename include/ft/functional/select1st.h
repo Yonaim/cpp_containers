@@ -13,9 +13,6 @@ namespace ft
     template <typename Pair>
     struct Select1st : public unary_function<Pair, typename Pair::first_type>
     {
-        typedef Pair                      argument_type;
-        typedef typename Pair::first_type result_type;
-
         const typename Pair::first_type &operator()(const Pair &p) const { return p.first; }
     };
 } // namespace ft

@@ -4,15 +4,15 @@
 #include "iterator_traits.h"
 
 /*
-기존 iterator를 래핑(wrapping) 하는 클래스, 단지 역방향으로 작동하게 만드는 adapter
+    기존 iterator를 래핑(wrapping) 하는 클래스, 단지 역방향으로 작동하게 만드는 adapter
 
-iterator와 대칭적 구조:
-- iterator: begin() ~ end() (처음 → 끝)
-- reverse_iterator: rbegin() ~ rend() (끝 → 처음)
+    iterator와 대칭적 구조:
+    - iterator: begin() ~ end() (처음 → 끝)
+    - reverse_iterator: rbegin() ~ rend() (끝 → 처음)
 
-rbegin() = end()
-rend() = begin()
-즉, rbegin()은 끝 원소의 **뒤쪽**을 가리키고 rend()는 맨 처음 **앞쪽**을 가리킨다.
+    rbegin() = end()
+    rend() = begin()
+    즉, rbegin()은 끝 원소의 뒤쪽을 가리키고 rend()는 맨 처음 앞쪽을 가리킨다.
 */
 
 /*
@@ -39,7 +39,7 @@ namespace ft
 
       public:
         typedef Iter iterator_type;
-        // iterator_traits를 사용하는 이유: Iter 타입에서 ㅊ타입 정보 갖고오는 정책을 일관화
+        // iterator_traits를 사용하는 이유: Iter 타입에서 타입 정보 갖고오는 정책을 일관화
         typedef typename iterator_traits<Iter>::value_type        value_type;
         typedef typename iterator_traits<Iter>::difference_type   difference_type;
         typedef typename iterator_traits<Iter>::pointer           pointer;

@@ -3,19 +3,11 @@
 #ifndef FT_BINARY_FUNCTION_H
 #define FT_BINARY_FUNCTION_H
 
-/**
- * @brief Provides the typedefs for binary function objects.
- *
- * std::binary_function was a base class template for creating
- * function objects with two arguments. It provides three types:
- *  - first_argument_type
- *  - second_argument_type
- *  - result_type
- *
- * Derived classes are expected to implement operator().
- * (Note: Removed in C++17; kept only for STL-like compatibility in this project.)
+ /*
+    - 이 클래스를 상속받은 클래스들은 Arg1, Arg2, Result typename을 갖다쓸 수 있음
+    - 이 클래스를 상속받은 타입은 함수 객체 타입일 것으로 기대 (operator() 구현)
+    - 대표적으로 equal_to가 이 클래스를 상속받는다
  */
-
 namespace ft
 {
     template <class Arg1, class Arg2, class Result>
