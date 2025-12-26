@@ -1,1 +1,0 @@
-g++ using.cpp -std=c++98 && ./a.out && rm a.out
