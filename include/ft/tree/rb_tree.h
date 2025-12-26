@@ -2,13 +2,15 @@
 #define FT_RB_TREE_H
 
 // #include <memory> // TODO: ft::allocator로 교체
-#include "pair.h"
 #include "allocator.h"
 #include "distance.h"
-#include "reverse_iterator.h"
+#include "is_empty.h"
 #include "iterator_tags.h"
-#include "rb_tree_node.h"
+#include "pair.h"
 #include "rb_tree_iterator.h"
+#include "rb_tree_node.h"
+#include "reverse_iterator.h"
+
 
 /*
     - STL 구현상 tree는 map, set에서만 쓰임
@@ -41,14 +43,13 @@
 */
 
 #include <cstddef>
-#include <type_traits>
 
 namespace ft
 {
     template <class T>
     struct is_instanceless
     {
-        static const bool value = std::is_empty<T>::value;
+        static const bool value = ft::is_empty<T>::value;
     };
 
     // =============================== Rb_tree_header =================================
@@ -91,7 +92,7 @@ namespace ft
         typedef _Tp    value_type;
 
         typedef
-            typename _Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
+            typename _Alloc::template rebind<_Rb_tree_node<value_type> >::other node_allocator_type;
         typedef _Rb_tree_node<value_type>                                      node_type;
 
         allocator_type get_allocator() const { return allocator_type(_node_allocator); }
@@ -113,7 +114,7 @@ namespace ft
         typedef _Tp    value_type;
 
         typedef
-            typename _Alloc::template rebind<_Rb_tree_node<value_type>>::other node_allocator_type;
+            typename _Alloc::template rebind<_Rb_tree_node<value_type> >::other node_allocator_type;
         typedef _Rb_tree_node<value_type>                                      node_type;
 
         allocator_type get_allocator() const { return allocator_type(); }
@@ -158,7 +159,7 @@ namespace ft
 
     // Compare(x, y): x < y의 결과를 bool로 반환
     template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
-              typename _Alloc = allocator<_Value>>
+              typename _Alloc = allocator<_Value> >
     class _Rb_tree : protected _Rb_tree_base<_Value, _Alloc>
     {
         typedef _Rb_tree_base<_Value, _Alloc> _Base;
@@ -177,7 +178,7 @@ namespace ft
         typedef typename _Alloc::difference_type difference_type;
         typedef typename _Alloc::size_type       size_type;
         typedef _Rb_tree_node_base              *_Base_ptr;
-        typedef _Rb_tree_node<_Value>            _Rb_tree_node;
+        typedef ft::_Rb_tree_node<_Value>        _Rb_tree_node;
         typedef _Rb_tree_node                   *_Node_ptr;
         typedef _Rb_tree_color                   _Color_type;
 

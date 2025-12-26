@@ -1,8 +1,9 @@
 #ifndef FT_RB_TREE_ITERATOR_H
 #define FT_RB_TREE_ITERATOR_H
 
-#include "rb_tree_node.h"
 #include "iterator_tags.h"
+#include "rb_tree_node.h"
+
 
 namespace ft
 {
@@ -105,7 +106,7 @@ namespace ft
             - 이미 const인 타입이 인자로 들어온다면 iterator와 const_iterator는 똑같다
         */
         typedef _Rb_tree_iterator<_Value, const _Value &, const _Value *> const_iterator;
-        typedef _Rb_tree_node<_Value>                                    *_Node_ptr;
+        typedef ft::_Rb_tree_node<_Value>                                *_Node_ptr;
 
         // 현재의 타입이 iterator인지 const_iterator인지 상관하지 않고 동일한 코드로 처리하기
         // 위해 define
