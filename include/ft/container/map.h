@@ -6,8 +6,9 @@
 #include <cstddef>
 #include <functional>
 #include "pair.h"
-#include "select1st.h"
 #include "rb_tree.h"
+#include "select1st.h"
+
 
 /*
 - A sorted associative container that contains key-value pairs with 'unique' keys.
@@ -161,10 +162,10 @@ namespace ft
         // cbegin, cend는 C++11
         iterator       begin() { return _tree.begin(); }
         const_iterator begin() const { return _tree.begin(); }
-        const_iterator rbegin() const noexcept { return _tree.rbegin(); }
+        const_iterator rbegin() const throw() { return _tree.rbegin(); }
         iterator       end() { return _tree.end(); }
         const_iterator end() const { return _tree.end(); }
-        const_iterator rend() const noexcept { return _tree.rend(); }
+        const_iterator rend() const throw() { return _tree.rend(); }
 
         // ========================== Capacity ===========================
         bool      empty() const { return _tree.empty(); }
