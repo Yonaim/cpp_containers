@@ -236,7 +236,7 @@ namespace ft
 
         while (x != NULL)
         {
-            if (_key_compare(_key(x), k))
+            if (_key_compare(k, _key(x)))
             {
                 y = x;
                 x = _left(x);
@@ -256,7 +256,7 @@ namespace ft
 
         while (x != NULL)
         {
-            if (_key_compare(_key(x), k))
+            if (_key_compare(k, _key(x)))
             {
                 y = x;
                 x = _left(x);
@@ -788,10 +788,10 @@ namespace ft
         y->parent = x->parent;
         if (x == _header._base_ptr->parent) // x = root
             _header._base_ptr->parent = y;
-        else if (x == x->parent->left) // x는 부모의 좌측 자식
-            x->parent->left = y;
-        else
+        else if (x == x->parent->right) // x는 부모의 우측 자식
             x->parent->right = y;
+        else
+            x->parent->left= y;
 
         // 3) y의 우측 자식 설정: x
         y->right = x;
