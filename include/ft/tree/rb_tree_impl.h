@@ -512,7 +512,7 @@ namespace ft
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(const key_type &k)
     {
         pair<iterator, iterator> p = equal_range(k);
-        size_type                n = distance(p.first, p.second);
+        size_type                n = ft::distance(p.first, p.second);
         erase(p.first, p.second);
         return n;
     }
