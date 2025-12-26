@@ -4,7 +4,6 @@
 #include "iterator_tags.h"
 #include "rb_tree_node.h"
 
-
 namespace ft
 {
     // ================= iterator =================
@@ -116,7 +115,7 @@ namespace ft
 
         _Rb_tree_iterator() {}
         // POD라서 생성자 호출이 필요없으므로 초기화 리스트를 사용하지 않아도 무빙
-        _Rb_tree_iterator(_Node_ptr n) { _base_node = n; }
+        _Rb_tree_iterator(_Base_ptr n) { _base_node = n; }
         _Rb_tree_iterator(const iterator &it) { _base_node = it._base_node; }
 
         // ================== operators ==================
@@ -133,7 +132,7 @@ namespace ft
             포인터를 반환하는 이유: 기본 포인터의 역할(체이닝 + 접근 가능)을 그대로 수행하기
            위함
         */
-        reference operator*() const { return _Node_ptr(_base_node)->value; }
+        reference operator*() const { return (static_cast<_Node_ptr>(_base_node))->value; }
         pointer   operator->() const { return &(operator*()); }
 
         // 순회 이동 연산 구현
@@ -200,6 +199,29 @@ namespace ft
         return lhs._base_node == rhs._base_node;
     }
 
+    // 1), 2)
+    template <class _Value, class _Ref, class _Ptr>
+    bool operator!=(const _Rb_tree_iterator<_Value, _Ref, _Ptr> &lhs,
+                    const _Rb_tree_iterator<_Value, _Ref, _Ptr> &rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    // 3)
+    template <class _Value>
+    bool operator!=(const _Rb_tree_iterator<_Value, const _Value &, const _Value *> &lhs,
+                    const _Rb_tree_iterator<_Value, _Value &, _Value *>             &rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    // 4)
+    template <class _Value>
+    bool operator!=(const _Rb_tree_iterator<_Value, _Value &, _Value *>             &lhs,
+                    const _Rb_tree_iterator<_Value, const _Value &, const _Value *> &rhs)
+    {
+        return !(lhs == rhs);
+    }
 } // namespace ft
 
 #endif

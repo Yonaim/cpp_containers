@@ -8,7 +8,7 @@
 #include "pair.h"
 #include "rb_tree.h"
 #include "select1st.h"
-
+#include <stdexcept>
 
 /*
 - A sorted associative container that contains key-value pairs with 'unique' keys.
@@ -23,16 +23,16 @@ namespace ft
 {
     // map은 tree의 thin wrapper
     template <class Key, class T, class Compare = std::less<Key>,
-              class Allocator = std::allocator<std::pair<const Key, T> > >
+              class Allocator = ft::allocator<ft::pair<const Key, T> > >
     class map
     {
       public:
         // typedefs:
-        typedef Key                     key_type;
-        typedef T                       mapped_type;
-        typedef std::pair<const Key, T> value_type;
-        typedef Compare                 key_compare;
-        typedef Allocator               allocator_type;
+        typedef Key                    key_type;
+        typedef T                      mapped_type;
+        typedef ft::pair<const Key, T> value_type;
+        typedef Compare                key_compare;
+        typedef Allocator              allocator_type;
 
         // value의 key(first)끼리 비교하는 함수 객체 타입
         // binary_function: 인자 2개인 함수 객체 (functor) 어댑터
@@ -60,13 +60,13 @@ namespace ft
             // Compares lhs.first and rhs.first by calling the stored comparator.
             bool operator()(const value_type &lhs, const value_type &rhs) const
             {
-                returm comp(lhs.first, rhs.first);
+                return comp(lhs.first, rhs.first);
             }
         };
 
       private:
         // Representative type: 실제 구현을 대표(represent)하는 타입
-        typedef _Rb_tree<key_type, value_type, Select1st<value_type, key_type, key_compare> >
+        typedef _Rb_tree<key_type, value_type, Select1st<value_type>, Compare>
                   _Rep_type;
         _Rep_type _tree;
 
@@ -82,7 +82,6 @@ namespace ft
         typedef typename _Rep_type::const_reverse_iterator const_reverse_iterator;
         typedef typename _Rep_type::size_type              size_type;
         typedef typename _Rep_type::difference_type        difference_type;
-        typedef typename _Rep_type::allocator_type         allocator_type;
 
         // =========================== allocation/deallocation ============================
 
@@ -129,11 +128,16 @@ namespace ft
         {
             iterator it = _tree.find(key);
             if (it == _tree.end())
+                throw std::out_of_range("map::at");
+            return it->second;
         }
+
         const T &at(const Key &key) const
         {
-            iterator it = _tree.find(key);
+            const_iterator it = _tree.find(key);
             if (it == _tree.end())
+                throw std::out_of_range("map::at");
+            return it->second;
         }
 
         /*
@@ -153,7 +157,7 @@ namespace ft
             // key not found -> insert
             // key_comp()는 functor 객체 (오버로딩된 operator()를 호출)
             if (it == _tree.end() || key_comp()(it->first, key))
-                it = _tree.insert(it, value_type(key, mapped_type()));
+                it = _tree.insert_unique(it, value_type(key, mapped_type()));
             return it->second;
         }
 
@@ -177,7 +181,7 @@ namespace ft
         void clear() { _tree.clear(); };
 
         // Inserts value
-        std::pair<iterator, bool> insert(const value_type &value)
+        ft::pair<iterator, bool> insert(const value_type &value)
         {
             return _tree.insert_unique(value);
         }
@@ -212,11 +216,11 @@ namespace ft
         // 중복 키가 존재하지 않으므로 반환 값은 0 혹은 1
         size_type count(const Key &key) const { return (_tree.find(key) == _tree.end() ? 0 : 1); }
 
-        iterator       find(const Key &key) const { return _tree.find(key); }
+        iterator       find(const Key &key) { return _tree.find(key); }
         const_iterator find(const Key &key) const { return _tree.find(key); }
 
-        std::pair<iterator, iterator> equal_range(const Key &key) { return _tree.equal_range(key); }
-        std::pair<const_iterator, const_iterator> equal_range(const Key &key) const
+        ft::pair<iterator, iterator> equal_range(const Key &key) { return _tree.equal_range(key); }
+        ft::pair<const_iterator, const_iterator> equal_range(const Key &key) const
         {
             return _tree.equal_range(key);
         }

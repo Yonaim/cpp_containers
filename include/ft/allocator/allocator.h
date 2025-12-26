@@ -5,8 +5,8 @@
 #include <limits>
 
 /*
-    The std::allocator class template is the default Allocator used by all standard library containers
-    if no user-specified allocator is provided.
+    The std::allocator class template is the default Allocator used by all standard library
+   containers if no user-specified allocator is provided.
 */
 
 /*
@@ -70,11 +70,12 @@ namespace ft
         // default allocator는 stateless하므로 아무런 동작을 하지 않는다.
         allocator() throw() {}
 
-        allocator(const allocator &other) throw() {}
+        allocator(const allocator &other) throw() { (void)other; }
 
         template <class U>
         allocator(const allocator<U> &other) throw()
         {
+            (void)other;
         }
 
         ~allocator() {}
@@ -101,13 +102,15 @@ namespace ft
         // memory
         pointer allocate(size_type n, const void *hint = 0)
         {
-            return ::operator new(sizeof(T) * n);
+            (void)hint;
+            return static_cast<pointer>(::operator new(sizeof(T) * n));
         }
         // ::operator delete 자체가 사이즈 정보가 필요 없으므로 std::allocator에서는 n이 쓰이지 않음
         // 커스텀 allocator에 n이 쓰일 수 있기 때문에 명세상으로 파라미터 n이 존재
         void deallocate(T *p, std::size_t n)
         {
             // destructor는 deallocate 호출 이전 사용자가 명시적으로 호출
+            (void)n;
             ::operator delete(p);
         }
         size_type max_size() const throw()

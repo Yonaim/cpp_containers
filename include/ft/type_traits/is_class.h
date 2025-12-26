@@ -15,15 +15,16 @@ namespace ft
     class is_class
     {
       private:
-        yes_type check(int T::*); // T 내부 멤버 중 int를 가리키는 포인터
-        no_type  check(...);
+        // static이어야 객체를 생성하려고 하지 않음
+        static yes_type check(int T::*); // T 내부 멤버 중 int를 가리키는 포인터
+        static no_type  check(...);
 
       public:
         // sizeof()의 피연산자는 evaluation되지 않음
         // 따라서 check()가 호출될 일은 없다 -> 선언만 하고 구현 안 해도됨
         enum
         {
-            value = sizeof(check(0)) == sizeof(yes_type)
+            value = (sizeof(check(0)) == sizeof(yes_type))
         };
     };
 } // namespace ft

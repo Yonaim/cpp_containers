@@ -35,7 +35,7 @@ namespace ft
     };
 
     template <class T>
-    class is_empty : _is_empty_impl<T>
+    class is_empty : public _is_empty_impl<T>
     {
     };
 } // namespace ft

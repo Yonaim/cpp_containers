@@ -103,8 +103,8 @@ namespace ft
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const key_type &k)
     {
-        _Node_ptr x = _root();           // current node (currently searching)
-        _Node_ptr y = _header._base_ptr; // last node which is not less than k
+        _Base_ptr x = _root();           // current node (currently searching)
+        _Base_ptr y = _header._base_ptr; // last node which is not less than k
 
         // lower_bound를 먼저 찾는다
         while (x != NULL)
@@ -128,8 +128,8 @@ namespace ft
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const key_type &k) const
     {
-        _Node_ptr x = _root();           // current node (currently searching)
-        _Node_ptr y = _header._base_ptr; // last node which is not less than k
+        _Base_ptr x = _root();           // current node (currently searching)
+        _Base_ptr y = _header._base_ptr; // last node which is not less than k
 
         // lower_bound를 먼저 찾는다
         while (x != NULL)
@@ -152,8 +152,8 @@ namespace ft
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::lower_bound(const key_type &k)
     {
-        _Node_ptr x = _root();           // current node (currently searching)
-        _Node_ptr y = _header._base_ptr; // last node which is not less than k
+        _Base_ptr x = _root();           // current node (currently searching)
+        _Base_ptr y = _header._base_ptr; // last node which is not less than k
 
         while (x != NULL)
         {
@@ -172,8 +172,8 @@ namespace ft
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::lower_bound(const key_type &k) const
     {
-        _Node_ptr x = _root();           // current node (currently searching)
-        _Node_ptr y = _header._base_ptr; // last node which is not less than k
+        _Base_ptr x = _root();           // current node (currently searching)
+        _Base_ptr y = _header._base_ptr; // last node which is not less than k
 
         while (x != NULL)
         {
@@ -192,8 +192,8 @@ namespace ft
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::upper_bound(const key_type &k)
     {
-        _Node_ptr x = _root();           // current node (currently searching)
-        _Node_ptr y = _header._base_ptr; // last node which is less than k
+        _Base_ptr x = _root();           // current node (currently searching)
+        _Base_ptr y = _header._base_ptr; // last node which is less than k
 
         while (x != NULL)
         {
@@ -212,8 +212,8 @@ namespace ft
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::upper_bound(const key_type &k) const
     {
-        _Node_ptr x = _root();           // current node (currently searching)
-        _Node_ptr y = _header._base_ptr; // last node which is less than k
+        _Base_ptr x = _root();           // current node (currently searching)
+        _Base_ptr y = _header._base_ptr; // last node which is less than k
 
         while (x != NULL)
         {
@@ -254,9 +254,9 @@ namespace ft
     */
     // _insert: 이미 탐색한 위치에 붙이기 + fixup만 담당하는 하위 루틴
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_insert(_Node_ptr x_hint, _Node_ptr y,
-                                                              const value_type &v)
+    typename ft::_Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
+    ft::_Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_insert(_Base_ptr x_hint, _Base_ptr y,
+                                                                  const value_type &v)
     {
         // x_hint: 강제 왼쪽 삽입 유무 플래그
         // y: 삽입할 위치의 부모 노드
@@ -264,10 +264,10 @@ namespace ft
         _Node_ptr z = _create_node(v);
 
         // 왼쪽에 달기
-        if (y == _header._base_ptr || x_hint != NULL || _key_compare(key(v), key(y)))
+        if (y == _header._base_ptr || x_hint != NULL || _key_compare(_key(v), _key(y)))
         {
             y->left = z;
-            if (y == _header.base_ptr) // 새로 삽입하는 노드가 루트
+            if (y == _header._base_ptr) // 새로 삽입하는 노드가 루트
             {
                 _root() = z;
                 _rightmost() = z;
@@ -294,8 +294,8 @@ namespace ft
     pair<typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator, bool>
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(const value_type &v)
     {
-        _Node_ptr x = _root(); // currently searching
-        _Node_ptr y;           // parent of x
+        _Base_ptr x = _root(); // currently searching
+        _Base_ptr y;           // parent of x
         bool      comp = true;
 
         // 1) lower_bound 탐색
@@ -303,7 +303,7 @@ namespace ft
         while (x != NULL)
         {
             y = x;
-            comp = _key_compare(v, _key(x)); // v < x ?
+            comp = _key_compare(_key(v), _key(x)); // v < x ?
             x = comp ? x->left : x->right;
         }
 
@@ -320,7 +320,7 @@ namespace ft
         }
         // v와 *it가 같은지 확인 (v >= it)
         // v <= it인 경우, 즉 !(it < v)가 참인 경우 v == it
-        if (compare_key_(_key(*it)), _key(v))
+        if (_key_compare(_key(*it), _key(v)))
             return pair<iterator, bool>(_insert(x, y, v), true);
         // 중복 노드 존재로 삽입 실패
         return pair<iterator, bool>(it, false); // 중복 노드의 이터레이터 반환
@@ -330,16 +330,16 @@ namespace ft
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(const value_type &v)
     {
-        _Node_ptr x = _root(); // currently searching
-        _Node_ptr y;           // parent of x
+        _Base_ptr x = _root(); // currently searching
+        _Base_ptr y;           // parent of x
         bool      comp = true;
 
         // lower_bound 탐색
         while (x != NULL)
         {
             y = x;
-            comp = _key_compare(v, _key(x)); // v < x ?
-            x = comp ? x->left : x->right;   // 같은 경우 오른쪽으로 계속 내려감
+            comp = _key_compare(_key(v), _key(x)); // v < x ?
+            x = comp ? x->left : x->right;         // 같은 경우 오른쪽으로 계속 내려감
         }
         // 중복 검사 없음: 항상 삽입
         return _insert(x, y, v);
@@ -390,7 +390,7 @@ namespace ft
             if (_key_compare(_key(before._base_node), _key(v)) &&
                 _key_compare(_key(v), _key(position._base_node)))
             {
-                if (before.right == NULL) // before의 right child
+                if (before._base_node->right == NULL) // before의 right child
                     return _insert(NULL, before._base_node, v);
                 else // position의 left child로 삽입
                     return _insert(position._base_node, position._base_node, v);
@@ -503,24 +503,24 @@ namespace ft
     /* =========================== Internal helpers ============================== */
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr &
+    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Base_ptr &
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_root() const
     {
-        return (_Node_ptr &)this->_header._base_ptr->parent;
+        return this->_header._base_ptr->parent;
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr &
+    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Base_ptr &
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_leftmost() const
     {
-        return (_Node_ptr &)this->_header._base_ptr->left;
+        return this->_header._base_ptr->left;
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr &
+    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Base_ptr &
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_rightmost() const
     {
-        return (_Node_ptr &)this->_header._base_ptr->right;
+        return this->_header._base_ptr->right;
     }
 
     /* static helpers */
@@ -609,6 +609,13 @@ namespace ft
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_color(_Base_ptr b)
     {
         return (_Color_type &)b->color;
+    }
+
+    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+    const typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::key_type &
+    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_key(const value_type &v)
+    {
+        return KeyOfValue()(v);
     }
 
     /* minimum / maximum */
@@ -864,9 +871,13 @@ namespace ft
     // 부모 노드를 맨 마지막에 지우는 것이 안전
     // 즉 post-order (L-R-Root)
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_erase_subtree(_Node_ptr x)
+    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_erase_subtree(_Base_ptr x)
     {
-        // TODO
+        if (!x)
+            return;
+        _erase_subtree(x->left);
+        _erase_subtree(x->right);
+        _destroy_node(static_cast<_Node_ptr>(x));
     }
 
 } // namespace ft

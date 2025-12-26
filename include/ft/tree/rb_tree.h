@@ -11,7 +11,6 @@
 #include "rb_tree_node.h"
 #include "reverse_iterator.h"
 
-
 /*
     - STL 구현상 tree는 map, set에서만 쓰임
     - RBT(Red Black Tree)만 사용
@@ -119,7 +118,7 @@ namespace ft
 
         allocator_type get_allocator() const { return allocator_type(); }
 
-        _Rb_tree_alloc_base(const allocator_type &a) {}
+        _Rb_tree_alloc_base(const allocator_type &a) { (void)a; }
 
       protected:
         node_type *_get_node()
@@ -190,8 +189,14 @@ namespace ft
         // ================================ API ================================
         _Rb_tree();
         ~_Rb_tree() { clear(); };
+        explicit _Rb_tree(const _Compare &comp, const _Alloc &alloc = _Alloc())
+            : _Base(alloc), _key_compare(comp)
+        {
+            _empty_initialize();
+        }
 
-        void clear();
+        void     clear();
+        _Compare key_comp() const { return _key_compare; }
 
         iterator               begin();
         const_iterator         begin() const;
@@ -232,9 +237,9 @@ namespace ft
       protected:
         _Compare _key_compare;
 
-        _Node_ptr &_root() const;
-        _Node_ptr &_leftmost() const;
-        _Node_ptr &_rightmost() const;
+        _Base_ptr &_root() const;
+        _Base_ptr &_leftmost() const;
+        _Base_ptr &_rightmost() const;
 
         // Node pointer helper
         static _Node_ptr      &_left(_Node_ptr n);
@@ -252,11 +257,12 @@ namespace ft
         static const key_type &_key(_Base_ptr b);
         static _Color_type    &_color(_Base_ptr b);
 
-        static _Node_ptr _minimum(_Node_ptr x);
-        static _Node_ptr _maximum(_Node_ptr x);
+        static const key_type &_key(const value_type &v);
+        static _Node_ptr       _minimum(_Node_ptr x);
+        static _Node_ptr       _maximum(_Node_ptr x);
 
       private:
-        iterator  _insert(_Node_ptr x, _Node_ptr y, const value_type &v);
+        iterator  _insert(_Base_ptr x_hint, _Base_ptr y, const value_type &v);
         void      _empty_initialize();
         _Node_ptr _create_node(const value_type &v);
         _Node_ptr _clone_node(_Node_ptr orig);
@@ -269,7 +275,7 @@ namespace ft
         // fixup
         void      _rebalance_for_insert(_Base_ptr x, _Base_ptr &root);
         _Base_ptr _rebalance_for_erase(_Base_ptr x, _Base_ptr x_parent);
-        void      _erase_subtree(_Node_ptr x);
+        void      _erase_subtree(_Base_ptr x);
     };
 
 } // namespace ft
