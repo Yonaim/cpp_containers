@@ -23,7 +23,7 @@ namespace ft
 {
     // map은 tree의 thin wrapper
     template <class Key, class T, class Compare = std::less<Key>,
-              class Allocator = std::allocator<std::pair<const Key, T>>>
+              class Allocator = std::allocator<std::pair<const Key, T> > >
     class map
     {
       public:
@@ -66,7 +66,7 @@ namespace ft
 
       private:
         // Representative type: 실제 구현을 대표(represent)하는 타입
-        typedef _Rb_tree<key_type, value_type, Select1st<value_type, key_type, key_compare>>
+        typedef _Rb_tree<key_type, value_type, Select1st<value_type, key_type, key_compare> >
                   _Rep_type;
         _Rep_type _tree;
 

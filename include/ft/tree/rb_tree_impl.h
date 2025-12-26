@@ -635,7 +635,7 @@ namespace ft
         this->_header._base_ptr->parent = 0;                      // root initially null
         this->_header._base_ptr->left = this->_header._base_ptr;  // leftmost = header
         this->_header._base_ptr->right = this->_header._base_ptr; // rightmost = header
-        this->_header._base_ptr->color = _Rb_tree_color::RED;     // header color = red
+        this->_header._base_ptr->color = RED;                     // header color = red
         this->_header.count = 0;
     }
 
@@ -784,19 +784,19 @@ namespace ft
         _Base_ptr p, g, u; // parent, grandparent, uncle
 
         // Double RED 문제가 해결될 때까지 반복해서 수행
-        while (x != root && x->parent->color == _Rb_tree_color::RED)
+        while (x != root && x->parent->color == RED)
         {
             p = x->parent;
             g = x->parent->parent;
             if (p == g->left) // p가 g의 왼쪽 자식 (u는 g의 오른쪽 자식) (LL, LR)
             {
                 u = g->right;
-                if (u && u->color == _Rb_tree_color::RED) // Case 1: Uncle이 RED
+                if (u && u->color == RED) // Case 1: Uncle이 RED
                 {
                     // parent와 uncle를 BLACK으로 바꿔주고 grandparent는 RED로 바꿔준다
-                    p->color = _Rb_tree_color::BLACK;
-                    u->color = _Rb_tree_color::BLACK;
-                    g->color = _Rb_tree_color::RED;
+                    p->color = BLACK;
+                    u->color = BLACK;
+                    g->color = RED;
                     x = g;
                 }
                 else // Case 2/3: Uncle이 BLACK (또는 null) -> 회전 필요
@@ -812,20 +812,20 @@ namespace ft
                     // recolor + 반대 회전
                     // 부모(BLACK)을 위로 올림
                     // grandparent(RED)는 부모의 우측 자식으로 내림
-                    p->color = _Rb_tree_color::BLACK;
-                    g->color = _Rb_tree_color::RED;
+                    p->color = BLACK;
+                    g->color = RED;
                     _rotate_right(g);
                 }
             }
             else // p가 g의 오른쪽 자식 (u는 g의 왼쪽 자식) (RL, RR)
             {
                 u = g->left;
-                if (u && u->color == _Rb_tree_color::RED) // Case 1: Uncle이 RED
+                if (u && u->color == RED) // Case 1: Uncle이 RED
                 {
                     // parent와 uncle를 BLACK으로 바꿔주고 grandparent는 RED로 바꿔준다
-                    p->color = _Rb_tree_color::BLACK;
-                    u->color = _Rb_tree_color::BLACK;
-                    g->color = _Rb_tree_color::RED;
+                    p->color = BLACK;
+                    u->color = BLACK;
+                    g->color = RED;
                     x = g;
                 }
                 else // Case 2/3: Uncle이 BLACK (또는 null) -> 회전 필요
@@ -841,13 +841,13 @@ namespace ft
                     // recolor + 반대 회전
                     // 부모(BLACK)을 위로 올림
                     // grandparent(RED)를 부모의 좌측 자식으로 내림
-                    p->color = _Rb_tree_color::BLACK;
-                    g->color = _Rb_tree_color::RED;
+                    p->color = BLACK;
+                    g->color = RED;
                     _rotate_left(g);
                 }
             }
         }
-        root->color = _Rb_tree_color::BLACK;
+        root->color = BLACK;
     }
 
     // erase: 제거한 노드가 BLACK일 경우 -> Black Depth 불균형 문제 발생
@@ -857,6 +857,7 @@ namespace ft
                                                                            _Base_ptr x_parent)
     {
         // TODO
+        return _Base_ptr();
     }
 
     /* subtree erase */
