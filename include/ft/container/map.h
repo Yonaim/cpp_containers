@@ -5,10 +5,10 @@
 #include <allocator.h> // TODO
 #include <cstddef>
 #include <functional>
+#include <stdexcept>
 #include "pair.h"
 #include "rb_tree.h"
 #include "select1st.h"
-#include <stdexcept>
 
 /*
 - A sorted associative container that contains key-value pairs with 'unique' keys.
@@ -39,6 +39,7 @@ namespace ft
         // nested class
         class value_compare : std::binary_function<value_type, value_type, bool>
         {
+            friend class map; // 생성자에 접근 필요
           public:
             /*
             C++98 STL functor 대부분은 binary_function이 제공하는 typedef를 그대로 사용한다.
@@ -66,9 +67,8 @@ namespace ft
 
       private:
         // Representative type: 실제 구현을 대표(represent)하는 타입
-        typedef _Rb_tree<key_type, value_type, Select1st<value_type>, Compare>
-                  _Rep_type;
-        _Rep_type _tree;
+        typedef _Rb_tree<key_type, value_type, Select1st<value_type>, Compare> _Rep_type;
+        _Rep_type                                                              _tree;
 
       public:
         // _Rep_type의 내부의 typedef을 그대로 가져와 재사용
