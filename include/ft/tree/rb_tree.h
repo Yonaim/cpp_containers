@@ -281,6 +281,48 @@ namespace ft
         void      _erase_subtree(_Base_ptr x);
     };
 
+    template <class _Key, class _Value, class _KeyOfValue, class _Compare, class _Alloc>
+    inline bool operator==(const _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc> &x,
+                           const _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc> &y)
+    {
+        return (x.size() == y.size() && ft::equal(x.begin(), x.end(), y.begin()));
+    }
+
+    template <class _Key, class _Value, class _KeyOfValue, class _Compare, class _Alloc>
+    inline bool operator<(const _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc> &x,
+                          const _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc> &y)
+    {
+        return ft::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());
+    }
+
+    template <class _Key, class _Value, class _KeyOfValue, class _Compare, class _Alloc>
+    inline bool operator!=(const _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc> &x,
+                           const _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc> &y)
+    {
+        return !(x == y);
+    }
+
+    template <class _Key, class _Value, class _KeyOfValue, class _Compare, class _Alloc>
+    inline bool operator>(const _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc> &x,
+                          const _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc> &y)
+    {
+        return (y < x);
+    }
+
+    template <class _Key, class _Value, class _KeyOfValue, class _Compare, class _Alloc>
+    inline bool operator<=(const _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc> &x,
+                           const _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc> &y)
+    {
+        return !(x > y);
+    }
+
+    template <class _Key, class _Value, class _KeyOfValue, class _Compare, class _Alloc>
+    inline bool operator>=(const _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc> &x,
+                           const _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc> &y)
+    {
+        return !(x < y);
+    }
+
 } // namespace ft
 
 #include "rb_tree_impl.h"
