@@ -74,8 +74,11 @@ namespace ft
     struct _Rb_tree_header
     {
         typedef _Rb_tree_node_base *_Base_ptr;
+        _Rb_tree_node_base          _base_node;
         _Base_ptr                   _base_ptr;
         size_t                      count;
+
+        _Rb_tree_header() : _base_node(), _base_ptr(&_base_node), count(0) {}
     };
 
     // =============================== Rb_tree_alloc_base =================================

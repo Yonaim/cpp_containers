@@ -185,7 +185,7 @@ namespace ft
             else
                 x = _right(x);
         }
-        return iterator(y);
+        return const_iterator(y);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -225,7 +225,7 @@ namespace ft
             else
                 x = _right(x);
         }
-        return iterator(y);
+        return const_iterator(y);
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -294,8 +294,8 @@ namespace ft
     pair<typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator, bool>
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(const value_type &v)
     {
-        _Base_ptr x = _root(); // currently searching
-        _Base_ptr y;           // parent of x
+        _Base_ptr x = _root();           // currently searching
+        _Base_ptr y = _header._base_ptr; // parent of x
         bool      comp = true;
 
         // 1) lower_bound 탐색
@@ -330,8 +330,8 @@ namespace ft
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(const value_type &v)
     {
-        _Base_ptr x = _root(); // currently searching
-        _Base_ptr y;           // parent of x
+        _Base_ptr x = _root();           // currently searching
+        _Base_ptr y = _header._base_ptr; // parent of x
         bool      comp = true;
 
         // lower_bound 탐색
