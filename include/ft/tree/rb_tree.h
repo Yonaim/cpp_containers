@@ -194,6 +194,7 @@ namespace ft
 
         // ================================ API ================================
         _Rb_tree();
+        _Rb_tree(const _Rb_tree &x);
         ~_Rb_tree() { clear(); };
         explicit _Rb_tree(const _Compare &comp, const _Alloc &alloc = _Alloc())
             : _Base(alloc), _key_compare(comp)

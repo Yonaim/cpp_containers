@@ -12,6 +12,25 @@ namespace ft
         _empty_initialize();
     }
 
+    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Rb_tree(
+        const _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc> &x)
+        : _Base(x.get_allocator()), _key_compare(x._key_compare)
+    {
+        if (x._root() == NULL)
+            _empty_initialize();
+        else
+        {
+            // 불변식: root의 parent는 header이다
+            _root_node() = _copy(x._root_node(), (_Node_ptr)this->_header._base_ptr);
+            this->_header._base_ptr->left = _minimum(_root_node());  // leftmost = header
+            this->_header._base_ptr->right = _maximum(_root_node()); // rightmost = header
+            this->_header._base_ptr->color = RED;               // header color = red
+            this->_header.count = x._header.count;
+        }
+    }
+
+
     /* ========================== swap() & clear() =========================== */
 
     // 같은 템플릿 인자 타입을 갖는 other와 this의 데이터를 서로 바꾼다
@@ -717,6 +736,41 @@ namespace ft
     {
         this->get_allocator().destroy(&n_ptr->value);
         this->_put_node(n_ptr);
+    }
+
+    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr
+    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_copy(_Node_ptr x, _Node_ptr p)
+    {
+        // x: 원본 서브트리의 노드 커서
+        // p: 복제된 서브트리를 붙일 위치 (부모 노드)
+        // top: 복제된 서브트리의 루트 노드
+        _Node_ptr top = _clone_node(x);
+        top->parent = p;
+
+        // 재귀 호출을 줄이기 위해 우측 자식 서브트리는 재귀, 좌측 자식 서브트리는 반복으로 해결
+        // 양쪽 다 반복으로 해결하려면 유저가 직접 스택 사용해야 함 (재귀는 콜 스택을 사용)
+
+        // 우측 서브트리 복제 (재귀)
+        if (x->right)
+            top->right = _copy((_Node_ptr)x->right, top);
+        x = (_Node_ptr)x->left;
+        p = top;
+
+        // 좌측 서브트리 복제 (반복)
+        // x: 원본 트리 커서, y: 복제 트리 커서 (현 시점의 x를 복제)
+        // p: 복제 트리 내부 y의 부모노드 (직전 반복의 y)
+        while (x != NULL)
+        {
+            _Node_ptr y = _clone_node(x);
+            y->parent = p;
+            p->left = y;
+            if (x->right)
+                y->right = _copy((_Node_ptr)x->right, x);
+            p = y;
+            x = (_Node_ptr)x->left;
+        }
+        return top;
     }
 
     /* rotate */
