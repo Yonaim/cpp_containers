@@ -87,8 +87,8 @@ namespace ft
         if (this->_header.count == 0)
             return;
         _erase_subtree(_root());
-        _leftmost() = this->_header._base_ptr;
-        _rightmost() = this->_header._base_ptr;
+        _leftmost() = (_Node_ptr)this->_header._base_ptr;
+        _rightmost() = (_Node_ptr)this->_header._base_ptr;
         this->_header.count = 0;
     }
 
