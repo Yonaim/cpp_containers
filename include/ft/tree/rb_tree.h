@@ -246,6 +246,7 @@ namespace ft
         _Compare _key_compare;
 
         _Base_ptr &_root() const;
+        _Node_ptr  &_root_node() const { return (_Node_ptr &)(_root()); }
         _Base_ptr &_leftmost() const;
         _Base_ptr &_rightmost() const;
 

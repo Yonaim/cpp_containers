@@ -572,7 +572,21 @@ namespace ft
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Base_ptr &
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_root() const
     {
-        return this->_header._base_ptr->parent;
+        /*
+            - base_ptr -> derived_ptr로 다운캐스팅은 문법적으로 가능하지만,
+                derived_ptr 참조 타입으로 캐스팅은 불가 (참조할 대상이 없다)
+            - 타입 시스템을 무시한 메모리 재해석(reinterpret 캐스팅, type punning)은 가능하다
+        */
+        // return *reinterpret_cast<_Node_ptr*>(&this->_header._base_ptr->parent);
+        // return static_cast<_Node_ptr &>(this->_header._base_ptr->parent);
+        return (this->_header._base_ptr->parent);
+    }
+
+    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr &
+    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_root_node() const
+    {
+        return (_Node_ptr &)(_root());
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
