@@ -438,7 +438,7 @@ namespace ft
                 return insert_unique(v).first; // fallback
         }
         // 2. position = end()
-        else if (position._base_node == _header._base_ptr->right)
+        else if (position._base_node == _header._base_ptr)
         {
             if (_key_compare(_key(_rightmost()), _key(v))) // end < v
                 // v를 새로운 max 삼는다
