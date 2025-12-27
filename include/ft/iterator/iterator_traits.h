@@ -36,6 +36,8 @@ volatile 객체를 대상으로 하는 iterator는 지원되지 않는다.
 */
 namespace ft
 {
+    // Iter: iterator 혹은 const_iterator 타입만 허용
+    // 이외 타입이 오는 경우, 아래 type alias에서 컴파일 오류
     template <class Iter>
     struct iterator_traits
     {
