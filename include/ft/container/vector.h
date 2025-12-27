@@ -10,39 +10,33 @@
 #include "lexicographical_compare.h"
 #include "reverse_iterator.h"
 
-
 // TODO: bool 타입에 대한 partial specialization
 
 /*
-Except for the std::vector<bool> partial specialization, the elements are stored contiguously, which
-means that elements can be accessed not only through iterators, but also using offsets to regular
-pointers to elements.
-*/
-
-/*
-function types:
-- constructor
-- destructor
-- element access
-- iterators
-- capacity
-- modifiers
-- operators (non-member)
+    function types:
+    - constructor
+    - destructor
+    - element access
+    - iterators
+    - capacity
+    - modifiers
+    - operators (non-member)
 */
 
 namespace ft
 {
     /*
-    - contiguous memory 사용
-    - 원소의 순서를 항상 보장 (order guarantee)
-    - 중간 삽입/삭제 시 삭제 위치 뒤쪽의 모든 원소 재배치 -> O(n)
-    - 맨 뒤 삽입/삭제 시 평균적으로 O(1)
-    - 메모리 공간 부족시 전체 새로 할당 후 다시 대입
+        - contiguous memory 사용 (bool partial specialization 제외)
+        - 원소의 순서를 항상 보장 (order guarantee)
+        - 중간 삽입/삭제 시 삭제 위치 뒤쪽의 모든 원소 재배치 -> O(n)
+        - 맨 뒤 삽입/삭제 시 평균적으로 O(1)
+        - 메모리 공간 부족시 전체 새로 할당 후 다시 대입
+        - iterator 뿐만 아니라 offset을 통한 접근도 가능하다
     */
 
     // T: The type of the elements (must be CopyAssignable & CopyConstructible)
     // Allocator: customizable (default one is std::allocator)
-    template <class T, class Allocator = ft::allocator<T> >
+    template <class T, class Allocator = ft::allocator<T>>
     class vector
     {
       public:
@@ -84,6 +78,13 @@ namespace ft
         }
 
         // Fill constructor (with specified value)
+        /*
+            C++98 std::vector에는 vector(count, allocator) 생성자가 없어서
+            allocator를 지정하면서 개수와 함께 초기화하려면
+            vector(count, value, alloc)을 사용해야 했다.
+            이때 기본 초기화를 위해 value로 T()를 명시적으로 전달했다.
+           예) vector(42, MyType(), MyAlloc<MyType>());
+        */
         vector(size_type count, const T &value, const Allocator &alloc = Allocator())
             : _allocator(alloc), _data(_allocator.allocate(count)), _size(count), _capacity(count)
         {
@@ -91,16 +92,21 @@ namespace ft
                 _allocator.construct(_data + i, value);
         }
 
-        /*
-        C++98에서는 default-inserted elements 개념이 없었기 때문에,
-        count만 지정하면서 Allocator를 커스텀하려면 두 번째 인자에 기본 생성자를 직접 넘겨야 했다.
-        ex) vector(42, MyType(), MyAlloc<MyType>());
-        */
-
         // Range constructor
-        // InputIt 타입을 오인하는 것을 방지하기 위해,
-        // enable_if를 이용해 !is_integral(=not integral)을 강제 (SFINAE)
-        // TODO: iterator_traits로 막는 것이 어려운 이유에 대해 조사
+        /*
+            - Fill constructor(vector(size_type n, value_type val))와의 충돌을 방지하기 위해
+                enable_if와 is_integral을 이용하여 InputIt 타입이 정수가 아님을 강제
+            - 그런데 이 방법은 정수 외에 다른 타입은 못 걸러낸다는 단점이 있음
+        */
+        /*
+            그럼 iterator_traits을 이용하면 되지 않나???
+            => iterator_category 등 이터레이터만의 특수 타입을 꺼내려고 시도하는 순간
+                SFINAE로 조용히 넘어가는게 아니라 하드 에러가 터져버린다.
+                (하드 에러가 터지는 즉시 컴파일이 중단되므로 우아한 해결책이 아님.)
+
+            그래서 타협안:
+                정수만 배제해서 (n, value)와 충돌만 막고 진짜 iterator 여부는 런타임 에러가 나게 둠
+        */
         template <class InputIt>
         vector(InputIt first, InputIt last, const Allocator &alloc = Allocator(),
                typename ft::enable_if<!ft::is_integral<InputIt>::value, void>::type * = 0)
@@ -176,7 +182,7 @@ namespace ft
 
         reference at(size_type pos)
         {
-            // TODO: 컴파일러 별로 다르다는데?
+            // 에러 메세지는 컴파일러 별로 다르다
             if (pos >= _size)
             {
                 std::ostringstream oss;
@@ -219,10 +225,9 @@ namespace ft
         */
         void reserve(size_type new_cap)
         {
+            // 에러 메세지는 컴파일러 별로 다르다
             if (new_cap > max_size())
                 throw std::length_error("ft::vector::reserve: length_error");
-            // TODO: 메세지 맞춰두기
-
             if (new_cap <= _capacity)
                 return;
 
