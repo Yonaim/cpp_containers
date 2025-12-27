@@ -30,6 +30,15 @@ namespace ft
         }
     }
 
+    // explicit 키워드는 클래스 내부에서만 쓸 수 있음
+    // 기본 인자는 정의에서는 못 쓰고 선언에서만 쓸 수 있음
+    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Rb_tree(const Compare &comp,
+                                                               const Alloc   &alloc)
+        : _Base(alloc), _key_compare(comp)
+    {
+        _empty_initialize();
+    }
 
     /* ========================== swap() & clear() =========================== */
 
