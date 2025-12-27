@@ -71,8 +71,7 @@ namespace ft
     */
     /*
          - 추후 노드 추가시, leftmost(begin) 값이 바뀜
-         - rightmost(end)는 늘 언제나 header와 동일
-             - end(끝) iterator는 rightmost이면서 header와 값이 동일
+         - end는 늘 언제나 header와 동일
     */
     struct _Rb_tree_header
     {
@@ -198,8 +197,8 @@ namespace ft
         explicit _Rb_tree(const _Compare &comp, const _Alloc &alloc = _Alloc());
         ~_Rb_tree() { clear(); };
 
-        void     swap(_Rb_tree &other);
-        void     clear();
+        void swap(_Rb_tree &other);
+        void clear();
 
         // 둘다 key값을 비교하는 객체
         // value_comp는 value를 받아 거기서 key를 꺼내 비교

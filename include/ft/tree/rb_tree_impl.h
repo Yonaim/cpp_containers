@@ -94,6 +94,11 @@ namespace ft
 
     /* ========================== iterator functions ========================== */
 
+    /*
+        - begin = leftmost()
+        - end = header (rightmost가 아님!!! rightmost는 실존하는 원소)
+        - reverse iterator는 iterator의 wrapper
+    */
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
     _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::begin()
@@ -868,7 +873,7 @@ namespace ft
         else if (x == x->parent->right) // x는 부모의 우측 자식
             x->parent->right = y;
         else
-            x->parent->left= y;
+            x->parent->left = y;
 
         // 3) y의 우측 자식 설정: x
         y->right = x;
