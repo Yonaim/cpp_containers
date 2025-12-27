@@ -1,6 +1,7 @@
 #ifndef FT_RB_TREE_IMPL_H
 #define FT_RB_TREE_IMPL_H
 
+#include "swap.h"
 // TODO: 비멤버 함수로 변경할거 변경
 // TODO: 템플릿 인자명 헤더와 통일
 
@@ -43,7 +44,7 @@ namespace ft
         _empty_initialize();
     }
 
-    /* ========================== swap() & clear() =========================== */
+    /* =============================== swap() =============================== */
 
     // 같은 템플릿 인자 타입을 갖는 other와 this의 데이터를 서로 바꾼다
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -51,38 +52,11 @@ namespace ft
     {
         if (this == &other)
             return;
-
-        // 1) 메타 데이터(count, key_compare) 교환
-        size_type tmp_count = this->_header.count;
-        this->_header.count = other._header.count;
-        other._header.count = tmp_count;
-
-        Compare tmp_comp = this->_key_compare;
-        this->_key_compare = other._key_compare;
-        other._key_compare = tmp_comp;
-
-        // 2) 헤더 링크 교환 (parent=root, left=leftmost, right=rightmost, color)
-        _Base_ptr   tmp_parent = this->_header._base_ptr->parent;
-        _Base_ptr   tmp_left = this->_header._base_ptr->left;
-        _Base_ptr   tmp_right = this->_header._base_ptr->right;
-        _Color_type tmp_color = this->_header._base_ptr->color;
-
-        this->_header._base_ptr->parent = other._header._base_ptr->parent;
-        this->_header._base_ptr->left = other._header._base_ptr->left;
-        this->_header._base_ptr->right = other._header._base_ptr->right;
-        this->_header._base_ptr->color = other._header._base_ptr->color;
-
-        other._header._base_ptr->parent = tmp_parent;
-        other._header._base_ptr->left = tmp_left;
-        other._header._base_ptr->right = tmp_right;
-        other._header._base_ptr->color = tmp_color;
-
-        // 3) 루트가 있으면 root->parent가 "자기 헤더"를 가리키게 재고정
-        if (this->_root() != 0)
-            this->_root()->parent = this->_header._base_ptr;
-        if (other._root() != 0)
-            other._root()->parent = other._header._base_ptr;
+        ft::swap(this->_header, other._header);
+        ft::swap(this->_key_compare, other._key_compare);
     }
+
+    /* ============================== clear() =============================== */
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::clear()
