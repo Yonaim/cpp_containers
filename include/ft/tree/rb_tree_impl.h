@@ -10,15 +10,17 @@ namespace ft
 
     /* ============================= constructor ============================ */
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Rb_tree() : _Base(), _key_compare()
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Rb_tree() : _Base(), _key_compare()
     {
         _empty_initialize();
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Rb_tree(
-        const _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc> &x)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Rb_tree(
+        const _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc> &x)
         : _Base(x.get_allocator()), _key_compare(x._key_compare)
     {
         if (x._root() == NULL)
@@ -29,16 +31,17 @@ namespace ft
             _root_node() = _copy(x._root_node(), (_Node_ptr)this->_header._base_ptr);
             this->_header._base_ptr->left = _minimum(_root_node());  // leftmost = header
             this->_header._base_ptr->right = _maximum(_root_node()); // rightmost = header
-            this->_header._base_ptr->color = RED;               // header color = red
+            this->_header._base_ptr->color = RED;                    // header color = red
             this->_header.count = x._header.count;
         }
     }
 
     // explicit 키워드는 클래스 내부에서만 쓸 수 있음
     // 기본 인자는 정의에서는 못 쓰고 선언에서만 쓸 수 있음
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Rb_tree(const Compare &comp,
-                                                               const Alloc   &alloc)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Rb_tree(const _Compare &comp,
+                                                                    const _Alloc   &alloc)
         : _Base(alloc), _key_compare(comp)
     {
         _empty_initialize();
@@ -47,8 +50,9 @@ namespace ft
     /* =============================== swap() =============================== */
 
     // 같은 템플릿 인자 타입을 갖는 other와 this의 데이터를 서로 바꾼다
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::swap(_Rb_tree &other)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::swap(_Rb_tree &other)
     {
         if (this == &other)
             return;
@@ -58,8 +62,9 @@ namespace ft
 
     /* ============================== clear() =============================== */
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::clear()
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::clear()
     {
         if (this->_header.count == 0)
             return;
@@ -76,80 +81,91 @@ namespace ft
         - end = header (rightmost가 아님!!! rightmost는 실존하는 원소)
         - reverse iterator는 iterator의 wrapper
     */
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::begin()
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::begin()
     {
         return iterator(_leftmost());
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::begin() const
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::begin() const
     {
         return const_iterator(_leftmost());
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::end()
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::end()
     {
         return iterator(_header._base_ptr);
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::end() const
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::end() const
     {
         return const_iterator(_header._base_ptr);
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::reverse_iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rbegin()
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::reverse_iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::rbegin()
     {
         return reverse_iterator(end());
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_reverse_iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rbegin() const
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_reverse_iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::rbegin() const
     {
         return const_reverse_iterator(end());
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::reverse_iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rend()
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::reverse_iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::rend()
     {
         return reverse_iterator(begin());
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_reverse_iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::rend() const
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_reverse_iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::rend() const
     {
         return const_reverse_iterator(begin());
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    bool _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::empty() const
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    bool _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::empty() const
     {
         return this->_header.count == 0;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::size_type
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::size() const
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::size_type
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::size() const
     {
         return this->_header.count;
     }
 
     /* =========================== find / lower / upper / equal_range ============ */
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const key_type &k)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::find(const key_type &k)
     {
         _Base_ptr x = _root();           // current node (currently searching)
         _Base_ptr y = _header._base_ptr; // last node which is not less than k
@@ -172,9 +188,10 @@ namespace ft
     }
 
     // 찾는게 없으면 end() 리턴
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::find(const key_type &k) const
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::find(const key_type &k) const
     {
         _Base_ptr x = _root();           // current node (currently searching)
         _Base_ptr y = _header._base_ptr; // last node which is not less than k
@@ -196,9 +213,10 @@ namespace ft
         return (it == end() || _key_compare(k, _key(y))) ? end() : const_iterator(y);
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::lower_bound(const key_type &k)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::lower_bound(const key_type &k)
     {
         _Base_ptr x = _root();           // current node (currently searching)
         _Base_ptr y = _header._base_ptr; // last node which is not less than k
@@ -216,9 +234,10 @@ namespace ft
         return iterator(y);
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::lower_bound(const key_type &k) const
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::lower_bound(const key_type &k) const
     {
         _Base_ptr x = _root();           // current node (currently searching)
         _Base_ptr y = _header._base_ptr; // last node which is not less than k
@@ -236,9 +255,10 @@ namespace ft
         return const_iterator(y);
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::upper_bound(const key_type &k)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::upper_bound(const key_type &k)
     {
         _Base_ptr x = _root();           // current node (currently searching)
         _Base_ptr y = _header._base_ptr; // last node which is less than k
@@ -256,9 +276,10 @@ namespace ft
         return iterator(y);
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::upper_bound(const key_type &k) const
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::upper_bound(const key_type &k) const
     {
         _Base_ptr x = _root();           // current node (currently searching)
         _Base_ptr y = _header._base_ptr; // last node which is less than k
@@ -276,18 +297,20 @@ namespace ft
         return const_iterator(y);
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    pair<typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator,
-         typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator>
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::equal_range(const key_type &k)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    pair<typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator,
+         typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator>
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::equal_range(const key_type &k)
     {
         return pair<iterator, iterator>(lower_bound(k), upper_bound(k));
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    pair<typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator,
-         typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::const_iterator>
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::equal_range(const key_type &k) const
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    pair<typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_iterator,
+         typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_iterator>
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::equal_range(const key_type &k) const
     {
         return pair<const_iterator, const_iterator>(lower_bound(k), upper_bound(k));
     }
@@ -301,10 +324,12 @@ namespace ft
         - x는 Null 혹은 non-Null로만 구분하며 값은 중요하지 않음
     */
     // _insert: 이미 탐색한 위치에 붙이기 + fixup만 담당하는 하위 루틴
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename ft::_Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-    ft::_Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_insert(_Base_ptr x_hint, _Base_ptr y,
-                                                                  const value_type &v)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename ft::_Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
+    ft::_Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_insert(_Base_ptr         x_hint,
+                                                                       _Base_ptr         y,
+                                                                       const value_type &v)
     {
         // x_hint: 강제 왼쪽 삽입 유무 플래그
         // y: 삽입할 위치의 부모 노드
@@ -338,9 +363,10 @@ namespace ft
         return iterator(z);
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    pair<typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator, bool>
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(const value_type &v)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    pair<typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator, bool>
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::insert_unique(const value_type &v)
     {
         _Base_ptr x = _root();           // currently searching
         _Base_ptr y = _header._base_ptr; // parent of x
@@ -374,9 +400,10 @@ namespace ft
         return pair<iterator, bool>(it, false); // 중복 노드의 이터레이터 반환
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(const value_type &v)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::insert_equal(const value_type &v)
     {
         _Base_ptr x = _root();           // currently searching
         _Base_ptr y = _header._base_ptr; // parent of x
@@ -404,10 +431,11 @@ namespace ft
 
         모두 해당되지 않으면 O(n) 탐색 필요 -> insert_unique
     */
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(iterator          position,
-                                                                    const value_type &v)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::insert_unique(iterator          position,
+                                                                         const value_type &v)
     {
         // 1. position = begin()
         if (position._base_node == _header._base_ptr->left)
@@ -448,10 +476,11 @@ namespace ft
         }
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::iterator
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(iterator          position,
-                                                                   const value_type &v)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::insert_equal(iterator          position,
+                                                                        const value_type &v)
     {
         // 1. position = begin()
         if (position._base_node == _header._base_node->left)
@@ -493,26 +522,29 @@ namespace ft
         }
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
     template <class _InputIterator>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_unique(_InputIterator first,
-                                                                         _InputIterator last)
+    void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::insert_unique(_InputIterator first,
+                                                                              _InputIterator last)
     {
         for (; first != last; ++first)
             insert_unique(*first);
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
     template <class _InputIterator>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::insert_equal(_InputIterator first,
-                                                                        _InputIterator last)
+    void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::insert_equal(_InputIterator first,
+                                                                             _InputIterator last)
     {
         for (; first != last; ++first)
             insert_equal(*first);
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(iterator position)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::erase(iterator position)
     {
         _Base_ptr z = position._base_node;
         _Base_ptr y = _rebalance_for_erase(z);
@@ -522,9 +554,10 @@ namespace ft
         --_header.count;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::size_type
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(const key_type &k)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::size_type
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::erase(const key_type &k)
     {
         pair<iterator, iterator> p = equal_range(k);
         size_type                n = ft::distance(p.first, p.second);
@@ -532,8 +565,9 @@ namespace ft
         return n;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(iterator first, iterator last)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::erase(iterator first, iterator last)
     {
         if (first == begin() && last == end())
             clear();
@@ -546,9 +580,10 @@ namespace ft
 
     // 포인터인 이유: 연속 메모리 배열의 시작 지점과 끝지점
     // 값 경계(low/high)가 아니라 리스트를 받는 것임
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(const key_type *first,
-                                                                 const key_type *last)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::erase(const key_type *first,
+                                                                      const key_type *last)
     {
         while (first != last)
             erase(*first++);
@@ -556,9 +591,10 @@ namespace ft
 
     /* =========================== Internal helpers ============================== */
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Base_ptr &
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_root() const
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Base_ptr &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_root() const
     {
         /*
             - base_ptr -> derived_ptr로 다운캐스팅은 문법적으로 가능하지만,
@@ -570,142 +606,161 @@ namespace ft
         return (this->_header._base_ptr->parent);
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr &
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_root_node() const
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Node_ptr &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_root_node() const
     {
         return (_Node_ptr &)(_root());
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Base_ptr &
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_leftmost() const
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Base_ptr &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_leftmost() const
     {
         return this->_header._base_ptr->left;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Base_ptr &
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_rightmost() const
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Base_ptr &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_rightmost() const
     {
         return this->_header._base_ptr->right;
     }
 
     /* static helpers */
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr &
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_left(_Node_ptr n)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Node_ptr &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_left(_Node_ptr n)
     {
         return (_Node_ptr &)n->left;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr &
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_right(_Node_ptr n)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Node_ptr &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_right(_Node_ptr n)
     {
         return (_Node_ptr &)n->right;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr &
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_parent(_Node_ptr n)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Node_ptr &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_parent(_Node_ptr n)
     {
         return (_Node_ptr &)n->parent;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::reference
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_value(_Node_ptr n)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::reference
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_value(_Node_ptr n)
     {
         return n->value;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    const typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::key_type &
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_key(_Node_ptr n)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    const typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::key_type &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_key(_Node_ptr n)
     {
-        return KeyOfValue()(n->value);
+        return _KeyOfValue()(n->value);
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Color_type &
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_color(_Node_ptr n)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Color_type &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_color(_Node_ptr n)
     {
         return (_Color_type &)n->color;
     }
 
     /* Base_ptr versions */
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr &
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_left(_Base_ptr b)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Node_ptr &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_left(_Base_ptr b)
     {
         return (_Node_ptr &)b->left;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr &
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_right(_Base_ptr b)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Node_ptr &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_right(_Base_ptr b)
     {
         return (_Node_ptr &)b->right;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr &
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_parent(_Base_ptr b)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Node_ptr &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_parent(_Base_ptr b)
     {
         return (_Node_ptr &)b->parent;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::reference
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_value(_Base_ptr b)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::reference
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_value(_Base_ptr b)
     {
         return reinterpret_cast<_Node_ptr>(b)->value;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    const typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::key_type &
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_key(_Base_ptr b)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    const typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::key_type &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_key(_Base_ptr b)
     {
-        return KeyOfValue()(_value(b));
+        return _KeyOfValue()(_value(b));
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Color_type &
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_color(_Base_ptr b)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Color_type &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_color(_Base_ptr b)
     {
         return (_Color_type &)b->color;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    const typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::key_type &
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_key(const value_type &v)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    const typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::key_type &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_key(const value_type &v)
     {
-        return KeyOfValue()(v);
+        return _KeyOfValue()(v);
     }
 
     /* minimum / maximum */
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_minimum(_Node_ptr x)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Node_ptr
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_minimum(_Node_ptr x)
     {
         return (_Node_ptr)_Rb_tree_node_base::_minimum(x);
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_maximum(_Node_ptr x)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Node_ptr
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_maximum(_Node_ptr x)
     {
         return (_Node_ptr)_Rb_tree_node_base::_maximum(x);
     }
 
     /* =========================== Internal private methods ====================== */
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_empty_initialize()
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_empty_initialize()
     {
         this->_header._base_ptr->parent = 0;                      // root initially null
         this->_header._base_ptr->left = this->_header._base_ptr;  // leftmost = header
@@ -714,9 +769,10 @@ namespace ft
         this->_header.count = 0;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_create_node(const value_type &v)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Node_ptr
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_create_node(const value_type &v)
     {
         _Node_ptr n_ptr = this->_get_node();
         try
@@ -731,9 +787,10 @@ namespace ft
         return n_ptr;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_clone_node(_Node_ptr orig)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Node_ptr
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_clone_node(_Node_ptr orig)
     {
         _Node_ptr n_ptr = _create_node(orig->value);
         n_ptr->color = orig->color;
@@ -743,16 +800,18 @@ namespace ft
         return n_ptr;
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_destroy_node(_Node_ptr n_ptr)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_destroy_node(_Node_ptr n_ptr)
     {
         this->get_allocator().destroy(&n_ptr->value);
         this->_put_node(n_ptr);
     }
 
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Node_ptr
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_copy(_Node_ptr x, _Node_ptr p)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Node_ptr
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_copy(_Node_ptr x, _Node_ptr p)
     {
         // x: 원본 서브트리의 노드 커서
         // p: 복제된 서브트리를 붙일 위치 (부모 노드)
@@ -813,8 +872,9 @@ namespace ft
       B   C                  A   B
 
     */
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_rotate_left(_Base_ptr x)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_rotate_left(_Base_ptr x)
     {
         const _Base_ptr y = x->right; // y: x의 오른쪽 자식
 
@@ -839,8 +899,9 @@ namespace ft
 
     // rotate_right(x): x->left가 위로 올라감
     // rotate_left의 좌우대칭
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_rotate_right(_Base_ptr x)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_rotate_right(_Base_ptr x)
     {
         const _Base_ptr y = x->left; // y: x의 왼쪽 자식
 
@@ -887,8 +948,10 @@ namespace ft
          rotate_right(P) : P를 내려보내고 X를 올리는 변화
     */
     // TODO: 비멤버 함수로 빼기
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_rebalance_for_insert(_Base_ptr  x,
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    void
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_rebalance_for_insert(_Base_ptr  x,
                                                                                  _Base_ptr &root)
     {
         // x는 현재 가리키고 있는 커서
@@ -1155,8 +1218,9 @@ namespace ft
     /* subtree erase */
     // 부모 노드를 맨 마지막에 지우는 것이 안전
     // 즉 post-order (L-R-Root)
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_erase_subtree(_Base_ptr x)
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_erase_subtree(_Base_ptr x)
     {
         if (!x)
             return;
