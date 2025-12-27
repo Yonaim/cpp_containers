@@ -1,6 +1,9 @@
 #ifndef FT_RB_TREE_IMPL_H
 #define FT_RB_TREE_IMPL_H
 
+// TODO: 비멤버 함수로 변경할거 변경
+// TODO: 템플릿 인자명 헤더와 통일
+
 namespace ft
 {
 
@@ -537,6 +540,12 @@ namespace ft
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
     void _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::erase(iterator position)
     {
+        _Base_ptr z = position._base_node;
+        _Base_ptr y = _rebalance_for_erase(z);
+
+        // 실제 노드 해제
+        _destroy_node(static_cast<_Node_ptr>(y));
+        --_header.count;
     }
 
     template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
@@ -979,15 +988,196 @@ namespace ft
     }
 
     // erase: 제거한 노드가 BLACK일 경우 -> Black Depth 불균형 문제 발생
-    template <class Key, class Value, class KeyOfValue, class Compare, class Alloc>
-    typename _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_Base_ptr
-    _Rb_tree<Key, Value, KeyOfValue, Compare, Alloc>::_rebalance_for_erase(_Base_ptr x,
-                                                                           _Base_ptr x_parent)
-    {
-        // TODO
-        return _Base_ptr();
-    }
+    // 실제로 free 해야 할 노드 포인터를 반환
 
+    // ------------------------------------------------------------
+    // erase rebalance (SGI/GCC 스타일)
+    // return: 실제로 free 해야 할 노드 포인터
+    // ------------------------------------------------------------
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename ft::_Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Base_ptr
+    ft::_Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_rebalance_for_erase(_Base_ptr z)
+    {
+        _Base_ptr &root = _root();
+        _Base_ptr &leftmost = _leftmost();
+        _Base_ptr &rightmost = _rightmost();
+
+        _Base_ptr y = z;
+        _Base_ptr x = 0;
+        _Base_ptr x_parent = 0;
+
+        // 1) y(실제로 unlink할 노드), x(y의 유일한 자식 또는 0) 결정
+        if (y->left == 0)
+            x = y->right;
+        else if (y->right == 0)
+            x = y->left;
+        else
+        {
+            y = y->right;
+            while (y->left != 0)
+                y = y->left; // successor
+            x = y->right;
+        }
+
+        // 2) y != z: successor를 z 자리로 올려치우기
+        if (y != z)
+        {
+            // z의 left를 y로
+            z->left->parent = y;
+            y->left = z->left;
+
+            if (y != z->right)
+            {
+                x_parent = y->parent;
+                if (x)
+                    x->parent = y->parent;
+                y->parent->left = x; // y는 successor라 parent의 left 자식이었음
+
+                y->right = z->right;
+                z->right->parent = y;
+            }
+            else
+                x_parent = y;
+
+            // z의 parent 쪽에서 z 대신 y 연결
+            if (root == z)
+                root = y;
+            else if (z->parent->left == z)
+                z->parent->left = y;
+            else
+                z->parent->right = y;
+
+            y->parent = z->parent;
+
+            // 색 swap 트릭
+            _Color_type tmp = y->color;
+            y->color = z->color;
+            z->color = tmp;
+
+            // 이제 실제로 free할 노드는 z
+            y = z;
+        }
+        // 3) y == z: z를 직접 splice out
+        else
+        {
+            x_parent = y->parent;
+            if (x)
+                x->parent = y->parent;
+
+            if (root == z)
+                root = x;
+            else if (z->parent->left == z)
+                z->parent->left = x;
+            else
+                z->parent->right = x;
+
+            // leftmost/rightmost 갱신
+            if (leftmost == z)
+            {
+                if (z->right == 0)
+                    leftmost = z->parent; // z가 root였으면 header가 됨
+                else
+                    leftmost = _Rb_tree_node_base::_minimum(x);
+            }
+            if (rightmost == z)
+            {
+                if (z->left == 0)
+                    rightmost = z->parent;
+                else
+                    rightmost = _Rb_tree_node_base::_maximum(x);
+            }
+        }
+
+        // 4) BLACK이 빠져나갔으면 fix-up
+        if (y->color == BLACK)
+        {
+            while (x != root && (x == 0 || x->color == BLACK))
+            {
+                if (x == x_parent->left)
+                {
+                    _Base_ptr w = x_parent->right;
+
+                    if (w && w->color == RED)
+                    {
+                        w->color = BLACK;
+                        x_parent->color = RED;
+                        _rotate_left(x_parent);
+                        w = x_parent->right;
+                    }
+
+                    if (w == 0 || ((w->left == 0 || w->left->color == BLACK) &&
+                                   (w->right == 0 || w->right->color == BLACK)))
+                    {
+                        if (w)
+                            w->color = RED;
+                        x = x_parent;
+                        x_parent = x_parent->parent;
+                    }
+                    else
+                    {
+                        if (w->right == 0 || w->right->color == BLACK)
+                        {
+                            if (w->left)
+                                w->left->color = BLACK;
+                            w->color = RED;
+                            _rotate_right(w);
+                            w = x_parent->right;
+                        }
+                        w->color = x_parent->color;
+                        x_parent->color = BLACK;
+                        if (w->right)
+                            w->right->color = BLACK;
+                        _rotate_left(x_parent);
+                        break;
+                    }
+                }
+                else
+                {
+                    // symmetric
+                    _Base_ptr w = x_parent->left;
+
+                    if (w && w->color == RED)
+                    {
+                        w->color = BLACK;
+                        x_parent->color = RED;
+                        _rotate_right(x_parent);
+                        w = x_parent->left;
+                    }
+
+                    if (w == 0 || ((w->right == 0 || w->right->color == BLACK) &&
+                                   (w->left == 0 || w->left->color == BLACK)))
+                    {
+                        if (w)
+                            w->color = RED;
+                        x = x_parent;
+                        x_parent = x_parent->parent;
+                    }
+                    else
+                    {
+                        if (w->left == 0 || w->left->color == BLACK)
+                        {
+                            if (w->right)
+                                w->right->color = BLACK;
+                            w->color = RED;
+                            _rotate_left(w);
+                            w = x_parent->left;
+                        }
+                        w->color = x_parent->color;
+                        x_parent->color = BLACK;
+                        if (w->left)
+                            w->left->color = BLACK;
+                        _rotate_right(x_parent);
+                        break;
+                    }
+                }
+            }
+            if (x)
+                x->color = BLACK;
+        }
+
+        return y; // free 해야 할 노드
+    }
     /* subtree erase */
     // 부모 노드를 맨 마지막에 지우는 것이 안전
     // 즉 post-order (L-R-Root)
@@ -1000,7 +1190,6 @@ namespace ft
         _erase_subtree(x->right);
         _destroy_node(static_cast<_Node_ptr>(x));
     }
-
 } // namespace ft
 
 #endif
