@@ -1,6 +1,6 @@
 #ifndef FT_RB_TREE_H
 #define FT_RB_TREE_H
-// #include <memory> // TODO: ft::allocator로 교체
+
 #include "allocator.h"
 #include "distance.h"
 #include "equal.h"
@@ -162,7 +162,7 @@ namespace ft
 
     // Compare(x, y): x < y의 결과를 bool로 반환
     template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
-              typename _Alloc = allocator<_Value> >
+              typename _Alloc = ft::allocator<_Value> >
     class _Rb_tree : protected _Rb_tree_base<_Value, _Alloc>
     {
         typedef _Rb_tree_base<_Value, _Alloc> _Base;
@@ -244,7 +244,7 @@ namespace ft
         _Compare _key_compare;
 
         _Base_ptr &_root() const;
-        _Node_ptr  &_root_node() const;
+        _Node_ptr &_root_node() const;
         _Base_ptr &_leftmost() const;
         _Base_ptr &_rightmost() const;
 
