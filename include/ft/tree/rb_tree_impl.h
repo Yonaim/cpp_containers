@@ -751,6 +751,7 @@ namespace ft
         n_ptr->color = orig->color;
         n_ptr->left = orig->left;
         n_ptr->right = orig->right;
+        n_ptr->parent = orig->parent;
         return n_ptr;
     }
 
