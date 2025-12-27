@@ -1,6 +1,5 @@
 #ifndef FT_RB_TREE_H
 #define FT_RB_TREE_H
-
 // #include <memory> // TODO: ft::allocator로 교체
 #include "allocator.h"
 #include "distance.h"
@@ -275,6 +274,7 @@ namespace ft
         _Node_ptr _create_node(const value_type &v);
         _Node_ptr _clone_node(_Node_ptr orig);
         void      _destroy_node(_Node_ptr n_ptr);
+        _Node_ptr _copy(_Node_ptr x, _Node_ptr p);
 
         // rotate
         void _rotate_left(_Base_ptr x);
