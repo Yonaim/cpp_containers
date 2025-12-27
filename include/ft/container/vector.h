@@ -1,14 +1,15 @@
 #ifndef FT_VECTOR_H
 #define FT_VECTOR_H
 
-#include <memory> // TODO: ft::allocator로 교체
 #include <sstream>
 #include <stdexcept>
+#include "allocator.h"
 #include "enable_if.h"
 #include "equal.h"
 #include "is_integral.h"
 #include "lexicographical_compare.h"
 #include "reverse_iterator.h"
+
 
 // TODO: bool 타입에 대한 partial specialization
 
@@ -41,7 +42,7 @@ namespace ft
 
     // T: The type of the elements (must be CopyAssignable & CopyConstructible)
     // Allocator: customizable (default one is std::allocator)
-    template <class T, class Allocator = std::allocator<T> >
+    template <class T, class Allocator = ft::allocator<T> >
     class vector
     {
       public:
