@@ -36,7 +36,7 @@ namespace ft
 
     // T: The type of the elements (must be CopyAssignable & CopyConstructible)
     // Allocator: customizable (default one is std::allocator)
-    template <class T, class Allocator = ft::allocator<T>>
+    template <class T, class Allocator = ft::allocator<T> >
     class vector
     {
       public:
