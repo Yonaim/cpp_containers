@@ -47,6 +47,21 @@ namespace ft
         _empty_initialize();
     }
 
+    /* ===================== copy assignment operator ======================= */
+
+    template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
+              typename _Alloc>
+    typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Rb_tree &
+    _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::operator=(const _Rb_tree &x)
+    {
+        if (this == &x)
+            return *this; // 있으면 더 좋고
+
+        _Rb_tree tmp(x); // 여기서 copy ctor 호출
+        this->swap(tmp); // swap으로 교체
+        return *this;
+    }
+
     /* =============================== swap() =============================== */
 
     // 같은 템플릿 인자 타입을 갖는 other와 this의 데이터를 서로 바꾼다
