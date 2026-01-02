@@ -4,13 +4,17 @@
 #include <sstream>
 #include <stdexcept>
 #include "allocator.h"
+#include "destroy_range.h"
 #include "enable_if.h"
 #include "equal.h"
 #include "is_integral.h"
 #include "lexicographical_compare.h"
 #include "reverse_iterator.h"
+#include "uninitialized_copy.h"
+#include "uninitialized_fill.h"
 
 // TODO: bool 타입에 대한 partial specialization
+// TODO: size_t -> size_type
 
 /*
     function types:
@@ -71,10 +75,17 @@ namespace ft
 
         // Fill constructor (default-inserted elements)
         explicit vector(size_type count, const Allocator &alloc = Allocator())
-            : _allocator(alloc), _data(_allocator.allocate(count)), _size(count), _capacity(count)
+            : _allocator(alloc), _data(_allocator.allocate(count)), _size(0), _capacity(count)
         {
-            for (size_type i = 0; i < count; ++i)
-                _allocator.construct(_data + i, value_type());
+            try
+            {
+                uninitialized_fill(_data, value_type(), count, _allocator);
+                _size = count;
+            }
+            catch (...)
+            {
+                _allocator.deallocate(_data, count);
+            }
         }
 
         // Fill constructor (with specified value)
@@ -86,10 +97,18 @@ namespace ft
            예) vector(42, MyType(), MyAlloc<MyType>());
         */
         vector(size_type count, const T &value, const Allocator &alloc = Allocator())
-            : _allocator(alloc), _data(_allocator.allocate(count)), _size(count), _capacity(count)
+            : _allocator(alloc), _data(_allocator.allocate(count)), _size(0), _capacity(count)
         {
-            for (size_type i = 0; i < count; ++i)
-                _allocator.construct(_data + i, value);
+            try
+            {
+                // 내부적으로 const allocator 타입을 받으면 안되므로 멤버 _allocator를 넘긴다
+                uninitialized_fill(_data, value, count, _allocator);
+                _size = count;
+            }
+            catch (...)
+            {
+                _allocator.deallocate(_data, count);
+            }
         }
 
         // Range constructor
@@ -100,9 +119,11 @@ namespace ft
         */
         /*
             그럼 iterator_traits을 이용하면 되지 않나???
-            => iterator_category 등 이터레이터만의 특수 타입을 꺼내려고 시도하는 순간
-                SFINAE로 조용히 넘어가는게 아니라 하드 에러가 터져버린다.
+            => iterator_category와 같은 것을 typedef로 만들려고 시도할 때,
+               '인스턴스화하는 과정에서' 에러.
+                -> SFINAE로 조용히 넘어가는게 아니라 하드 에러가 터진다.
                 (하드 에러가 터지는 즉시 컴파일이 중단되므로 우아한 해결책이 아님.)
+                (enable_if는 인스턴스는 생성되되 멤버만 없을 뿐으로, SFINAE로 취급)
 
             그래서 타협안:
                 정수만 배제해서 (n, value)와 충돌만 막고 진짜 iterator 여부는 런타임 에러가 나게 둠
@@ -115,33 +136,33 @@ namespace ft
             size_type n = 0;
             for (InputIt it = first; it != last; ++it)
                 ++n;
-
-            _size = n;
             _capacity = n;
             _data = _allocator.allocate(n);
-
-            size_type i = 0;
             try
             {
-                for (InputIt it = first; it != last; ++it, ++i)
-                    _allocator.construct(_data + i, *it);
+                uninitialized_copy(first, last, _data, _allocator);
+                _size = n;
             }
             catch (...)
             {
-                for (size_type j = 0; j < i; ++j)
-                    _allocator.destroy(_data + j);
-                _allocator.deallocate(_data, n);
-                throw;
+                _allocator.deallocate(_data, _capacity);
             }
         }
 
         // Copy constructor
         vector(const vector &other)
-            : _allocator(other._allocator), _size(other._size), _capacity(other._capacity)
+            : _allocator(other._allocator), _size(0), _capacity(other._capacity)
         {
             _data = _allocator.allocate(_capacity);
-            for (size_type i = 0; i < _size; ++i)
-                _allocator.construct(_data + i, other._data[i]);
+            try
+            {
+                uninitialized_copy(other._data, other._data + other._size, _data, _allocator);
+                _size = other._size;
+            }
+            catch (...)
+            {
+                _allocator.deallocate(_data, _capacity);
+            }
         }
 
         // Copy assignment operator
@@ -160,9 +181,14 @@ namespace ft
             else
                 clear();
 
-            for (size_type i = 0; i < other._size; ++i)
-                _allocator.construct(_data + i, other._data[i]);
-
+            try
+            {
+                uninitialized_copy(other._data, other._data + other._size, _data, _allocator);
+            }
+            catch (...)
+            {
+                _allocator.deallocate(_data, _capacity);
+            }
             _size = other._size;
             return *this;
         }
@@ -170,8 +196,7 @@ namespace ft
         // Destructor
         ~vector()
         {
-            for (size_type i = 0; i < _size; ++i)
-                _allocator.destroy(_data + i);
+            destroy_range(_allocator, _data, _data + _size);
             if (_data)
                 _allocator.deallocate(_data, _capacity);
         }
@@ -232,13 +257,19 @@ namespace ft
                 return;
 
             T *new_data = _allocator.allocate(new_cap);
-            for (size_type i = 0; i < _size; i++)
+            // POD가 아닌 한, memcpy()와 같은 단순한 메모리 복사는 불가
+            // If an exception is thrown, this function has no effect (strong exception guarantee).
+            try
             {
-                // POD가 아닌 한, memcpy()와 같은 단순한 메모리 복사는 불가
-                // size 횟수만큼 생성과 소멸을 수행
-                _allocator.construct(new_data + i, _data[i]);
-                _allocator.destroy(&_data[i]);
+                uninitialized_copy(_data, _data + _size, new_data, _allocator);
             }
+            catch (...)
+            {
+                _allocator.deallocate(new_data, new_cap);
+                throw; // rethrow (현재 잡은 예외 그대로 던짐)
+            }
+            // 소멸자는 무조건 성공한다고 가정
+            destroy_range(_allocator, _data, _data + _size);
             _allocator.deallocate(_data, _capacity);
             _data = new_data;
             _capacity = new_cap;
@@ -258,7 +289,7 @@ namespace ft
         // growth policy: 1.5배 혹은 2배
         void push_back(const T &value)
         {
-            if (_size + 1 > _capacity)
+            if (_size == _capacity)
             {
                 size_type new_cap;
                 if (_capacity == 0)
@@ -267,8 +298,14 @@ namespace ft
                     new_cap = _capacity * 2;
                 reserve(new_cap);
             }
-            _allocator.construct(_data + (_size++), value);
+            // 여러 개를 처리하는게 아니므로 예외가 발생해도 복구할게 없음, 굳이 guard 쓸 필요 x
+            _allocator.construct(_data + _size, value); // (O)
+            ++_size;
+
+            // C++98에서는 인자 평가 순서가 보장되지 않음
+            // _allocator.construct(_data + (_size++), value); (X)
         }
+
         // removes the last element
         void pop_back()
         {
@@ -279,10 +316,43 @@ namespace ft
             --_size;
         }
 
-        // Inserts elements at the specified location in the container
-        // 특정 위치에 '삽입'하므로, 지정한 pos 뒤의 원소들은 한 칸씩 뒤로 밀어야 함
-        // 새 공간을 할당하지 않고 진행하려면 뒤에서부터 복사하여 덮어씌워지는 일을 방지
-        // 단일 삽입
+        /*
+            - 특정 위치에 단일 삽입
+            - 지정한 pos 뒤의 원소들은 한 칸씩 뒤로 밀어야 함
+            - 뒤에서부터 복사하여 덮어씌워지는 일을 방지 (새 공간을 할당하지 않고 진행)
+            - strong exception safety guarantee 만족
+        */
+        /*
+            - 미리 destroy하고 reverse 이터레이터를 인자로 uninitialized_copy() 호출하는 방식은
+                 안되는 이유???
+                 -> exception-safety 만족을 위해서는 미리 destroy를 하면 안된다.
+                    (destroy는 되돌릴 수 없는 연산!)
+            - 가능하면 assignment(대입)을 한다.
+                - copy constructor와 copy assignment는 전혀 다름
+                - assignment시, 객체를 파괴/새로 생성하지 않고 현재 객체의 값만 교체해주면 됨
+                - 이미 살아 있는 객체에 '=' 로 값을 덮어쓰는 것
+                - exception-safety 및 객체 수명 관리자 차원에서의 컨테이너의 의의를 준수
+
+            => uninitialized 영역과 initialized 영역을 구분하여 처리한다.
+                - uninitialized -> uninitialized_copy
+                - initialized -> assignment
+                - destroy -> 마지막
+        */
+        /*
+            [ 0 ........ size-1 ]   initialized
+            [ size ..... capacity-1 ] uninitialized
+
+            1) [0, size) : initialized
+            2) [idx, size) : initialized
+            3) [size, capacity) : uninitialized
+
+            - 하나만 삽입하는 함수이므로 construct는 1회만 이루어짐 (reserve가 필요한 경우 제외)
+            - [0, idx)는 건들지 않음
+            - [idx, size)를 하나씩 뒤로 미룸
+                - [size]를 제외하고는 이미 객체가 생성되어 있는 상태이므로 initialize할 필요 x
+        */
+        // pos > size인 경우는 UB (range-checked 함수가 아님)
+        // insert(end(), value)는 push_back과 동일
         iterator insert(const_iterator pos, const T &value)
         {
             const size_type idx = pos - begin();
@@ -290,21 +360,40 @@ namespace ft
             if (_size == _capacity)
                 reserve(_capacity == 0 ? 1 : _capacity * 2);
 
-            // size 타입 초기화를 _size - 1로 할때, overflow 주의 (_size = 0)
-            // for (size_type i = _size - 1; i >= idx; --i)
-            for (size_type i = _size; i-- > idx;) // 이 라인에서 (--) 연산을 함
+            // end()에 삽입이면 그냥 push_back과 동일
+            if (idx == _size)
             {
-                _allocator.construct(_data + i + 1, _data[i]);
-                _allocator.destroy(_data + i);
+                _allocator.construct(_data + _size, value);
+                ++_size;
+                return begin() + idx;
             }
-            _allocator.construct(_data + idx, value);
+
+            // 1) 맨 뒤 uninitialized 슬롯을 "마지막 원소 복제"로 initialize
+            _allocator.construct(_data + _size, _data[_size - 1]);
+
+            // 2) initialized 구간은 assignment로 shift (뒤에서 앞으로)
+            // _size == 0이면 항상 idx == _size이므로, 오버플로우 발생 X
+            for (size_type i = _size - 1; i > idx; --i)
+                _data[i] = _data[i - 1];
+
+            // 3) idx 위치에 value 대입
+            _data[idx] = value;
             ++_size;
 
             // 새로 할당될시 pos는 옛날 메모리를 가리키는 것이므로 다를 수 있음!!
             // 그래서 begin + idx를 리턴한다.
             return begin() + idx;
         }
+
         // 다수 삽입
+
+        /*
+            1) [0, size) : initialized
+            2-1) [idx, idx + count) : initialized
+            2-2) [idx, size), [size, idx + count) : initialized + uninitialized
+            2-3) [idx, idx + count) : uninitialized (idx == size)
+            3) [size, capacity) : uninitialized
+        */
         iterator insert(const_iterator pos, size_type count, const T &value)
         {
             const size_type idx = pos - begin();
@@ -312,21 +401,68 @@ namespace ft
             if (count == 0)
                 return const_cast<iterator>(pos);
             if (_size + count > _capacity)
+                reserve(_grow_capacity_to(_size + count));
+
+            if (idx == _size) // 1. idx == size
             {
-                size_type new_cap = (_capacity == 0 ? count : _capacity);
-                while (new_cap < _size + count)
-                    new_cap *= 1.5;
-                reserve(new_cap);
+                uninitialized_fill(&_data[idx], value, count, _allocator);
             }
-            // 뒤에서부터 원본 백업
-            for (size_type i = _size; i-- > idx;)
+            else if (idx + count < _size) // 2. idx + count < _size
             {
-                _allocator.construct(_data + i + count, _data[i]);
-                _allocator.destroy(_data + i);
+                // 1) 맨 뒤쪽 count개를 uninitialized 영역에 생성
+                uninitialized_copy(&_data[_size - count], &_data[_size], &_data[_size], _allocator);
+
+                try
+                {
+                    // 2) [idx, size - count)를 [idx + count, size)로 shift
+                    for (size_t i = _size - count; i > idx; --i)
+                        _data[i + count - 1] = _data[i - 1];
+
+                    // 3) [idx, idx + count)를 value로 채우기
+                    for (size_type i = idx; i < idx + count; ++i)
+                        _data[i] = value;
+                }
+                catch (...)
+                {
+                    destroy_range(_allocator, _data + _size, _data + _size + count);
+                    throw;
+                }
             }
-            // 새 값 삽입
-            for (size_type i = 0; i < count; ++i)
-                _allocator.construct(_data + idx + i, value);
+            else // 3. idx < _size && idx + count >= _size
+            {
+                // [idx, size) : initialized
+                // [size, idx + count) : uninitialized
+                // [idx + count, size + count) : uninitialized
+
+                const size_t extra_cnt = idx + count - _size; // value 자리 init 개수
+                const size_t tail_cnt = _size - idx;
+
+                construct_guard<Allocator> guard(_allocator, &_data[_size]);
+                try
+                {
+                    // 1) value를 uninitialized 영역에 새로 construct
+                    // [size, size + extra_cnt)
+                    uninitialized_fill(&_data[_size], value, extra_cnt, _allocator);
+                    guard.bump_n(extra_cnt);
+
+                    // 2) 기존 값을 uninitialized 영역에 shift
+                    // [idx, size) -> [idx + count, size + count)
+                    uninitialized_copy(&_data[idx], &_data[_size], &_data[idx + count], _allocator);
+                    guard.bump_n(_size - idx);
+
+                    // 3) value를 initialized 영역에 assignment
+                    // [idx, size)
+                    for (size_t i = 0; i < tail_cnt; ++i)
+                        _data[idx + i] = value;
+                }
+                catch (...)
+                {
+                    // guard의 소멸자가 rollback 수행
+                    // 실행 중이던 부분은 내부 guard가 rollback함
+                    throw;
+                }
+                guard.release();
+            }
             _size += count;
             return begin() + idx;
         }
@@ -389,22 +525,88 @@ namespace ft
             const size_type idx = cpos - begin();
             const size_type count = std::distance(first, last);
 
+            if (count == 0)
+                return begin() + idx;
             if (_size + count > _capacity)
+                reserve(_grow_capacity_to(_size + count));
+
+            if (idx == _size) // 1. idx == size
             {
-                size_type new_cap = (_capacity == 0 ? count : _capacity);
-                while (new_cap < _size + count)
-                    new_cap *= 1.5;
-                reserve(new_cap);
+                uninitialized_copy(first, last, &_data[idx], _allocator);
             }
-            // 뒤에서부터 원본 백업
-            for (size_type i = _size; i-- > idx;)
+            else if (idx + count <= _size) // 2. idx + count < _size
             {
-                _allocator.construct(_data + i + count, _data[i]);
-                _allocator.destroy(_data + i);
+                // 1) 맨 뒤쪽 count개를 uninitialized 영역에 생성
+                uninitialized_copy(&_data[_size - count], &_data[_size], &_data[_size], _allocator);
+
+                /*
+                    - 복사 대입(operator=)이 noexcept인게 보장되어 있지 않음
+                    - 포인터처럼 접근이 불가한 iterator일 수도 있으므
+                    => assignment 연산에 대해서도 rollback 처리 필요
+                */
+                try
+                {
+                    // 2) [idx, size - count)를 [idx + count, size)로 shift
+                    for (size_t i = _size - count; i > idx; --i)
+                        _data[i + count - 1] = _data[i - 1];
+
+                    // 3) [idx, idx + count)를 range로 채우기
+                    size_t i = idx;
+                    for (; first != last; ++first, ++i)
+                        _data[i] = *first;
+                }
+                catch (...)
+                {
+                    destroy_range(_allocator, _data + _size, _data + _size + count);
+                    throw;
+                }
             }
-            // 새 값 삽입
-            for (size_type i = 0; first != last; ++first, ++i)
-                _allocator.construct(_data + idx + i, *first);
+            else // 3. idx < _size && idx + count >= _size
+            {
+                // [idx, size) : initialized
+                // [size, idx + count) : uninitialized
+                // [idx + count, size + count) : uninitialized
+
+                const size_t tail_cnt = _size - idx;          // 원본의 꼬리 원소들 개수
+                const size_t extra_cnt = idx + count - _size; // tail 이후의 추가 분량
+
+                // 새롭게 init이 필요한 개수 = count
+                // count = (tail_cnt + extra_cnt)
+                // tail_cnt: [idx, size)의 거리
+                // extra_cnt: [size, idx + count)의 거리
+
+                InputIt mid = first;
+                std::advance(mid, tail_cnt);
+                // forward iterator이므로 앞으로 나아가는 것만 가능
+                // mid는 말 그대로 중간 지점
+
+                construct_guard<Allocator> guard(_allocator, &_data[_size]);
+                try
+                {
+                    // 1) [first + tail_cnt, last)를 uninitialized 영역에 새로 construct
+                    // [size, size + extra_cnt)
+                    uninitialized_copy(mid, last, &_data[_size], _allocator);
+                    guard.bump_n(extra_cnt);
+
+                    // 2) 기존 값을 uninitialized 영역에 shift
+                    // [idx, size) -> [idx + count, size + count)
+                    uninitialized_copy(&_data[idx], &_data[_size], &_data[idx + count], _allocator);
+                    guard.bump_n(_size - idx);
+
+                    // 3) [first, mid)를 initialized 영역에 assignment
+                    // [idx, size)
+                    size_t i = idx;
+                    for (; first != mid; ++first, ++i)
+                        _data[i] = *first;
+                }
+                catch (...)
+                {
+                    // guard의 소멸자가 rollback 수행
+                    // 실행 중이던 부분은 내부 guard가 rollback함
+                    throw;
+                }
+                guard.release();
+            }
             _size += count;
             return begin() + idx;
         }
@@ -421,13 +623,15 @@ namespace ft
         {
             const size_type idx = pos - begin();
 
+            if (pos == end())
+                return end();
+
             // 삭제 대상 위치 뒤쪽의 원소들을 앞으로 옮김
+            // 왼쪽으로 shift: 바로 뒷 원소를 대입해나가기
             for (size_type i = idx; i < _size; ++i)
-            {
-                _allocator.destroy(_data + i);                 // 현재 원소 삭제
-                _allocator.construct(_data + i, _data[i + 1]); // 바로 뒤 원소를 복사
-            }
-            // 마지막 원소 제거
+                _data[i] = _data[i + 1];
+
+            // 마지막 원소 파괴
             _allocator.destroy(_data + _size - 1);
             --_size;
 
@@ -435,6 +639,7 @@ namespace ft
             // 따라서 주소가 같을지라도 새 iterator를 반환해야한다
             return begin() + idx;
         }
+
         // 범위 삭제
         iterator erase(iterator first, iterator last)
         {
@@ -444,16 +649,19 @@ namespace ft
             const size_type idx = first - begin(); // 삭제 시작 위치
             const size_type count = last - first;
 
-            // 삭제 대상 위치 뒤쪽의 원소들을 앞으로 옮김
-            for (size_type i = idx; i + count < _size; ++i)
-            {
-                _allocator.destroy(_data + i);                         // 현재 원소 삭제
-                _allocator.construct(_data + i, *(_data + i + count)); // count 거리 뒤 원소를 복사
-            }
-            for (size_type i = _size - count; i < _size; ++i)
-                _allocator.destroy(_data + i);
+            // 1 2 3 4 5 6 7
+            // 1 2 x x x 6 7
+            // 1 2 6 7
+
+            // tail을 왼쪽으로 count만큼 당김
+            // [idx+count, _size) -> [idx, _size-count)
+            // 왼쪽으로 shift: 바로 뒷 원소를 대입해나가기
+            for (size_type i = idx; i - count < _size; ++i)
+                _data[i] = _data[i + count];
+
+            destroy_range(_allocator, &_data[_size - count], &_data[_size]);
             _size -= count;
-            return first;
+            return begin() + idx;
         }
 
         // changes the number of elements stored
@@ -462,34 +670,32 @@ namespace ft
             if (_size > count)
             {
                 // remove
-                while (_size > count)
-                    _allocator.destroy(_data + (--_size));
+                destroy_range(_allocator, _data + count, _data + _size);
             }
             else if (_size < count)
             {
                 // add copies of T() (or value)
-                if (count > _capacity)
-                    reserve(count);
-                while (_size < count)
-                    _allocator.construct(_data + (_size++), value_type());
+                if (_capacity < count)
+                    reserve(_grow_capacity_to(count));
+                uninitialized_fill(_data + _size, value_type(), count - _size, _allocator);
             }
+            _size = count;
         }
         void resize(size_type count, const value_type &value)
         {
             if (_size > count)
             {
                 // remove
-                while (_size > count)
-                    _allocator.destroy(_data + (--_size));
+                destroy_range(_allocator, _data + count, _data + _size);
             }
             else if (_size < count)
             {
                 // add copies of T() (or value)
-                if (count > _capacity)
-                    reserve(count);
-                while (_size < count)
-                    _allocator.construct(_data + (_size++), value);
+                if (_capacity < count)
+                    reserve(_grow_capacity_to(count));
+                uninitialized_fill(_data + _size, value, count - _size, _allocator);
             }
+            _size = count;
         }
 
         // -------------------- Iterators -------------------- //
@@ -514,6 +720,25 @@ namespace ft
         pointer        _data;
         size_type      _size;
         size_type      _capacity;
+
+        // 최소 needed 이상이 되는 capacity를 반환
+        size_type _grow_capacity_to(size_type needed) const
+        {
+            size_type cap = (_capacity == 0 ? 1 : _capacity);
+
+            // 이미 충분하면 그대로
+            if (cap >= needed)
+                return cap;
+            // grow
+            while (cap < needed)
+            {
+                // 1.5x with progress guarantee
+                // inc = increment
+                size_type inc = cap / 2;
+                cap = (inc == 0 ? cap + 1 : cap + inc);
+            }
+            return cap;
+        }
     };
 
     // -------------------- Non-member operators -------------------- //
