@@ -863,7 +863,7 @@ namespace ft
             y->parent = p;
             p->left = y;
             if (x->right)
-                y->right = _copy((_Node_ptr)x->right, x);
+                y->right = _copy((_Node_ptr)x->right, y);
             p = y;
             x = (_Node_ptr)x->left;
         }
