@@ -94,6 +94,7 @@ namespace ft
         if (this->_header.count == 0)
             return;
         _erase_subtree(_root());
+        _root() = NULL;
         _leftmost() = (_Node_ptr)this->base();
         _rightmost() = (_Node_ptr)this->base();
         this->_header.count = 0;
