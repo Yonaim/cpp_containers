@@ -628,7 +628,7 @@ namespace ft
 
             // 삭제 대상 위치 뒤쪽의 원소들을 앞으로 옮김
             // 왼쪽으로 shift: 바로 뒷 원소를 대입해나가기
-            for (size_type i = idx; i < _size; ++i)
+            for (size_type i = idx; i < _size - 1; ++i)
                 _data[i] = _data[i + 1];
 
             // 마지막 원소 파괴
