@@ -177,8 +177,8 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::find(const key_type &k)
     {
-        _Base_ptr x = _root();           // current node (currently searching)
-        _Base_ptr y = base(); // last node which is not less than k
+        _Base_ptr x = _root(); // current node (currently searching)
+        _Base_ptr y = base();  // last node which is not less than k
 
         // lower_bound를 먼저 찾는다
         while (x != NULL)
@@ -203,8 +203,8 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::find(const key_type &k) const
     {
-        _Base_ptr x = _root();           // current node (currently searching)
-        _Base_ptr y = base(); // last node which is not less than k
+        _Base_ptr x = _root(); // current node (currently searching)
+        _Base_ptr y = base();  // last node which is not less than k
 
         // lower_bound를 먼저 찾는다
         while (x != NULL)
@@ -228,8 +228,8 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::lower_bound(const key_type &k)
     {
-        _Base_ptr x = _root();           // current node (currently searching)
-        _Base_ptr y = base(); // last node which is not less than k
+        _Base_ptr x = _root(); // current node (currently searching)
+        _Base_ptr y = base();  // last node which is not less than k
 
         while (x != NULL)
         {
@@ -249,8 +249,8 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::lower_bound(const key_type &k) const
     {
-        _Base_ptr x = _root();           // current node (currently searching)
-        _Base_ptr y = base(); // last node which is not less than k
+        _Base_ptr x = _root(); // current node (currently searching)
+        _Base_ptr y = base();  // last node which is not less than k
 
         while (x != NULL)
         {
@@ -270,8 +270,8 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::upper_bound(const key_type &k)
     {
-        _Base_ptr x = _root();           // current node (currently searching)
-        _Base_ptr y = base(); // last node which is less than k
+        _Base_ptr x = _root(); // current node (currently searching)
+        _Base_ptr y = base();  // last node which is less than k
 
         while (x != NULL)
         {
@@ -291,8 +291,8 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::upper_bound(const key_type &k) const
     {
-        _Base_ptr x = _root();           // current node (currently searching)
-        _Base_ptr y = base(); // last node which is less than k
+        _Base_ptr x = _root(); // current node (currently searching)
+        _Base_ptr y = base();  // last node which is less than k
 
         while (x != NULL)
         {
@@ -378,8 +378,8 @@ namespace ft
     pair<typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator, bool>
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::insert_unique(const value_type &v)
     {
-        _Base_ptr x = _root();           // currently searching
-        _Base_ptr y = base(); // parent of x
+        _Base_ptr x = _root(); // currently searching
+        _Base_ptr y = base();  // parent of x
         bool      comp = true;
 
         // 1) lower_bound 탐색
@@ -415,8 +415,8 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::insert_equal(const value_type &v)
     {
-        _Base_ptr x = _root();           // currently searching
-        _Base_ptr y = base(); // parent of x
+        _Base_ptr x = _root(); // currently searching
+        _Base_ptr y = base();  // parent of x
         bool      comp = true;
 
         // lower_bound 탐색
@@ -772,10 +772,10 @@ namespace ft
               typename _Alloc>
     void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_empty_initialize()
     {
-        this->base()->parent = 0;                      // root initially null
+        this->base()->parent = 0;           // root initially null
         this->base()->left = this->base();  // leftmost = header
         this->base()->right = this->base(); // rightmost = header
-        this->base()->color = RED;                     // header color = red
+        this->base()->color = RED;          // header color = red
         this->_header.count = 0;
     }
 
@@ -802,12 +802,12 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Node_ptr
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_clone_node(_Node_ptr orig)
     {
-        _Node_ptr n_ptr = _create_node(orig->value);
-        n_ptr->color = orig->color;
-        n_ptr->left = orig->left;
-        n_ptr->right = orig->right;
-        n_ptr->parent = orig->parent;
-        return n_ptr;
+        _Node_ptr n = _create_node(orig->value);
+        n->color = orig->color;
+        n->left = 0;
+        n->right = 0;
+        n->parent = 0;
+        return n;
     }
 
     template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
