@@ -654,9 +654,9 @@ namespace ft
             // 1 2 6 7
 
             // tail을 왼쪽으로 count만큼 당김
-            // [idx+count, _size) -> [idx, _size-count)
+            // [idx + count, _size) -> [idx, _size - count)
             // 왼쪽으로 shift: 바로 뒷 원소를 대입해나가기
-            for (size_type i = idx; i - count < _size; ++i)
+            for (size_type i = idx; i + count < _size; ++i)
                 _data[i] = _data[i + count];
 
             destroy_range(_allocator, &_data[_size - count], &_data[_size]);
