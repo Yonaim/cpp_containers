@@ -1,5 +1,5 @@
-#ifndef UNINITIALIZED_FILL_H
-#define UNINITIALIZED_FILL_H
+#ifndef FT_UNINITIALIZED_FILL_H
+#define FT_UNINITIALIZED_FILL_H
 
 #include "construct_guard.h"
 
@@ -9,12 +9,13 @@
 
 namespace ft
 {
-    template <class _InputIt, class _Alloc>
-    void uninitialized_fill(typename _Alloc::value_type *dest, typename _Alloc::value_type value,
-                            size_t n, _Alloc &alloc)
+    template <class _Alloc>
+    typename _Alloc::value_type *uninitialized_fill(typename _Alloc::value_type *dest,
+                                                    typename _Alloc::value_type value, size_t n,
+                                                    _Alloc &alloc)
     {
-        typename Alloc::value_type *cur = dest;
-        _construct_guard<_Alloc>    guard(alloc, dest);
+        typename _Alloc::value_type *cur = dest;
+        construct_guard<_Alloc>      guard(alloc, dest);
 
         for (size_t i = 0; i < n; ++i)
         {

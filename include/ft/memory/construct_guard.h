@@ -1,5 +1,15 @@
-#ifndef CONSTRUCT_GUARD_H
-#define CONSTRUCT_GUARD_H
+#ifndef FT_CONSTRUCT_GUARD_H
+#define FT_CONSTRUCT_GUARD_H
+
+/*
+    exception-safe (예외 안전):
+    처리 중간에 예외가 발생해도 상태가 안전하게 유지되는 것
+
+    보통 3단계로 나뉨.
+    1) Basic guarantee: 예외가 발생해도 객체는 valid (내용은 변했을 수 있음)
+    2) Strong guarantee: commit or rollback (예외 발생시 연산이 아예 수행하지 않은 상태 그대로 유지)
+    3) No-throw guarantee: 절대 예외를 던지지 않음 (혹은 내부에서 처리하여 밖으로 안 나감)
+*/
 
 /*
     C++ 예외 규칙:
@@ -22,6 +32,7 @@
 
 /*
     - RAII 기반 Rollback 패턴 코드
+        - exception 처리 로직에서 누락되지 않게 묶는 역할
     - 정상적으로 construct된 횟수를 기록한다.
     - 예외 발생시 이 값을 이용해 적절한 횟수의 destroy를 수행할 수 있다.(=롤백)
     - 롤백 처리는 소멸자에서 한다.
@@ -33,7 +44,7 @@
 namespace ft
 {
     template <class _Alloc>
-    struct _construct_guard
+    struct construct_guard
     {
         // allcator 타입에서 value_type을 꺼내와 사용
         typedef typename _Alloc::value_type value_type;
@@ -42,15 +53,16 @@ namespace ft
         size_t      count;
         value_type *start;
 
-        _construct_guard(_Alloc &a, value_type *s) : alloc(a), count(0), start(s) {}
-        ~_construct_guard()
+        construct_guard(_Alloc &a, value_type *s) : alloc(a), count(0), start(s) {}
+        ~construct_guard()
         {
-            for (int i = 0; i < count; ++i)
+            for (size_t i = 0; i < count; ++i)
                 alloc.destroy(start + i);
         }
 
         // 정상 construct 횟수 카운트 증가
         void bump() { ++count; }
+        void bump_n(size_t n) { count += n; }
 
         // 정상 처리 완료
         void release() { count = 0; }
