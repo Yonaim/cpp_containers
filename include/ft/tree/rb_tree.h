@@ -76,10 +76,9 @@ namespace ft
     {
         typedef _Rb_tree_node_base *_Base_ptr;
         _Rb_tree_node_base          _base_node;
-        _Base_ptr                   _base_ptr;
         size_t                      count;
 
-        _Rb_tree_header() : _base_node(), _base_ptr(&_base_node), count(0) {}
+        _Rb_tree_header() : _base_node(), count(0) {}
     };
 
     // =============================== Rb_tree_alloc_base =================================
@@ -269,6 +268,8 @@ namespace ft
         static _Node_ptr       _maximum(_Node_ptr x);
 
       private:
+        _Base_ptr base() { return &_header._base_node; }
+        _Base_ptr base() const { return const_cast<_Base_ptr>(&_header._base_node); }
         iterator  _insert(_Base_ptr x_hint, _Base_ptr y, const value_type &v);
         void      _empty_initialize();
         _Node_ptr _create_node(const value_type &v);

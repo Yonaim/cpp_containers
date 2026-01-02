@@ -28,10 +28,10 @@ namespace ft
         else
         {
             // 불변식: root의 parent는 header이다
-            _root_node() = _copy(x._root_node(), (_Node_ptr)this->_header._base_ptr);
-            this->_header._base_ptr->left = _minimum(_root_node());  // leftmost = header
-            this->_header._base_ptr->right = _maximum(_root_node()); // rightmost = header
-            this->_header._base_ptr->color = RED;                    // header color = red
+            _root_node() = _copy(x._root_node(), (_Node_ptr)this->base());
+            this->base()->left = _minimum(_root_node());  // leftmost = header
+            this->base()->right = _maximum(_root_node()); // rightmost = header
+            this->base()->color = RED;                    // header color = red
             this->_header.count = x._header.count;
         }
     }
@@ -62,16 +62,12 @@ namespace ft
         ft::swap(this->_header.count, other._header.count);
         ft::swap(this->_key_compare, other._key_compare);
 
-        // 2) _base_ptr은 "항상 자기 _base_node"를 가리키게 재설정
-        this->_header._base_ptr = &this->_header._base_node;
-        other._header._base_ptr = &other._header._base_node;
-
-        // 3) root가 있으면 root->parent를 새 헤더로 보정
+        // 2) root가 있으면 root->parent를 새 헤더로 보정
         if (this->_header._base_node.parent)
-            this->_header._base_node.parent->parent = this->_header._base_ptr;
+            this->_header._base_node.parent->parent = this->base();
 
         if (other._header._base_node.parent)
-            other._header._base_node.parent->parent = other._header._base_ptr;
+            other._header._base_node.parent->parent = other.base();
     }
 
     /* ============================== clear() =============================== */
@@ -83,8 +79,8 @@ namespace ft
         if (this->_header.count == 0)
             return;
         _erase_subtree(_root());
-        _leftmost() = (_Node_ptr)this->_header._base_ptr;
-        _rightmost() = (_Node_ptr)this->_header._base_ptr;
+        _leftmost() = (_Node_ptr)this->base();
+        _rightmost() = (_Node_ptr)this->base();
         this->_header.count = 0;
     }
 
@@ -116,7 +112,7 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::end()
     {
-        return iterator(_header._base_ptr);
+        return iterator(base());
     }
 
     template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
@@ -124,7 +120,7 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::end() const
     {
-        return const_iterator(_header._base_ptr);
+        return const_iterator(base());
     }
 
     template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
@@ -182,7 +178,7 @@ namespace ft
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::find(const key_type &k)
     {
         _Base_ptr x = _root();           // current node (currently searching)
-        _Base_ptr y = _header._base_ptr; // last node which is not less than k
+        _Base_ptr y = base(); // last node which is not less than k
 
         // lower_bound를 먼저 찾는다
         while (x != NULL)
@@ -208,7 +204,7 @@ namespace ft
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::find(const key_type &k) const
     {
         _Base_ptr x = _root();           // current node (currently searching)
-        _Base_ptr y = _header._base_ptr; // last node which is not less than k
+        _Base_ptr y = base(); // last node which is not less than k
 
         // lower_bound를 먼저 찾는다
         while (x != NULL)
@@ -233,7 +229,7 @@ namespace ft
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::lower_bound(const key_type &k)
     {
         _Base_ptr x = _root();           // current node (currently searching)
-        _Base_ptr y = _header._base_ptr; // last node which is not less than k
+        _Base_ptr y = base(); // last node which is not less than k
 
         while (x != NULL)
         {
@@ -254,7 +250,7 @@ namespace ft
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::lower_bound(const key_type &k) const
     {
         _Base_ptr x = _root();           // current node (currently searching)
-        _Base_ptr y = _header._base_ptr; // last node which is not less than k
+        _Base_ptr y = base(); // last node which is not less than k
 
         while (x != NULL)
         {
@@ -275,7 +271,7 @@ namespace ft
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::upper_bound(const key_type &k)
     {
         _Base_ptr x = _root();           // current node (currently searching)
-        _Base_ptr y = _header._base_ptr; // last node which is less than k
+        _Base_ptr y = base(); // last node which is less than k
 
         while (x != NULL)
         {
@@ -296,7 +292,7 @@ namespace ft
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::upper_bound(const key_type &k) const
     {
         _Base_ptr x = _root();           // current node (currently searching)
-        _Base_ptr y = _header._base_ptr; // last node which is less than k
+        _Base_ptr y = base(); // last node which is less than k
 
         while (x != NULL)
         {
@@ -351,10 +347,10 @@ namespace ft
         _Node_ptr z = _create_node(v);
 
         // 왼쪽에 달기
-        if (y == _header._base_ptr || x_hint != NULL || _key_compare(_key(v), _key(y)))
+        if (y == base() || x_hint != NULL || _key_compare(_key(v), _key(y)))
         {
             y->left = z;
-            if (y == _header._base_ptr) // 새로 삽입하는 노드가 루트
+            if (y == base()) // 새로 삽입하는 노드가 루트
             {
                 _root() = z;
                 _rightmost() = z;
@@ -372,7 +368,7 @@ namespace ft
         z->parent = y;
         z->left = NULL;
         z->right = NULL;
-        _rebalance_for_insert(z, _header._base_ptr->parent);
+        _rebalance_for_insert(z, base()->parent);
         ++_header.count;
         return iterator(z);
     }
@@ -383,7 +379,7 @@ namespace ft
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::insert_unique(const value_type &v)
     {
         _Base_ptr x = _root();           // currently searching
-        _Base_ptr y = _header._base_ptr; // parent of x
+        _Base_ptr y = base(); // parent of x
         bool      comp = true;
 
         // 1) lower_bound 탐색
@@ -420,7 +416,7 @@ namespace ft
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::insert_equal(const value_type &v)
     {
         _Base_ptr x = _root();           // currently searching
-        _Base_ptr y = _header._base_ptr; // parent of x
+        _Base_ptr y = base(); // parent of x
         bool      comp = true;
 
         // lower_bound 탐색
@@ -452,7 +448,7 @@ namespace ft
                                                                          const value_type &v)
     {
         // 1. position = begin()
-        if (position._base_node == _header._base_ptr->left)
+        if (position._base_node == base()->left)
         {
             if (size() > 0 && _key_compare(_key(v), _key(position._base_node))) // v < begin
                 // v를 새로운 begin 삼는다 (left 삽입)
@@ -462,7 +458,7 @@ namespace ft
                 return insert_unique(v).first; // fallback
         }
         // 2. position = end()
-        else if (position._base_node == _header._base_ptr)
+        else if (position._base_node == base())
         {
             if (_key_compare(_key(_rightmost()), _key(v))) // end < v
                 // v를 새로운 max 삼는다
@@ -615,9 +611,9 @@ namespace ft
                 derived_ptr 참조 타입으로 캐스팅은 불가 (참조할 대상이 없다)
             - 타입 시스템을 무시한 메모리 재해석(reinterpret 캐스팅, type punning)은 가능하다
         */
-        // return *reinterpret_cast<_Node_ptr*>(&this->_header._base_ptr->parent);
-        // return static_cast<_Node_ptr &>(this->_header._base_ptr->parent);
-        return (this->_header._base_ptr->parent);
+        // return *reinterpret_cast<_Node_ptr*>(&this->base()->parent);
+        // return static_cast<_Node_ptr &>(this->base()->parent);
+        return (this->base()->parent);
     }
 
     template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
@@ -633,7 +629,7 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Base_ptr &
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_leftmost() const
     {
-        return this->_header._base_ptr->left;
+        return this->base()->left;
     }
 
     template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
@@ -641,7 +637,7 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Base_ptr &
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_rightmost() const
     {
-        return this->_header._base_ptr->right;
+        return this->base()->right;
     }
 
     /* static helpers */
@@ -776,10 +772,10 @@ namespace ft
               typename _Alloc>
     void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_empty_initialize()
     {
-        this->_header._base_ptr->parent = 0;                      // root initially null
-        this->_header._base_ptr->left = this->_header._base_ptr;  // leftmost = header
-        this->_header._base_ptr->right = this->_header._base_ptr; // rightmost = header
-        this->_header._base_ptr->color = RED;                     // header color = red
+        this->base()->parent = 0;                      // root initially null
+        this->base()->left = this->base();  // leftmost = header
+        this->base()->right = this->base(); // rightmost = header
+        this->base()->color = RED;                     // header color = red
         this->_header.count = 0;
     }
 
@@ -899,8 +895,8 @@ namespace ft
 
         // 2) y의 부모 설정: x의 부모
         y->parent = x->parent;
-        if (x == _header._base_ptr->parent) // x = root
-            _header._base_ptr->parent = y;
+        if (x == base()->parent) // x = root
+            base()->parent = y;
         else if (x == x->parent->left) // x는 부모의 좌측 자식
             x->parent->left = y;
         else
@@ -926,8 +922,8 @@ namespace ft
 
         // 2) y의 부모 설정: x의 부모
         y->parent = x->parent;
-        if (x == _header._base_ptr->parent) // x = root
-            _header._base_ptr->parent = y;
+        if (x == base()->parent) // x = root
+            base()->parent = y;
         else if (x == x->parent->right) // x는 부모의 우측 자식
             x->parent->right = y;
         else
