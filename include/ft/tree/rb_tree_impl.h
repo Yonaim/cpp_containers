@@ -56,8 +56,22 @@ namespace ft
     {
         if (this == &other)
             return;
-        ft::swap(this->_header, other._header);
+
+        // 1) 헤더 노드 내용 + 노드 개수 교환 (포인터 멤버 _base_ptr은 교환하지 않음)
+        ft::swap(this->_header._base_node, other._header._base_node);
+        ft::swap(this->_header.count, other._header.count);
         ft::swap(this->_key_compare, other._key_compare);
+
+        // 2) _base_ptr은 "항상 자기 _base_node"를 가리키게 재설정
+        this->_header._base_ptr = &this->_header._base_node;
+        other._header._base_ptr = &other._header._base_node;
+
+        // 3) root가 있으면 root->parent를 새 헤더로 보정
+        if (this->_header._base_node.parent)
+            this->_header._base_node.parent->parent = this->_header._base_ptr;
+
+        if (other._header._base_node.parent)
+            other._header._base_node.parent->parent = other._header._base_ptr;
     }
 
     /* ============================== clear() =============================== */
