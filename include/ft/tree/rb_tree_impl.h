@@ -27,11 +27,11 @@ namespace ft
             _empty_initialize();
         else
         {
-            _root_node() = _copy(x._root_node(), NULL);   // 루트 노드 복제하여 달기
-            _root_node()->parent = this->base();          // 불변식: root의 parent는 header
-            this->base()->left = _minimum(_root_node());  // leftmost = header
-            this->base()->right = _maximum(_root_node()); // rightmost = header
-            this->base()->color = RED;                    // header color = red
+            _root_node() = _copy(x._root_node(), NULL);        // 루트 노드 복제하여 달기
+            _root_node()->parent = this->_sentinel();          // 불변식: root의 parent는 header
+            this->_sentinel()->left = _minimum(_root_node());  // leftmost = header
+            this->_sentinel()->right = _maximum(_root_node()); // rightmost = header
+            this->_sentinel()->color = RED;                    // header color = red
             this->_header.count = x._header.count;
         }
     }
@@ -79,33 +79,33 @@ namespace ft
         // ---- this ----
         if (this->_header.count == 0)
         {
-            this->base()->parent = 0;
-            this->base()->left = this->base();
-            this->base()->right = this->base();
-            this->base()->color = RED;
+            this->_sentinel()->parent = 0;
+            this->_sentinel()->left = this->_sentinel();
+            this->_sentinel()->right = this->_sentinel();
+            this->_sentinel()->color = RED;
         }
         else
         {
-            this->_root()->parent = this->base();
-            this->base()->left = this->_minimum(this->_root_node());
-            this->base()->right = this->_maximum(this->_root_node());
-            this->base()->color = RED;
+            this->_root()->parent = this->_sentinel();
+            this->_sentinel()->left = this->_minimum(this->_root_node());
+            this->_sentinel()->right = this->_maximum(this->_root_node());
+            this->_sentinel()->color = RED;
         }
 
         // ---- other ----
         if (other._header.count == 0)
         {
-            other.base()->parent = 0;
-            other.base()->left = other.base();
-            other.base()->right = other.base();
-            other.base()->color = RED;
+            other._sentinel()->parent = 0;
+            other._sentinel()->left = other._sentinel();
+            other._sentinel()->right = other._sentinel();
+            other._sentinel()->color = RED;
         }
         else
         {
-            other._root()->parent = other.base();
-            other.base()->left = other._minimum(other._root_node());
-            other.base()->right = other._maximum(other._root_node());
-            other.base()->color = RED;
+            other._root()->parent = other._sentinel();
+            other._sentinel()->left = other._minimum(other._root_node());
+            other._sentinel()->right = other._maximum(other._root_node());
+            other._sentinel()->color = RED;
         }
     }
 
@@ -119,8 +119,8 @@ namespace ft
             return;
         _erase_subtree(_root());
         _root() = NULL;
-        _leftmost() = (_Node_ptr)this->base();
-        _rightmost() = (_Node_ptr)this->base();
+        _leftmost() = (_Node_ptr)this->_sentinel();
+        _rightmost() = (_Node_ptr)this->_sentinel();
         this->_header.count = 0;
     }
 
@@ -152,7 +152,7 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::end()
     {
-        return iterator(base());
+        return iterator(_sentinel());
     }
 
     template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
@@ -160,7 +160,7 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::end() const
     {
-        return const_iterator(base());
+        return const_iterator(_sentinel());
     }
 
     template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
@@ -217,8 +217,8 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::find(const key_type &k)
     {
-        _Base_ptr x = _root(); // current node (currently searching)
-        _Base_ptr y = base();  // last node which is not less than k
+        _Base_ptr x = _root();     // current node (currently searching)
+        _Base_ptr y = _sentinel(); // last node which is not less than k
 
         // lower_bound를 먼저 찾는다
         while (x != NULL)
@@ -243,8 +243,8 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::find(const key_type &k) const
     {
-        _Base_ptr x = _root(); // current node (currently searching)
-        _Base_ptr y = base();  // last node which is not less than k
+        _Base_ptr x = _root();     // current node (currently searching)
+        _Base_ptr y = _sentinel(); // last node which is not less than k
 
         // lower_bound를 먼저 찾는다
         while (x != NULL)
@@ -268,8 +268,8 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::lower_bound(const key_type &k)
     {
-        _Base_ptr x = _root(); // current node (currently searching)
-        _Base_ptr y = base();  // last node which is not less than k
+        _Base_ptr x = _root();     // current node (currently searching)
+        _Base_ptr y = _sentinel(); // last node which is not less than k
 
         while (x != NULL)
         {
@@ -289,8 +289,8 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::lower_bound(const key_type &k) const
     {
-        _Base_ptr x = _root(); // current node (currently searching)
-        _Base_ptr y = base();  // last node which is not less than k
+        _Base_ptr x = _root();     // current node (currently searching)
+        _Base_ptr y = _sentinel(); // last node which is not less than k
 
         while (x != NULL)
         {
@@ -310,8 +310,8 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::upper_bound(const key_type &k)
     {
-        _Base_ptr x = _root(); // current node (currently searching)
-        _Base_ptr y = base();  // last node which is less than k
+        _Base_ptr x = _root();     // current node (currently searching)
+        _Base_ptr y = _sentinel(); // last node which is less than k
 
         while (x != NULL)
         {
@@ -331,8 +331,8 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::const_iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::upper_bound(const key_type &k) const
     {
-        _Base_ptr x = _root(); // current node (currently searching)
-        _Base_ptr y = base();  // last node which is less than k
+        _Base_ptr x = _root();     // current node (currently searching)
+        _Base_ptr y = _sentinel(); // last node which is less than k
 
         while (x != NULL)
         {
@@ -387,10 +387,10 @@ namespace ft
         _Node_ptr z = _create_node(v);
 
         // 왼쪽에 달기
-        if (y == base() || x_hint != NULL || _key_compare(_key(v), _key(y)))
+        if (y == _sentinel() || x_hint != NULL || _key_compare(_key(v), _key(y)))
         {
             y->left = z;
-            if (y == base()) // 새로 삽입하는 노드가 루트
+            if (y == _sentinel()) // 새로 삽입하는 노드가 루트
             {
                 _root() = z;
                 _rightmost() = z;
@@ -408,7 +408,7 @@ namespace ft
         z->parent = y;
         z->left = NULL;
         z->right = NULL;
-        _rebalance_for_insert(z, base()->parent);
+        _rebalance_for_insert(z, _sentinel()->parent);
         ++_header.count;
         return iterator(z);
     }
@@ -418,8 +418,8 @@ namespace ft
     pair<typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator, bool>
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::insert_unique(const value_type &v)
     {
-        _Base_ptr x = _root(); // currently searching
-        _Base_ptr y = base();  // parent of x
+        _Base_ptr x = _root();     // currently searching
+        _Base_ptr y = _sentinel(); // parent of x
         bool      comp = true;
 
         // 1) lower_bound 탐색
@@ -455,8 +455,8 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::iterator
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::insert_equal(const value_type &v)
     {
-        _Base_ptr x = _root(); // currently searching
-        _Base_ptr y = base();  // parent of x
+        _Base_ptr x = _root();     // currently searching
+        _Base_ptr y = _sentinel(); // parent of x
         bool      comp = true;
 
         // lower_bound 탐색
@@ -488,7 +488,7 @@ namespace ft
                                                                          const value_type &v)
     {
         // 1. position = begin()
-        if (position._base_node == base()->left)
+        if (position._base_node == _sentinel()->left)
         {
             if (size() > 0 && _key_compare(_key(v), _key(position._base_node))) // v < begin
                 // v를 새로운 begin 삼는다 (left 삽입)
@@ -498,7 +498,7 @@ namespace ft
                 return insert_unique(v).first; // fallback
         }
         // 2. position = end()
-        else if (position._base_node == base())
+        else if (position._base_node == _sentinel())
         {
             if (_key_compare(_key(_rightmost()), _key(v))) // end < v
                 // v를 새로운 max 삼는다
@@ -651,9 +651,9 @@ namespace ft
                 derived_ptr '참조' 타입으로 캐스팅은 불가 (참조할 대상이 없다)
             - 타입 시스템을 무시한 메모리 재해석(reinterpret 캐스팅, type punning)은 가능하다
         */
-        // return *reinterpret_cast<_Node_ptr*>(&this->base()->parent);
-        // return static_cast<_Node_ptr &>(this->base()->parent);
-        return (this->base()->parent);
+        // return *reinterpret_cast<_Node_ptr*>(&this->_sentinel()->parent);
+        // return static_cast<_Node_ptr &>(this->_sentinel()->parent);
+        return (this->_sentinel()->parent);
     }
 
     template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
@@ -669,7 +669,7 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Base_ptr &
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_leftmost() const
     {
-        return this->base()->left;
+        return this->_sentinel()->left;
     }
 
     template <typename _Key, typename _Value, typename _KeyOfValue, typename _Compare,
@@ -677,7 +677,7 @@ namespace ft
     typename _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_Base_ptr &
     _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_rightmost() const
     {
-        return this->base()->right;
+        return this->_sentinel()->right;
     }
 
     /* static helpers */
@@ -812,10 +812,10 @@ namespace ft
               typename _Alloc>
     void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_empty_initialize()
     {
-        this->base()->parent = 0;           // root initially null
-        this->base()->left = this->base();  // leftmost = header
-        this->base()->right = this->base(); // rightmost = header
-        this->base()->color = RED;          // header color = red
+        this->_sentinel()->parent = 0;                // root initially null
+        this->_sentinel()->left = this->_sentinel();  // leftmost = header
+        this->_sentinel()->right = this->_sentinel(); // rightmost = header
+        this->_sentinel()->color = RED;               // header color = red
         this->_header.count = 0;
     }
 
@@ -935,8 +935,8 @@ namespace ft
 
         // 2) y의 부모 설정: x의 부모
         y->parent = x->parent;
-        if (x == base()->parent) // x = root
-            base()->parent = y;
+        if (x == _sentinel()->parent) // x = root
+            _sentinel()->parent = y;
         else if (x == x->parent->left) // x는 부모의 좌측 자식
             x->parent->left = y;
         else
@@ -962,8 +962,8 @@ namespace ft
 
         // 2) y의 부모 설정: x의 부모
         y->parent = x->parent;
-        if (x == base()->parent) // x = root
-            base()->parent = y;
+        if (x == _sentinel()->parent) // x = root
+            _sentinel()->parent = y;
         else if (x == x->parent->right) // x는 부모의 우측 자식
             x->parent->right = y;
         else
@@ -1272,7 +1272,7 @@ namespace ft
               typename _Alloc>
     void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_erase_subtree(_Base_ptr x)
     {
-        if (!x || x == this->base())
+        if (!x || x == this->_sentinel())
             return;
         _erase_subtree(x->left);
         _erase_subtree(x->right);
