@@ -15,7 +15,8 @@ namespace ft
     class is_class
     {
       private:
-        // static이어야 객체를 생성하려고 하지 않음
+        // 만약 T가 class 혹은 struct라면 내부 멤버에 접근하려고 시도할 것임
+        // static 함수인 이유? -> static이어야 객체를 생성하려고 하지 않음
         static yes_type check(int T::*); // T 내부 멤버 중 int를 가리키는 포인터
         static no_type  check(...);
 

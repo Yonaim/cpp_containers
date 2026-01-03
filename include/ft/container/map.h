@@ -5,9 +5,12 @@
 #include <cstddef>
 #include <functional>
 #include <stdexcept>
-#include "pair.h"
+#include "functional.h"
 #include "rb_tree.h"
-#include "select1st.h"
+#include "type_traits.h"
+
+
+// todo: exception-safe 처리
 
 /*
 - A sorted associative container that contains key-value pairs with 'unique' keys.
@@ -22,7 +25,7 @@ namespace ft
 {
     // map은 tree의 thin wrapper
     template <class Key, class T, class Compare = std::less<Key>,
-              class Allocator = ft::allocator<ft::pair<const Key, T> > >
+              class Allocator = ft::allocator<ft::pair<const Key, T>>>
     class map
     {
       public:
