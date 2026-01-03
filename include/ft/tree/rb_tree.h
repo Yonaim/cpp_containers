@@ -46,13 +46,6 @@
 
 namespace ft
 {
-    // instanceless = 객체 인스턴스를 멤버로 하나도 들고 있지 않음
-    template <class T>
-    struct is_instanceless
-    {
-        static const bool value = ft::is_empty<T>::value;
-    };
-
     // =============================== Rb_tree_header =================================
 
     /*
@@ -139,9 +132,9 @@ namespace ft
     // =============================== Rb_tree_base =================================
 
     template <class _Tp, class _Alloc>
-    class _Rb_tree_base : private _Rb_tree_alloc_base<_Tp, _Alloc, is_instanceless<_Alloc>::value>
+    class _Rb_tree_base : private _Rb_tree_alloc_base<_Tp, _Alloc, ft::is_empty<_Alloc>::value>
     {
-        typedef _Rb_tree_alloc_base<_Tp, _Alloc, is_instanceless<_Alloc>::value> Base;
+        typedef _Rb_tree_alloc_base<_Tp, _Alloc, ft::is_empty<_Alloc>::value> Base;
 
       protected:
         typedef typename Base::node_type node_type;
