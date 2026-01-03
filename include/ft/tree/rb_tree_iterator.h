@@ -43,14 +43,56 @@ namespace ft
             else
             {
                 // case 2: 오른쪽 서브트리 없음
-                _Base_ptr parent = _base_node->parent;
-                // 위로 올라가면서 내가 부모의 오른쪽 자식인 동안 계속 climb
-                while (parent && _base_node == parent->right)
+                _Base_ptr x = _base_node;
+                _Base_ptr y = x->parent;
+
+                // 최초로 자신이 왼쪽 자식일 때를 찾는다
+                // 해당 순간, 부모 노드가 바로 increment 노드임
+                /*
+                    1) 일반적인 경우: x가 y의 왼쪽 자식인 경우
+                        : 최초로 x가 y의 왼쪽 자식일 때 반복문이 종료
+
+                    2) _base_node가 rightmost인 경우
+                        : rightmost가 왼쪽 자식인 경우는 존재할 수 없으므로
+                        계속 타고 올라가다가 결국 x=root에 도달
+                        x=root에 도달하면 y=header가 됨, 반복문 탈출
+                    
+                    3) 트리에 노드가 단 하나만 존재하는 경우 (root = rightmost)
+                        : x = root = rightmost로 시작 (y는 header)
+                        header->right = rightmost이므로 한번은 true
+                        따라서 x = header 그리고 y = root가 되어버리고 반복문이 종료됨
+                    
+                    => 1번과 2번은 반복문이 종료된 시점의 부모, 즉 y가 옳은 결과이다.
+                        (2번의 경우 header가 곧 end()이기 때문에 옳다.)
+                        3번의 경우는 x가 옳은 결과이다.
+                */
+                while (y && x == y->right)
                 {
-                    _base_node = parent;
-                    parent = _base_node->parent;
+                    x = y;
+                    y = x->parent;
                 }
-                _base_node = parent;
+                /*
+                */
+                /*
+                    1) 일반적인 경우: x가 y의 왼쪽 자식인 경우
+                        x->right != y 성립. 즉 부모인 y가 _base_node가 된다.
+                        조건문 true
+
+                    2) _base_node가 rightmost인 경우
+                        x=root이고 y=header
+                        x->right=rightmost이고 x->right != y
+                        조건문 true
+                    
+                    3) 트리에 노드가 단 하나만 존재하는 경우 (root = rightmost)
+                        x=header이고 y=root
+                        x->right = rightmost = root = y
+                        조건문 false (= x 그대로 대입)
+                    
+                    3번의 케이스를 예외처리하기 위한 if문이다.
+                */
+                if (x->right != y)
+                    x = y;
+                _base_node = x;
             }
         }
         void _decrement()
