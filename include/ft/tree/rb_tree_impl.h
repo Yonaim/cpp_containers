@@ -72,17 +72,41 @@ namespace ft
         if (this == &other)
             return;
 
-        // 1) 헤더 노드 내용 + 노드 개수 교환 (포인터 멤버 _base_ptr은 교환하지 않음)
         ft::swap(this->_header._base_node, other._header._base_node);
         ft::swap(this->_header.count, other._header.count);
         ft::swap(this->_key_compare, other._key_compare);
 
-        // 2) root가 있으면 root->parent를 새 헤더로 보정
-        if (this->_header._base_node.parent)
-            this->_header._base_node.parent->parent = this->base();
+        // ---- this ----
+        if (this->_header.count == 0)
+        {
+            this->base()->parent = 0;
+            this->base()->left = this->base();
+            this->base()->right = this->base();
+            this->base()->color = RED;
+        }
+        else
+        {
+            this->_root()->parent = this->base();
+            this->base()->left = this->_minimum(this->_root_node());
+            this->base()->right = this->_maximum(this->_root_node());
+            this->base()->color = RED;
+        }
 
-        if (other._header._base_node.parent)
-            other._header._base_node.parent->parent = other.base();
+        // ---- other ----
+        if (other._header.count == 0)
+        {
+            other.base()->parent = 0;
+            other.base()->left = other.base();
+            other.base()->right = other.base();
+            other.base()->color = RED;
+        }
+        else
+        {
+            other._root()->parent = other.base();
+            other.base()->left = other._minimum(other._root_node());
+            other.base()->right = other._maximum(other._root_node());
+            other.base()->color = RED;
+        }
     }
 
     /* ============================== clear() =============================== */
@@ -624,7 +648,7 @@ namespace ft
     {
         /*
             - base_ptr -> derived_ptr로 다운캐스팅은 문법적으로 가능하지만,
-                derived_ptr 참조 타입으로 캐스팅은 불가 (참조할 대상이 없다)
+                derived_ptr '참조' 타입으로 캐스팅은 불가 (참조할 대상이 없다)
             - 타입 시스템을 무시한 메모리 재해석(reinterpret 캐스팅, type punning)은 가능하다
         */
         // return *reinterpret_cast<_Node_ptr*>(&this->base()->parent);
@@ -1248,7 +1272,7 @@ namespace ft
               typename _Alloc>
     void _Rb_tree<_Key, _Value, _KeyOfValue, _Compare, _Alloc>::_erase_subtree(_Base_ptr x)
     {
-        if (!x)
+        if (!x || x == this->base())
             return;
         _erase_subtree(x->left);
         _erase_subtree(x->right);
