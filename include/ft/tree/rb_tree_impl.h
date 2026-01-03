@@ -27,8 +27,8 @@ namespace ft
             _empty_initialize();
         else
         {
-            // 불변식: root의 parent는 header이다
-            _root_node() = _copy(x._root_node(), (_Node_ptr)this->base());
+            _root_node() = _copy(x._root_node(), NULL);   // 루트 노드 복제하여 달기
+            _root_node()->parent = this->base();          // 불변식: root의 parent는 header
             this->base()->left = _minimum(_root_node());  // leftmost = header
             this->base()->right = _maximum(_root_node()); // rightmost = header
             this->base()->color = RED;                    // header color = red
