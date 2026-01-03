@@ -115,7 +115,8 @@ namespace ft
         }
         size_type max_size() const throw()
         {
-            return std::numeric_limits<size_type>::max() / sizeof(T);
+            // iterator 안전성 때문에 의도적으로 절반으로 줄여서 반환
+            return std::numeric_limits<size_type>::max() / sizeof(T) / 2;
         }
         void construct(pointer p, const_reference val)
         {
